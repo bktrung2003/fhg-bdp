@@ -137,7 +137,7 @@ function DealsPage() {
           </div>
         </div>
       ) : (
-        <div className="rounded-lg border bg-card overflow-hidden">
+        <div className="rounded-lg border bg-card overflow-x-auto w-full">
           <DataTable columns={dealColumns} data={deals} />
         </div>
       )}
