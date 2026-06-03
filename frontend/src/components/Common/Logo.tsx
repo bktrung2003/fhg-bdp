@@ -1,25 +1,10 @@
 import { Link } from "@tanstack/react-router"
+import { useTheme } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 
-// Fusion bird mark — SVG matching brand colors
-function FusionMark({ size = 28 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 60 52"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {/* Upper wing — main orange */}
-      <ellipse cx="22" cy="18" rx="18" ry="14" transform="rotate(-20 22 18)" fill="#E8913A" opacity="0.95" />
-      {/* Lower wing — lighter orange */}
-      <ellipse cx="26" cy="28" rx="20" ry="12" transform="rotate(-15 26 28)" fill="#F5BC6C" opacity="0.9" />
-      {/* Body — gray */}
-      <path d="M38 8 C54 12 58 28 50 40 C44 48 34 48 28 42 C20 34 24 20 32 14 C36 10 38 8 38 8Z" fill="#8E8E8E" opacity="0.85" />
-    </svg>
-  )
-}
+// Paths to the real Fusion logo images in /public/assets/images/
+const LOGO_LIGHT = "/assets/images/fusion-logo.png"
+const LOGO_DARK = "/assets/images/fusion-logo-dark.png"
 
 interface LogoProps {
   variant?: "full" | "icon" | "responsive"
@@ -28,30 +13,47 @@ interface LogoProps {
 }
 
 export function Logo({ variant = "full", className, asLink = true }: LogoProps) {
-  const iconOnly = <FusionMark size={28} />
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === "dark"
+  const src = isDark ? LOGO_DARK : LOGO_LIGHT
 
-  const fullLogo = (
-    <div className={cn("flex items-center gap-2.5", className)}>
-      <FusionMark size={32} />
-      <div className="leading-tight">
-        <p className="font-semibold text-[15px] tracking-tight" style={{ color: "#636363" }}>
-          fusion
-        </p>
-        <p className="text-[9.5px] font-medium tracking-[0.15em] uppercase" style={{ color: "#8E8E8E" }}>
-          BD CORE OS
-        </p>
-      </div>
-    </div>
+  // Icon only — small bird, no text
+  const iconOnly = (
+    <img
+      src={src}
+      alt="Fusion"
+      className={cn("h-7 w-auto object-contain", className)}
+    />
   )
 
+  // Full — logo with text
+  const fullLogo = (
+    <img
+      src={src}
+      alt="Fusion BD CORE OS"
+      className={cn("h-10 w-auto object-contain", className)}
+    />
+  )
+
+  // Responsive — full when sidebar open, icon when collapsed
   const responsive = (
     <>
-      <div className="group-data-[collapsible=icon]:hidden">
-        {fullLogo}
-      </div>
-      <div className="hidden group-data-[collapsible=icon]:flex justify-center">
-        <FusionMark size={24} />
-      </div>
+      <img
+        src={src}
+        alt="Fusion BD CORE OS"
+        className={cn(
+          "h-9 w-auto object-contain group-data-[collapsible=icon]:hidden",
+          className,
+        )}
+      />
+      <img
+        src={src}
+        alt="Fusion"
+        className={cn(
+          "h-7 w-auto object-contain hidden group-data-[collapsible=icon]:block",
+          className,
+        )}
+      />
     </>
   )
 

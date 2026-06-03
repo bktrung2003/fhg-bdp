@@ -10,13 +10,17 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       {/* Left panel — Fusion brand */}
-      <div className="bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 relative hidden lg:flex lg:flex-col lg:items-center lg:justify-center gap-8 p-12">
-        <Logo variant="full" className="scale-[2] origin-center" asLink={false} />
-        <div className="text-center mt-8">
-          <p className="text-lg font-semibold text-foreground/80 tracking-tight">
+      <div className="bg-gradient-to-br from-[#1a1f2e] via-[#1e2436] to-[#141820] relative hidden lg:flex lg:flex-col lg:items-center lg:justify-center gap-6 p-12">
+        <img
+          src="/assets/images/fusion-logo-dark.png"
+          alt="Fusion"
+          className="h-48 w-auto object-contain"
+        />
+        <div className="text-center">
+          <p className="text-lg font-semibold text-white/80 tracking-tight">
             Business Development CORE OS
           </p>
-          <p className="text-sm text-muted-foreground mt-2 max-w-sm leading-relaxed">
+          <p className="text-sm text-white/50 mt-2 max-w-sm leading-relaxed">
             One source of truth for pipeline, owner relationships, deal governance and pre-opening execution.
           </p>
         </div>
