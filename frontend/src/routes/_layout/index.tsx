@@ -7,7 +7,7 @@ export const Route = createFileRoute("/_layout/")({
   head: () => ({
     meta: [
       {
-        title: "Dashboard - FastAPI Template",
+        title: "Dashboard - Fusion BD CORE OS",
       },
     ],
   }),
@@ -18,14 +18,12 @@ function Dashboard() {
 
   return (
     <div>
-      <div>
-        <h1 className="text-2xl truncate max-w-sm">
-          Hi, {currentUser?.full_name || currentUser?.email} 👋
-        </h1>
-        <p className="text-muted-foreground">
-          Welcome back, nice to see you again!!!
-        </p>
-      </div>
+      <h1 className="text-2xl font-semibold tracking-tight">
+        Welcome back, {currentUser?.full_name || currentUser?.email}
+      </h1>
+      <p className="text-muted-foreground mt-1">
+        Fusion BD CORE OS · Business Development Operating System
+      </p>
     </div>
   )
 }

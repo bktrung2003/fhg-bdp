@@ -1,11 +1,5 @@
 import { Link } from "@tanstack/react-router"
-
-import { useTheme } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
-import icon from "/assets/images/fastapi-icon.svg"
-import iconLight from "/assets/images/fastapi-icon-light.svg"
-import logo from "/assets/images/fastapi-logo.svg"
-import logoLight from "/assets/images/fastapi-logo-light.svg"
 
 interface LogoProps {
   variant?: "full" | "icon" | "responsive"
@@ -13,48 +7,41 @@ interface LogoProps {
   asLink?: boolean
 }
 
-export function Logo({
-  variant = "full",
-  className,
-  asLink = true,
-}: LogoProps) {
-  const { resolvedTheme } = useTheme()
-  const isDark = resolvedTheme === "dark"
+export function Logo({ variant = "full", className, asLink = true }: LogoProps) {
+  const icon = (
+    <div className={cn(
+      "flex h-7 w-7 items-center justify-center rounded-lg bg-foreground text-background font-bold text-sm flex-shrink-0",
+      className
+    )}>
+      F
+    </div>
+  )
 
-  const fullLogo = isDark ? logoLight : logo
-  const iconLogo = isDark ? iconLight : icon
+  const full = (
+    <div className={cn("flex items-center gap-2.5", className)}>
+      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-foreground text-background font-bold text-sm flex-shrink-0">
+        F
+      </div>
+      <div className="leading-tight">
+        <p className="font-semibold text-sm tracking-tight">Fusion BD</p>
+        <p className="text-[10px] text-muted-foreground font-medium">CORE OS</p>
+      </div>
+    </div>
+  )
 
-  const content =
-    variant === "responsive" ? (
-      <>
-        <img
-          src={fullLogo}
-          alt="FastAPI"
-          className={cn(
-            "h-6 w-auto group-data-[collapsible=icon]:hidden",
-            className,
-          )}
-        />
-        <img
-          src={iconLogo}
-          alt="FastAPI"
-          className={cn(
-            "size-5 hidden group-data-[collapsible=icon]:block",
-            className,
-          )}
-        />
-      </>
-    ) : (
-      <img
-        src={variant === "full" ? fullLogo : iconLogo}
-        alt="FastAPI"
-        className={cn(variant === "full" ? "h-6 w-auto" : "size-5", className)}
-      />
-    )
+  const responsive = (
+    <>
+      <div className="group-data-[collapsible=icon]:hidden">
+        {full}
+      </div>
+      <div className="hidden group-data-[collapsible=icon]:flex">
+        {icon}
+      </div>
+    </>
+  )
 
-  if (!asLink) {
-    return content
-  }
+  const content = variant === "icon" ? icon : variant === "responsive" ? responsive : full
 
+  if (!asLink) return content
   return <Link to="/">{content}</Link>
 }
