@@ -99,13 +99,14 @@ function Dashboard() {
   activeDeals.forEach(d => { const s = d.stage ?? "Lead"; stageCounts[s] = (stageCounts[s] ?? 0) + 1 })
 
   // Country distribution
-  const countryCounts: Record<string, { count: number; keys: number; value: number }> = {}
+  const countryCounts: Record<string, { count: number; keys: number; value: number; weighted: number }> = {}
   activeDeals.forEach(d => {
     const c = d.country ?? "Unknown"
-    if (!countryCounts[c]) countryCounts[c] = { count: 0, keys: 0, value: 0 }
+    if (!countryCounts[c]) countryCounts[c] = { count: 0, keys: 0, value: 0, weighted: 0 }
     countryCounts[c].count++
     countryCounts[c].keys += d.keys ?? 0
     countryCounts[c].value += d.pipeline_value ?? 0
+    countryCounts[c].weighted += (d.pipeline_value ?? 0) * (d.probability ?? 0) / 100
   })
 
   const totalAlerts = redDeals.length + overdueTasks.length + redMilestones.length
@@ -162,33 +163,7 @@ function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Stage Distribution */}
-        <div className="rounded-xl border bg-card p-5">
-          <h3 className="font-semibold text-sm mb-4">Pipeline by Stage</h3>
-          <div className="flex flex-col gap-2">
-            {Object.entries(stageCounts)
-              .sort(([a], [b]) => {
-                const order = ["Lead","NDA / Qualified","Feasibility","Proposal","Negotiation","LOI Signed","HMA Signed","Pre-opening"]
-                return order.indexOf(a) - order.indexOf(b)
-              })
-              .map(([stage, count]) => (
-                <div key={stage} className="flex items-center justify-between">
-                  <Badge label={stage} map={STAGE_COLOR} />
-                  <div className="flex items-center gap-2">
-                    <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-primary rounded-full"
-                        style={{ width: `${Math.min(100, (count / Math.max(1, activeDeals.length)) * 100)}%` }}
-                      />
-                    </div>
-                    <span className="text-sm font-semibold w-6 text-right">{count}</span>
-                  </div>
-                </div>
-              ))}
-          </div>
-        </div>
-
-        {/* Country Performance */}
+        {/* ── Country Performance ── */}
         <div className="rounded-xl border bg-card p-5">
           <h3 className="font-semibold text-sm mb-4">Country Performance</h3>
           {Object.keys(countryCounts).length === 0 ? (
@@ -198,63 +173,192 @@ function Dashboard() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left text-xs font-semibold text-muted-foreground pb-2">Country</th>
-                    <th className="text-right text-xs font-semibold text-muted-foreground pb-2">Deals</th>
-                    <th className="text-right text-xs font-semibold text-muted-foreground pb-2">Keys</th>
-                    <th className="text-right text-xs font-semibold text-muted-foreground pb-2">Value</th>
+                    {["Country","Deals","Keys","Value","Wt. Value"].map(h => (
+                      <th key={h} className={`text-xs font-semibold text-muted-foreground pb-2 ${h === "Country" ? "text-left" : "text-right"}`}>{h}</th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
                   {Object.entries(countryCounts)
                     .sort(([, a], [, b]) => b.value - a.value)
                     .map(([country, d]) => (
-                      <tr key={country} className="border-b last:border-0">
+                      <tr key={country} className="border-b last:border-0 hover:bg-muted/30 cursor-pointer"
+                        onClick={() => navigate({ to: "/deals" })}>
                         <td className="py-2 font-medium">{country}</td>
                         <td className="py-2 text-right tabular-nums">{d.count}</td>
-                        <td className="py-2 text-right tabular-nums text-muted-foreground">{d.keys}</td>
-                        <td className="py-2 text-right tabular-nums font-medium">{fmtM(d.value)}</td>
+                        <td className="py-2 text-right tabular-nums text-muted-foreground">{d.keys.toLocaleString()}</td>
+                        <td className="py-2 text-right tabular-nums">{fmtM(d.value)}</td>
+                        <td className="py-2 text-right tabular-nums text-primary font-medium">{fmtM(d.weighted)}</td>
                       </tr>
                     ))}
                 </tbody>
+                <tfoot>
+                  <tr className="border-t font-semibold">
+                    <td className="py-2">Total</td>
+                    <td className="py-2 text-right">{activeDeals.length}</td>
+                    <td className="py-2 text-right tabular-nums">{totalKeys.toLocaleString()}</td>
+                    <td className="py-2 text-right tabular-nums">{fmtM(pipelineValue)}</td>
+                    <td className="py-2 text-right tabular-nums text-primary">{fmtM(weightedPipeline)}</td>
+                  </tr>
+                </tfoot>
               </table>
             </div>
           )}
         </div>
 
-        {/* Risk Watchlist */}
+        {/* ── Strategic KPIs ── */}
         <div className="rounded-xl border bg-card p-5">
-          <h3 className="font-semibold text-sm mb-4">Risk Watchlist</h3>
-          <div className="flex flex-col gap-2">
+          <h3 className="font-semibold text-sm mb-4">Strategic KPIs</h3>
+          <div className="flex flex-col gap-3">
+            {(() => {
+              // Brand mix
+              const brandCounts: Record<string, number> = {}
+              activeDeals.forEach(d => { const b = d.brand ?? "Unbranded"; brandCounts[b] = (brandCounts[b] ?? 0) + 1 })
+              // Owner concentration
+              const ownerDealCounts: Record<string, number> = {}
+              activeDeals.forEach(d => { const o = d.owner_name ?? "Unknown"; ownerDealCounts[o] = (ownerDealCounts[o] ?? 0) + 1 })
+              const topOwner = Object.entries(ownerDealCounts).sort(([,a],[,b]) => b - a)[0]
+              const concentrationRisk = topOwner && activeDeals.length > 0 ? Math.round((topOwner[1] / activeDeals.length) * 100) : 0
+              // Geographic diversification
+              const countryCount = Object.keys(countryCounts).length
+              // Weak feasibility
+              const weakFeas = activeDeals.filter(d => d.feasibility === "Weak" || d.feasibility === "TBD").length
+              // Stuck deals (>30d in stage)
+              const stuckDeals = activeDeals.filter(d => (d.days_in_stage ?? 0) > 30).length
+
+              return (
+                <>
+                  {/* Brand Mix */}
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Brand Mix</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {Object.entries(brandCounts).sort(([,a],[,b]) => b - a).map(([brand, count]) => (
+                        <span key={brand} className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium">
+                          {brand} <span className="ml-1 font-bold text-primary">{count}</span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Owner Concentration */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Owner Concentration</p>
+                      <p className="text-xs mt-0.5">
+                        Top: <span className="font-semibold">{topOwner?.[0] ?? "—"}</span>
+                        <span className="text-muted-foreground"> ({topOwner?.[1] ?? 0} deals)</span>
+                      </p>
+                    </div>
+                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                      concentrationRisk > 40 ? "bg-red-100 text-red-600" :
+                      concentrationRisk > 25 ? "bg-amber-100 text-amber-700" :
+                      "bg-green-100 text-green-700"
+                    }`}>
+                      {concentrationRisk}% risk
+                    </span>
+                  </div>
+
+                  {/* Geographic Diversification */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Geographic Spread</p>
+                      <p className="text-xs mt-0.5">{countryCount} {countryCount === 1 ? "country" : "countries"} in pipeline</p>
+                    </div>
+                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                      countryCount >= 4 ? "bg-green-100 text-green-700" :
+                      countryCount >= 2 ? "bg-amber-100 text-amber-700" :
+                      "bg-red-100 text-red-600"
+                    }`}>
+                      {countryCount >= 4 ? "Diversified" : countryCount >= 2 ? "Moderate" : "Concentrated"}
+                    </span>
+                  </div>
+
+                  {/* Weak feasibility */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Weak / TBD Feasibility</p>
+                      <p className="text-xs mt-0.5">{weakFeas} deal{weakFeas !== 1 ? "s" : ""} need assessment</p>
+                    </div>
+                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                      weakFeas === 0 ? "bg-green-100 text-green-700" :
+                      weakFeas <= 2 ? "bg-amber-100 text-amber-700" :
+                      "bg-red-100 text-red-600"
+                    }`}>
+                      {weakFeas}
+                    </span>
+                  </div>
+
+                  {/* Stuck deals */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Stuck Deals (&gt;30d)</p>
+                      <p className="text-xs mt-0.5">{stuckDeals} deal{stuckDeals !== 1 ? "s" : ""} not progressing</p>
+                    </div>
+                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                      stuckDeals === 0 ? "bg-green-100 text-green-700" :
+                      stuckDeals <= 2 ? "bg-amber-100 text-amber-700" :
+                      "bg-red-100 text-red-600"
+                    }`}>
+                      {stuckDeals}
+                    </span>
+                  </div>
+                </>
+              )
+            })()}
+          </div>
+        </div>
+
+        {/* ── Risk Watchlist ── */}
+        <div className="rounded-xl border bg-card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-sm">Risk Watchlist</h3>
+            <div className="flex items-center gap-2 text-xs">
+              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-red-500" />{redDeals.length + redMilestones.length}</span>
+              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-amber-400" />{amberDeals.length + amberMilestones.length}</span>
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5 max-h-[340px] overflow-y-auto pr-1">
             {/* Red deals */}
             {redDeals.map(d => (
-              <div key={d.id} className="flex items-center gap-2 rounded-lg bg-red-50 border border-red-100 px-3 py-2 cursor-pointer hover:bg-red-100"
+              <div key={`d-${d.id}`} className="flex items-center gap-2 rounded-lg bg-red-50 border border-red-100 px-3 py-2 cursor-pointer hover:bg-red-100"
                 onClick={() => navigate({ to: "/deals/$dealId" as any, params: { dealId: d.id } })}>
                 <span className="h-2 w-2 rounded-full bg-red-500 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold truncate">{d.name}</p>
-                  <p className="text-[10px] text-red-600">{d.stage} · {d.days_in_stage}d in stage</p>
-                </div>
-              </div>
-            ))}
-            {/* Amber deals */}
-            {amberDeals.slice(0, 5).map(d => (
-              <div key={d.id} className="flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-100 px-3 py-2 cursor-pointer hover:bg-amber-100"
-                onClick={() => navigate({ to: "/deals/$dealId" as any, params: { dealId: d.id } })}>
-                <span className="h-2 w-2 rounded-full bg-amber-400 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold truncate">{d.name}</p>
-                  <p className="text-[10px] text-amber-600">{d.stage} · {d.days_in_stage}d in stage</p>
+                  <p className="text-[10px] text-red-600">{d.stage} · {d.days_in_stage}d · {d.country}</p>
                 </div>
               </div>
             ))}
             {/* Red milestones */}
-            {redMilestones.slice(0, 3).map(m => (
-              <div key={m.id} className="flex items-center gap-2 rounded-lg bg-red-50 border border-red-100 px-3 py-2 cursor-pointer hover:bg-red-100"
+            {redMilestones.map(m => (
+              <div key={`m-${m.id}`} className="flex items-center gap-2 rounded-lg bg-red-50 border border-red-100 px-3 py-2 cursor-pointer hover:bg-red-100"
                 onClick={() => navigate({ to: "/preopening" })}>
                 <Rocket className="h-3 w-3 text-red-500 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold truncate">{m.name}</p>
                   <p className="text-[10px] text-red-600">{m.deal_name} · {m.department} · due {m.due_date}</p>
+                </div>
+              </div>
+            ))}
+            {/* Overdue tasks */}
+            {overdueTasks.slice(0, 5).map(t => (
+              <div key={`t-${t.id}`} className="flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-100 px-3 py-2 cursor-pointer hover:bg-amber-100"
+                onClick={() => navigate({ to: "/activities" })}>
+                <AlertCircle className="h-3 w-3 text-amber-500 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold truncate">{t.title}</p>
+                  <p className="text-[10px] text-amber-600">Overdue · {t.task_owner} · due {t.due_date}</p>
+                </div>
+              </div>
+            ))}
+            {/* Amber deals */}
+            {amberDeals.slice(0, 5).map(d => (
+              <div key={`a-${d.id}`} className="flex items-center gap-2 rounded-lg bg-amber-50/60 border border-amber-100 px-3 py-2 cursor-pointer hover:bg-amber-100"
+                onClick={() => navigate({ to: "/deals/$dealId" as any, params: { dealId: d.id } })}>
+                <span className="h-2 w-2 rounded-full bg-amber-400 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold truncate">{d.name}</p>
+                  <p className="text-[10px] text-amber-600">{d.stage} · {d.days_in_stage}d · {d.country}</p>
                 </div>
               </div>
             ))}
@@ -265,6 +369,41 @@ function Dashboard() {
               </div>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* ── Pipeline by Stage — full width bar ── */}
+      <div className="rounded-xl border bg-card p-5">
+        <h3 className="font-semibold text-sm mb-4">Pipeline by Stage</h3>
+        <div className="flex flex-col gap-2.5">
+          {Object.entries(stageCounts)
+            .sort(([a], [b]) => {
+              const order = ["Lead","NDA / Qualified","Feasibility","Proposal","Negotiation","LOI Signed","HMA Signed","Pre-opening"]
+              return order.indexOf(a) - order.indexOf(b)
+            })
+            .map(([stage, count]) => {
+              const stageDeals = activeDeals.filter(d => d.stage === stage)
+              const stageKeys = stageDeals.reduce((s, d) => s + (d.keys ?? 0), 0)
+              const stageValue = stageDeals.reduce((s, d) => s + (d.pipeline_value ?? 0), 0)
+              return (
+                <div key={stage} className="flex items-center gap-3">
+                  <div className="w-[120px] flex-shrink-0">
+                    <Badge label={stage} map={STAGE_COLOR} />
+                  </div>
+                  <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full transition-all"
+                      style={{ width: `${Math.min(100, (count / Math.max(1, activeDeals.length)) * 100)}%` }}
+                    />
+                  </div>
+                  <div className="flex items-center gap-4 text-xs tabular-nums w-[200px] flex-shrink-0 justify-end">
+                    <span className="font-semibold">{count} deal{count !== 1 ? "s" : ""}</span>
+                    <span className="text-muted-foreground">{stageKeys.toLocaleString()} keys</span>
+                    <span className="font-medium text-primary">{fmtM(stageValue)}</span>
+                  </div>
+                </div>
+              )
+            })}
         </div>
       </div>
 
