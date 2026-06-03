@@ -1,194 +1,213 @@
 @echo off
-chcp 65001 >nul
-setlocal EnableDelayedExpansion
+title Fusion BD CORE OS - Dev
 
 set ROOT=%~dp0
-set ROOT=%ROOT:~0,-1%
+if "%ROOT:~-1%"=="\" set ROOT=%ROOT:~0,-1%
+
 set BACKEND=%ROOT%\backend
 set FRONTEND=%ROOT%\frontend
-
-title Fusion BD CORE OS — Dev
 
 :MENU
 cls
 echo.
-echo  ╔══════════════════════════════════════════════╗
-echo  ║      Fusion BD CORE OS — Local Dev           ║
-echo  ║      Native Windows (no Docker)              ║
-echo  ╚══════════════════════════════════════════════╝
+echo  ================================================
+echo   Fusion BD CORE OS - Local Dev
+echo  ================================================
 echo.
-echo  [1]  Start          (backend + frontend)
-echo  [2]  Start backend  only
-echo  [3]  Start frontend only
-echo  ──────────────────────────────────────────────
-echo  [S]  Setup          (first time only)
-echo  [M]  Migrate DB     (alembic upgrade head)
-echo  [G]  Generate API client  (after backend changes)
-echo  ──────────────────────────────────────────────
-echo  [O]  Open in browser
-echo  [Q]  Quit
+echo   [1] Start All     (backend + frontend)
+echo   [2] Start Backend only
+echo   [3] Start Frontend only
+echo   ------------------------------------------------
+echo   [S] Setup         (chay lan dau tien)
+echo   [M] Migrate DB    (alembic upgrade head)
+echo   [G] Generate client (sau khi doi API)
+echo   ------------------------------------------------
+echo   [O] Mo browser
+echo   [Q] Thoat
 echo.
-set /p choice="  Choice: "
+set /p choice="  Chon: "
 
 if /i "%choice%"=="1" goto START_ALL
 if /i "%choice%"=="2" goto START_BACKEND
 if /i "%choice%"=="3" goto START_FRONTEND
 if /i "%choice%"=="S" goto SETUP
-if /i "%choice%"=="s" goto SETUP
 if /i "%choice%"=="M" goto MIGRATE
-if /i "%choice%"=="m" goto MIGRATE
 if /i "%choice%"=="G" goto GEN_CLIENT
-if /i "%choice%"=="g" goto GEN_CLIENT
 if /i "%choice%"=="O" goto OPEN
-if /i "%choice%"=="o" goto OPEN
 if /i "%choice%"=="Q" goto END
-if /i "%choice%"=="q" goto END
+
+echo   Lua chon khong hop le.
+pause
 goto MENU
 
 
-:: ─── START ALL ─────────────────────────────────────────────────────────────
 :START_ALL
 echo.
-echo  Starting Backend...
-start "FHG-Backend" /D "%BACKEND%" cmd /k "uv run fastapi run --reload app/main.py"
+echo  Dang khoi dong Backend...
+start "FHG-Backend" /D "%BACKEND%" cmd /k "echo === FUSION BACKEND === && uv run fastapi run --reload app/main.py"
 timeout /t 2 /nobreak >nul
-
-echo  Starting Frontend...
-start "FHG-Frontend" /D "%FRONTEND%" cmd /k "bun dev"
-
+echo  Dang khoi dong Frontend...
+start "FHG-Frontend" /D "%FRONTEND%" cmd /k "echo === FUSION FRONTEND === && bun dev"
 echo.
-echo  ✓ Both services started in separate windows.
-echo.
-echo  Backend  →  http://localhost:8000
-echo  API Docs →  http://localhost:8000/docs
-echo  Frontend →  http://localhost:5173
+echo  Done! Xem cac cua so vua mo.
+echo  Backend  : http://localhost:8000
+echo  API Docs : http://localhost:8000/docs
+echo  Frontend : http://localhost:5173
 echo.
 pause
 goto MENU
 
 
-:: ─── START BACKEND ONLY ────────────────────────────────────────────────────
 :START_BACKEND
 echo.
-start "FHG-Backend" /D "%BACKEND%" cmd /k "uv run fastapi run --reload app/main.py"
-echo  ✓ Backend started → http://localhost:8000/docs
+start "FHG-Backend" /D "%BACKEND%" cmd /k "echo === FUSION BACKEND === && uv run fastapi run --reload app/main.py"
+echo  Backend dang chay -> http://localhost:8000/docs
 echo.
 pause
 goto MENU
 
 
-:: ─── START FRONTEND ONLY ───────────────────────────────────────────────────
 :START_FRONTEND
 echo.
-start "FHG-Frontend" /D "%FRONTEND%" cmd /k "bun dev"
-echo  ✓ Frontend started → http://localhost:5173
+start "FHG-Frontend" /D "%FRONTEND%" cmd /k "echo === FUSION FRONTEND === && bun dev"
+echo  Frontend dang chay -> http://localhost:5173
 echo.
 pause
 goto MENU
 
 
-:: ─── SETUP (first time) ────────────────────────────────────────────────────
 :SETUP
 cls
 echo.
-echo  ╔══════════════════════════════════════════════╗
-echo  ║  SETUP — Run this once on first install      ║
-echo  ╚══════════════════════════════════════════════╝
+echo  ================================================
+echo   SETUP - Chi chay lan dau tien
+echo  ================================================
 echo.
 
-:: Step 1 — Check uv
-echo  [1/5] Checking uv...
+echo  [1/5] Kiem tra uv...
 where uv >nul 2>&1
 if %errorlevel% neq 0 (
-    echo  ✗ uv not found. Install with:
+    echo  LOI: uv chua duoc cai.
+    echo  Cai dat bang lenh sau trong PowerShell:
     echo    powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+    echo.
     pause
     goto MENU
 )
-echo  ✓ uv found.
+echo  OK - uv da co.
+echo.
 
-:: Step 2 — Check bun / node
-echo  [2/5] Checking bun...
+echo  [2/5] Kiem tra bun...
 where bun >nul 2>&1
 if %errorlevel% neq 0 (
-    echo  ✗ bun not found. Install with:
+    echo  LOI: bun chua duoc cai.
+    echo  Cai dat bang lenh sau trong PowerShell:
     echo    powershell -c "irm https://bun.sh/install.ps1 | iex"
-    echo  (or use: npm run dev instead of bun dev)
+    echo.
     pause
     goto MENU
 )
-echo  ✓ bun found.
+echo  OK - bun da co.
+echo.
 
-:: Step 3 — Create PostgreSQL DB
-echo  [3/5] PostgreSQL setup...
+echo  [3/5] Tao database PostgreSQL...
 echo.
-echo  Chay lenh nay trong psql (run as postgres admin):
-echo  ─────────────────────────────────────────────────
-echo    CREATE USER fusion WITH PASSWORD 'FusionDB2026!';
-echo    CREATE DATABASE fusion_bdp OWNER fusion;
-echo  ─────────────────────────────────────────────────
+echo  Chay lenh sau trong psql (voi user postgres):
+echo  ------------------------------------------------
+echo    CREATE DATABASE fusion_bdp;
+echo  ------------------------------------------------
+echo  (Neu da tao roi thi bo qua buoc nay)
 echo.
-set /p dbdone="  Da tao DB xong chua? (Y/N): "
+set /p dbdone="  Da tao DB xong chua? (Y de tiep tuc): "
 if /i not "%dbdone%"=="Y" (
-    echo  Tao DB truoc roi chay Setup lai.
+    echo  Tao DB truoc roi quay lai.
     pause
     goto MENU
 )
+echo.
 
-:: Step 4 — Install backend deps
-echo  [4/5] Installing backend dependencies...
+echo  [4/5] Cai dat Python packages (uv sync)...
 cd /D "%BACKEND%"
 uv sync
 if %errorlevel% neq 0 (
-    echo  ✗ uv sync failed.
+    echo.
+    echo  LOI: uv sync that bai. Xem loi phia tren.
     pause
+    cd /D "%ROOT%"
     goto MENU
 )
-echo  ✓ Backend deps installed.
+echo  OK - Python packages da cai xong.
+echo.
 
-:: Step 5 — Run migrations + initial data
-echo  [5/5] Running DB migrations + creating superuser...
+echo  [5/5] Chay DB migration va tao superuser...
 uv run python -m app.backend_pre_start
+if %errorlevel% neq 0 (
+    echo.
+    echo  LOI: Khong ket noi duoc PostgreSQL.
+    echo  Kiem tra lai:
+    echo   - PostgreSQL co dang chay khong?
+    echo   - .env co dung POSTGRES_USER=postgres va POSTGRES_PASSWORD=postgres?
+    pause
+    cd /D "%ROOT%"
+    goto MENU
+)
+
 uv run alembic upgrade head
+if %errorlevel% neq 0 (
+    echo.
+    echo  LOI: Migration that bai. Xem loi phia tren.
+    pause
+    cd /D "%ROOT%"
+    goto MENU
+)
+
 uv run python -m app.initial_data
 if %errorlevel% neq 0 (
-    echo  ✗ Migration failed. Check DB connection in .env
+    echo.
+    echo  LOI: Tao initial data that bai.
     pause
+    cd /D "%ROOT%"
     goto MENU
 )
-echo  ✓ DB migrated.
-
-:: Install frontend deps
+echo  OK - DB migration va superuser da tao.
 echo.
-echo  Installing frontend dependencies...
+
+echo  Cai dat frontend packages (bun install)...
 cd /D "%FRONTEND%"
 bun install
-echo  ✓ Frontend deps installed.
+if %errorlevel% neq 0 (
+    echo.
+    echo  LOI: bun install that bai.
+    pause
+    cd /D "%ROOT%"
+    goto MENU
+)
+echo  OK - Frontend packages da cai xong.
+echo.
 
-echo.
-echo  ══════════════════════════════════════════
-echo  ✓ Setup complete!
-echo  Superuser: admin@fusionhotel.com
-echo  Password : FusionAdmin2026!
-echo.
-echo  → Chon [1] Start de chay app
-echo  ══════════════════════════════════════════
-echo.
 cd /D "%ROOT%"
+echo  ================================================
+echo   Setup hoan tat!
+echo.
+echo   Superuser : admin@fusionhotel.com
+echo   Password  : FusionAdmin2026!
+echo.
+echo   Chon [1] Start de chay app.
+echo  ================================================
+echo.
 pause
 goto MENU
 
 
-:: ─── MIGRATE ───────────────────────────────────────────────────────────────
 :MIGRATE
 echo.
-echo  Running alembic upgrade head...
+echo  Dang chay alembic upgrade head...
 cd /D "%BACKEND%"
 uv run alembic upgrade head
 if %errorlevel% equ 0 (
-    echo  ✓ Migration done.
+    echo  OK - Migration xong.
 ) else (
-    echo  ✗ Migration failed. Check error above.
+    echo  LOI - Xem loi phia tren.
 )
 cd /D "%ROOT%"
 echo.
@@ -196,18 +215,17 @@ pause
 goto MENU
 
 
-:: ─── GENERATE API CLIENT ───────────────────────────────────────────────────
 :GEN_CLIENT
 echo.
-echo  Generating frontend API client from OpenAPI spec...
-echo  (Backend phai dang chay tai http://localhost:8000)
+echo  Generating API client...
+echo  (Backend phai dang chay tai localhost:8000)
 echo.
 cd /D "%FRONTEND%"
 bun run generate-client
 if %errorlevel% equ 0 (
-    echo  ✓ Client generated → src/client/
+    echo  OK - Client da duoc update tai src/client/
 ) else (
-    echo  ✗ Failed. Make sure backend is running first.
+    echo  LOI - Chac chan backend dang chay truoc khi generate.
 )
 cd /D "%ROOT%"
 echo.
@@ -215,7 +233,6 @@ pause
 goto MENU
 
 
-:: ─── OPEN BROWSER ──────────────────────────────────────────────────────────
 :OPEN
 start http://localhost:5173
 start http://localhost:8000/docs
@@ -223,5 +240,4 @@ goto MENU
 
 
 :END
-cd /D "%ROOT%"
-exit
+exit /b 0
