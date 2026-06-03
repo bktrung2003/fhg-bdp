@@ -717,3 +717,73 @@ class FeasibilitySnapshotPublic(SQLModel):
     outputs: str
     created_by_id: uuid.UUID
     created_at: datetime | None
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PRE-OPENING TRACKER
+# ─────────────────────────────────────────────────────────────────────────────
+
+class MilestoneGate(str, Enum):
+    GREEN = "Green"
+    AMBER = "Amber"
+    RED = "Red"
+
+
+class MilestoneDept(str, Enum):
+    OPS = "Ops"
+    IT = "IT"
+    FINANCE = "Finance"
+    DESIGN = "Design"
+    LEGAL = "Legal"
+    PROCUREMENT = "Procurement"
+    HR = "HR"
+    MARKETING = "Marketing"
+
+
+class MilestoneBase(SQLModel):
+    name: str = Field(min_length=1, max_length=255)
+    deal_id: uuid.UUID | None = Field(default=None)
+    deal_name: str | None = Field(default=None, max_length=255)
+    department: MilestoneDept = Field(default=MilestoneDept.OPS, sa_type=String(30))
+    milestone_owner: str | None = Field(default=None, max_length=100)
+    due_date: str | None = Field(default=None, max_length=20)
+    status: MilestoneGate = Field(default=MilestoneGate.GREEN, sa_type=String(10))
+    blocker: str | None = Field(default=None, max_length=500)
+
+
+class MilestoneCreate(MilestoneBase):
+    pass
+
+
+class MilestoneUpdate(SQLModel):
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    deal_id: uuid.UUID | None = None
+    deal_name: str | None = Field(default=None, max_length=255)
+    department: MilestoneDept | None = None
+    milestone_owner: str | None = Field(default=None, max_length=100)
+    due_date: str | None = Field(default=None, max_length=20)
+    status: MilestoneGate | None = None
+    blocker: str | None = Field(default=None, max_length=500)
+
+
+class Milestone(MilestoneBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    created_by_id: uuid.UUID = Field(foreign_key="user.id", ondelete="CASCADE")
+    created_at: datetime | None = Field(
+        default_factory=get_datetime_utc, sa_type=DateTime(timezone=True)
+    )
+    updated_at: datetime | None = Field(
+        default_factory=get_datetime_utc, sa_type=DateTime(timezone=True)
+    )
+
+
+class MilestonePublic(MilestoneBase):
+    id: uuid.UUID
+    created_by_id: uuid.UUID
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+class MilestonesPublic(SQLModel):
+    data: list[MilestonePublic]
+    count: int

@@ -16,6 +16,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
+import { Route as LayoutPreopeningRouteImport } from './routes/_layout/preopening'
 import { Route as LayoutOwnersRouteImport } from './routes/_layout/owners'
 import { Route as LayoutItemsRouteImport } from './routes/_layout/items'
 import { Route as LayoutFeasibilityRouteImport } from './routes/_layout/feasibility'
@@ -56,6 +57,11 @@ const LayoutIndexRoute = LayoutIndexRouteImport.update({
 const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutPreopeningRoute = LayoutPreopeningRouteImport.update({
+  id: '/preopening',
+  path: '/preopening',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutOwnersRoute = LayoutOwnersRouteImport.update({
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/feasibility': typeof LayoutFeasibilityRoute
   '/items': typeof LayoutItemsRoute
   '/owners': typeof LayoutOwnersRoute
+  '/preopening': typeof LayoutPreopeningRoute
   '/settings': typeof LayoutSettingsRoute
 }
 export interface FileRoutesByTo {
@@ -121,6 +128,7 @@ export interface FileRoutesByTo {
   '/feasibility': typeof LayoutFeasibilityRoute
   '/items': typeof LayoutItemsRoute
   '/owners': typeof LayoutOwnersRoute
+  '/preopening': typeof LayoutPreopeningRoute
   '/settings': typeof LayoutSettingsRoute
   '/': typeof LayoutIndexRoute
 }
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   '/_layout/feasibility': typeof LayoutFeasibilityRoute
   '/_layout/items': typeof LayoutItemsRoute
   '/_layout/owners': typeof LayoutOwnersRoute
+  '/_layout/preopening': typeof LayoutPreopeningRoute
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/': typeof LayoutIndexRoute
 }
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
     | '/feasibility'
     | '/items'
     | '/owners'
+    | '/preopening'
     | '/settings'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/feasibility'
     | '/items'
     | '/owners'
+    | '/preopening'
     | '/settings'
     | '/'
   id:
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/_layout/feasibility'
     | '/_layout/items'
     | '/_layout/owners'
+    | '/_layout/preopening'
     | '/_layout/settings'
     | '/_layout/'
   fileRoutesById: FileRoutesById
@@ -249,6 +261,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutSettingsRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/preopening': {
+      id: '/_layout/preopening'
+      path: '/preopening'
+      fullPath: '/preopening'
+      preLoaderRoute: typeof LayoutPreopeningRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/owners': {
       id: '/_layout/owners'
       path: '/owners'
@@ -309,6 +328,7 @@ interface LayoutRouteChildren {
   LayoutFeasibilityRoute: typeof LayoutFeasibilityRoute
   LayoutItemsRoute: typeof LayoutItemsRoute
   LayoutOwnersRoute: typeof LayoutOwnersRoute
+  LayoutPreopeningRoute: typeof LayoutPreopeningRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
 }
@@ -321,6 +341,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutFeasibilityRoute: LayoutFeasibilityRoute,
   LayoutItemsRoute: LayoutItemsRoute,
   LayoutOwnersRoute: LayoutOwnersRoute,
+  LayoutPreopeningRoute: LayoutPreopeningRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutIndexRoute: LayoutIndexRoute,
 }
