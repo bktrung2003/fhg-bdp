@@ -227,7 +227,7 @@ function UploadDocument() {
               <label htmlFor="confidential" className="text-sm cursor-pointer flex items-center gap-1.5">
                 <Lock className="h-3.5 w-3.5 text-amber-600" />
                 <span className="font-medium text-amber-800">Confidential</span>
-                <span className="text-amber-600 text-xs">— chỉ bạn + BDD/COO/CEO xem được</span>
+                <span className="text-amber-600 text-xs">— only you + BDD / COO / CEO can view</span>
               </label>
             </div>
 
