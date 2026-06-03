@@ -94,6 +94,12 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
 
+    # MinIO / S3 storage
+    MINIO_ENDPOINT: str = "http://minio:9000"
+    MINIO_ROOT_USER: str = "fusion_minio"
+    MINIO_ROOT_PASSWORD: str = ""
+    MINIO_BUCKET_DEALS: str = "fusion-documents"
+
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":
             message = (

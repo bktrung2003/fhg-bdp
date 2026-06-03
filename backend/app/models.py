@@ -618,3 +618,62 @@ class ActivityPublic(ActivityBase):
 class ActivitiesPublic(SQLModel):
     data: list[ActivityPublic]
     count: int
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DOCUMENTS
+# ─────────────────────────────────────────────────────────────────────────────
+
+class DocPermission(str, Enum):
+    INTERNAL = "Internal Only"
+    SHARED = "Shared with Owner"
+    RESTRICTED = "Restricted"
+
+
+class DocType(str, Enum):
+    NDA = "NDA"
+    PROPOSAL = "Proposal"
+    FEASIBILITY = "Feasibility"
+    HMA = "HMA Draft"
+    CONTRACT = "Contract"
+    TECHNICAL = "Technical Drawings"
+    LEGAL = "Legal Document"
+    PRESENTATION = "Presentation"
+    OTHER = "Other"
+
+
+class DocumentBase(SQLModel):
+    name: str = Field(min_length=1, max_length=255)
+    doc_type: DocType = Field(default=DocType.OTHER, sa_type=String(30))
+    permission: DocPermission = Field(default=DocPermission.INTERNAL, sa_type=String(30))
+    deal_id: uuid.UUID | None = Field(default=None)
+    deal_name: str | None = Field(default=None, max_length=255)
+    version: str | None = Field(default="v1.0", max_length=20)
+    note: str | None = Field(default=None, max_length=500)
+
+
+class Document(DocumentBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    original_filename: str = Field(max_length=255)
+    file_size: int = Field(default=0)          # bytes
+    content_type: str = Field(default="application/octet-stream", max_length=100)
+    storage_path: str = Field(max_length=500)  # MinIO key or local path
+    uploaded_by_id: uuid.UUID = Field(foreign_key="user.id", ondelete="CASCADE")
+    uploaded_at: datetime | None = Field(
+        default_factory=get_datetime_utc, sa_type=DateTime(timezone=True)
+    )
+
+
+class DocumentPublic(DocumentBase):
+    id: uuid.UUID
+    original_filename: str
+    file_size: int
+    content_type: str
+    uploaded_by_id: uuid.UUID
+    uploaded_at: datetime | None = None
+    download_url: str | None = None   # presigned or local URL
+
+
+class DocumentsPublic(SQLModel):
+    data: list[DocumentPublic]
+    count: int
