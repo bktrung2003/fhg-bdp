@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 from enum import Enum
+from typing import Optional
 
 from pydantic import EmailStr
 from sqlalchemy import DateTime, String
@@ -66,14 +67,6 @@ class User(UserBase, table=True):
         sa_type=DateTime(timezone=True),  # type: ignore
     )
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
-    bd_deals: list["Deal"] = Relationship(
-        back_populates="bd_owner",
-        sa_relationship_kwargs={"foreign_keys": "[Deal.bd_owner_id]"},
-    )
-    created_deals: list["Deal"] = Relationship(
-        back_populates="created_by",
-        sa_relationship_kwargs={"foreign_keys": "[Deal.created_by_id]"},
-    )
 
 
 # Properties to return via API, id is always required
@@ -269,13 +262,11 @@ class Deal(DealBase, table=True):
     )
 
     # Relationships
-    bd_owner: "User | None" = Relationship(
-        sa_relationship_kwargs={"foreign_keys": "[Deal.bd_owner_id]"},
-        back_populates="bd_deals",
+    bd_owner: Optional["User"] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[Deal.bd_owner_id]", "lazy": "select"}
     )
-    created_by: "User | None" = Relationship(
-        sa_relationship_kwargs={"foreign_keys": "[Deal.created_by_id]"},
-        back_populates="created_deals",
+    created_by: Optional["User"] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[Deal.created_by_id]", "lazy": "select"}
     )
     audit_logs: list["DealAuditLog"] = Relationship(
         back_populates="deal", cascade_delete=True
