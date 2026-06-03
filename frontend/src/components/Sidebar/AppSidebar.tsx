@@ -1,4 +1,4 @@
-import { Briefcase, Building2, Home, Users } from "lucide-react"
+import { Briefcase, Building2, Home, Users, UserCheck } from "lucide-react"
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
 import { Logo } from "@/components/Common/Logo"
@@ -15,6 +15,7 @@ import { User } from "./User"
 const baseItems: Item[] = [
   { icon: Home, title: "Dashboard", path: "/" },
   { icon: Building2, title: "Deal Pipeline", path: "/deals" },
+  { icon: UserCheck, title: "Owner CRM 360", path: "/owners" },
   { icon: Briefcase, title: "Items", path: "/items" },
 ]
 

@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { DealsListDealsData, DealsListDealsResponse, DealsCreateDealData, DealsCreateDealResponse, DealsGetDealData, DealsGetDealResponse, DealsUpdateDealData, DealsUpdateDealResponse, DealsDeleteDealData, DealsDeleteDealResponse, DealsChangeStageData, DealsChangeStageResponse, DealsGetDealAuditData, DealsGetDealAuditResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { DealsListDealsData, DealsListDealsResponse, DealsCreateDealData, DealsCreateDealResponse, DealsGetDealData, DealsGetDealResponse, DealsUpdateDealData, DealsUpdateDealResponse, DealsDeleteDealData, DealsDeleteDealResponse, DealsChangeStageData, DealsChangeStageResponse, DealsGetDealAuditData, DealsGetDealAuditResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, OwnersListOwnersData, OwnersListOwnersResponse, OwnersCreateOwnerData, OwnersCreateOwnerResponse, OwnersGetOwnerData, OwnersGetOwnerResponse, OwnersUpdateOwnerData, OwnersUpdateOwnerResponse, OwnersDeleteOwnerData, OwnersDeleteOwnerResponse, OwnersListContactsData, OwnersListContactsResponse, OwnersAddContactData, OwnersAddContactResponse, OwnersListInteractionsData, OwnersListInteractionsResponse, OwnersAddInteractionData, OwnersAddInteractionResponse, OwnersDeleteContactData, OwnersDeleteContactResponse, PrivateCreateUserData, PrivateCreateUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class DealsService {
     /**
@@ -376,6 +376,226 @@ export class LoginService {
             url: '/api/v1/password-recovery-html-content/{email}',
             path: {
                 email: data.email
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class OwnersService {
+    /**
+     * List Owners
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @param data.search
+     * @param data.ownerType
+     * @param data.relationship
+     * @param data.catchupStatus
+     * @returns OwnersPublic Successful Response
+     * @throws ApiError
+     */
+    public static listOwners(data: OwnersListOwnersData = {}): CancelablePromise<OwnersListOwnersResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/owners/',
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                search: data.search,
+                owner_type: data.ownerType,
+                relationship: data.relationship,
+                catchup_status: data.catchupStatus
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Owner
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns OwnerPublic Successful Response
+     * @throws ApiError
+     */
+    public static createOwner(data: OwnersCreateOwnerData): CancelablePromise<OwnersCreateOwnerResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/owners/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Owner
+     * @param data The data for the request.
+     * @param data.id
+     * @returns OwnerPublic Successful Response
+     * @throws ApiError
+     */
+    public static getOwner(data: OwnersGetOwnerData): CancelablePromise<OwnersGetOwnerResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/owners/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Owner
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns OwnerPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateOwner(data: OwnersUpdateOwnerData): CancelablePromise<OwnersUpdateOwnerResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/owners/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Owner
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteOwner(data: OwnersDeleteOwnerData): CancelablePromise<OwnersDeleteOwnerResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/owners/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * List Contacts
+     * @param data The data for the request.
+     * @param data.id
+     * @returns OwnerContactPublic Successful Response
+     * @throws ApiError
+     */
+    public static listContacts(data: OwnersListContactsData): CancelablePromise<OwnersListContactsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/owners/{id}/contacts',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Add Contact
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns OwnerContactPublic Successful Response
+     * @throws ApiError
+     */
+    public static addContact(data: OwnersAddContactData): CancelablePromise<OwnersAddContactResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/owners/{id}/contacts',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * List Interactions
+     * @param data The data for the request.
+     * @param data.id
+     * @returns OwnerInteractionPublic Successful Response
+     * @throws ApiError
+     */
+    public static listInteractions(data: OwnersListInteractionsData): CancelablePromise<OwnersListInteractionsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/owners/{id}/interactions',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Add Interaction
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns OwnerInteractionPublic Successful Response
+     * @throws ApiError
+     */
+    public static addInteraction(data: OwnersAddInteractionData): CancelablePromise<OwnersAddInteractionResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/owners/{id}/interactions',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Contact
+     * @param data The data for the request.
+     * @param data.contactId
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteContact(data: OwnersDeleteContactData): CancelablePromise<OwnersDeleteContactResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/owners/contacts/{contact_id}',
+            path: {
+                contact_id: data.contactId
             },
             errors: {
                 422: 'Validation Error'

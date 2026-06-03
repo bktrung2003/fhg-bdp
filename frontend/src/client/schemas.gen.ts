@@ -63,6 +63,18 @@ export const Body_login_login_access_tokenSchema = {
     title: 'Body_login-login_access_token'
 } as const;
 
+export const CatchupStatusSchema = {
+    type: 'string',
+    enum: ['On track', 'Due this week', 'Overdue', 'No cadence'],
+    title: 'CatchupStatus'
+} as const;
+
+export const ContactStrengthSchema = {
+    type: 'string',
+    enum: ['New', 'Warm', 'Strong'],
+    title: 'ContactStrength'
+} as const;
+
 export const DealAuditLogPublicSchema = {
     properties: {
         id: {
@@ -777,6 +789,12 @@ export const HTTPValidationErrorSchema = {
     title: 'HTTPValidationError'
 } as const;
 
+export const InteractionTypeSchema = {
+    type: 'string',
+    enum: ['Meeting', 'Dinner', 'Site visit', 'Phone call', 'WhatsApp summary', 'Proposal sent', 'NDA signed', 'Other'],
+    title: 'InteractionType'
+} as const;
+
 export const ItemCreateSchema = {
     properties: {
         title: {
@@ -930,6 +948,576 @@ export const NewPasswordSchema = {
     type: 'object',
     required: ['token', 'new_password'],
     title: 'NewPassword'
+} as const;
+
+export const OwnerContactCreateSchema = {
+    properties: {
+        fusion_role: {
+            type: 'string',
+            maxLength: 100,
+            title: 'Fusion Role'
+        },
+        owner_contact: {
+            type: 'string',
+            maxLength: 100,
+            title: 'Owner Contact'
+        },
+        strength: {
+            '$ref': '#/components/schemas/ContactStrength',
+            default: 'New'
+        },
+        last_met: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Last Met'
+        },
+        senior_flag: {
+            type: 'boolean',
+            title: 'Senior Flag',
+            default: false
+        },
+        note: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Note'
+        },
+        owner_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Owner Id'
+        }
+    },
+    type: 'object',
+    required: ['fusion_role', 'owner_contact', 'owner_id'],
+    title: 'OwnerContactCreate'
+} as const;
+
+export const OwnerContactPublicSchema = {
+    properties: {
+        fusion_role: {
+            type: 'string',
+            maxLength: 100,
+            title: 'Fusion Role'
+        },
+        owner_contact: {
+            type: 'string',
+            maxLength: 100,
+            title: 'Owner Contact'
+        },
+        strength: {
+            '$ref': '#/components/schemas/ContactStrength',
+            default: 'New'
+        },
+        last_met: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Last Met'
+        },
+        senior_flag: {
+            type: 'boolean',
+            title: 'Senior Flag',
+            default: false
+        },
+        note: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Note'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        owner_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Owner Id'
+        }
+    },
+    type: 'object',
+    required: ['fusion_role', 'owner_contact', 'id', 'owner_id'],
+    title: 'OwnerContactPublic'
+} as const;
+
+export const OwnerCreateSchema = {
+    properties: {
+        company: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Company'
+        },
+        owner_type: {
+            '$ref': '#/components/schemas/OwnerType',
+            default: 'Developer'
+        },
+        country: {
+            type: 'string',
+            maxLength: 100,
+            title: 'Country'
+        },
+        priority: {
+            '$ref': '#/components/schemas/OwnerPriority',
+            default: 'Medium'
+        },
+        relationship: {
+            '$ref': '#/components/schemas/OwnerRelationship',
+            default: 'New'
+        },
+        catchup_status: {
+            '$ref': '#/components/schemas/CatchupStatus',
+            default: 'No cadence'
+        },
+        next_catchup: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Next Catchup'
+        },
+        assets: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Assets'
+        },
+        financial_health: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Financial Health'
+        },
+        strategic_value: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Strategic Value'
+        }
+    },
+    type: 'object',
+    required: ['company', 'country'],
+    title: 'OwnerCreate'
+} as const;
+
+export const OwnerInteractionCreateSchema = {
+    properties: {
+        interaction_type: {
+            '$ref': '#/components/schemas/InteractionType',
+            default: 'Meeting'
+        },
+        date: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Date'
+        },
+        note: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Note'
+        },
+        owner_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Owner Id'
+        }
+    },
+    type: 'object',
+    required: ['date', 'owner_id'],
+    title: 'OwnerInteractionCreate'
+} as const;
+
+export const OwnerInteractionPublicSchema = {
+    properties: {
+        interaction_type: {
+            '$ref': '#/components/schemas/InteractionType',
+            default: 'Meeting'
+        },
+        date: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Date'
+        },
+        note: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Note'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        owner_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Owner Id'
+        },
+        created_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['date', 'id', 'owner_id'],
+    title: 'OwnerInteractionPublic'
+} as const;
+
+export const OwnerPrioritySchema = {
+    type: 'string',
+    enum: ['Strategic', 'High', 'Medium', 'Low'],
+    title: 'OwnerPriority'
+} as const;
+
+export const OwnerPublicSchema = {
+    properties: {
+        company: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Company'
+        },
+        owner_type: {
+            '$ref': '#/components/schemas/OwnerType',
+            default: 'Developer'
+        },
+        country: {
+            type: 'string',
+            maxLength: 100,
+            title: 'Country'
+        },
+        priority: {
+            '$ref': '#/components/schemas/OwnerPriority',
+            default: 'Medium'
+        },
+        relationship: {
+            '$ref': '#/components/schemas/OwnerRelationship',
+            default: 'New'
+        },
+        catchup_status: {
+            '$ref': '#/components/schemas/CatchupStatus',
+            default: 'No cadence'
+        },
+        next_catchup: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Next Catchup'
+        },
+        assets: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Assets'
+        },
+        financial_health: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Financial Health'
+        },
+        strategic_value: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Strategic Value'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        created_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created At'
+        },
+        updated_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Updated At'
+        },
+        deal_count: {
+            type: 'integer',
+            title: 'Deal Count',
+            default: 0
+        },
+        last_interaction: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Last Interaction'
+        }
+    },
+    type: 'object',
+    required: ['company', 'country', 'id'],
+    title: 'OwnerPublic'
+} as const;
+
+export const OwnerRelationshipSchema = {
+    type: 'string',
+    enum: ['New', 'Warm', 'Strong', 'Strategic Partner', 'Risk / Unstable'],
+    title: 'OwnerRelationship'
+} as const;
+
+export const OwnerTypeSchema = {
+    type: 'string',
+    enum: ['Developer', 'Family Office', 'REIT', 'Asset Owner', 'Institutional Investor'],
+    title: 'OwnerType'
+} as const;
+
+export const OwnerUpdateSchema = {
+    properties: {
+        company: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255,
+                    minLength: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Company'
+        },
+        owner_type: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/OwnerType'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        country: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Country'
+        },
+        priority: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/OwnerPriority'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        relationship: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/OwnerRelationship'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        catchup_status: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/CatchupStatus'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        next_catchup: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Next Catchup'
+        },
+        assets: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Assets'
+        },
+        financial_health: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Financial Health'
+        },
+        strategic_value: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Strategic Value'
+        }
+    },
+    type: 'object',
+    title: 'OwnerUpdate'
+} as const;
+
+export const OwnersPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/OwnerPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'OwnersPublic'
 } as const;
 
 export const PrivateUserCreateSchema = {

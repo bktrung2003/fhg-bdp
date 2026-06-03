@@ -11,6 +11,10 @@ export type Body_login_login_access_token = {
     client_secret?: (string | null);
 };
 
+export type CatchupStatus = 'On track' | 'Due this week' | 'Overdue' | 'No cadence';
+
+export type ContactStrength = 'New' | 'Warm' | 'Strong';
+
 export type DealAuditLogPublic = {
     id: string;
     field: string;
@@ -103,6 +107,8 @@ export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
 
+export type InteractionType = 'Meeting' | 'Dinner' | 'Site visit' | 'Phone call' | 'WhatsApp summary' | 'Proposal sent' | 'NDA signed' | 'Other';
+
 export type ItemCreate = {
     title: string;
     description?: (string | null);
@@ -133,6 +139,98 @@ export type Message = {
 export type NewPassword = {
     token: string;
     new_password: string;
+};
+
+export type OwnerContactCreate = {
+    fusion_role: string;
+    owner_contact: string;
+    strength?: ContactStrength;
+    last_met?: (string | null);
+    senior_flag?: boolean;
+    note?: (string | null);
+    owner_id: string;
+};
+
+export type OwnerContactPublic = {
+    fusion_role: string;
+    owner_contact: string;
+    strength?: ContactStrength;
+    last_met?: (string | null);
+    senior_flag?: boolean;
+    note?: (string | null);
+    id: string;
+    owner_id: string;
+};
+
+export type OwnerCreate = {
+    company: string;
+    owner_type?: OwnerType;
+    country: string;
+    priority?: OwnerPriority;
+    relationship?: OwnerRelationship;
+    catchup_status?: CatchupStatus;
+    next_catchup?: (string | null);
+    assets?: (string | null);
+    financial_health?: (string | null);
+    strategic_value?: (string | null);
+};
+
+export type OwnerInteractionCreate = {
+    interaction_type?: InteractionType;
+    date: string;
+    note?: (string | null);
+    owner_id: string;
+};
+
+export type OwnerInteractionPublic = {
+    interaction_type?: InteractionType;
+    date: string;
+    note?: (string | null);
+    id: string;
+    owner_id: string;
+    created_at?: (string | null);
+};
+
+export type OwnerPriority = 'Strategic' | 'High' | 'Medium' | 'Low';
+
+export type OwnerPublic = {
+    company: string;
+    owner_type?: OwnerType;
+    country: string;
+    priority?: OwnerPriority;
+    relationship?: OwnerRelationship;
+    catchup_status?: CatchupStatus;
+    next_catchup?: (string | null);
+    assets?: (string | null);
+    financial_health?: (string | null);
+    strategic_value?: (string | null);
+    id: string;
+    created_at?: (string | null);
+    updated_at?: (string | null);
+    deal_count?: number;
+    last_interaction?: (string | null);
+};
+
+export type OwnerRelationship = 'New' | 'Warm' | 'Strong' | 'Strategic Partner' | 'Risk / Unstable';
+
+export type OwnersPublic = {
+    data: Array<OwnerPublic>;
+    count: number;
+};
+
+export type OwnerType = 'Developer' | 'Family Office' | 'REIT' | 'Asset Owner' | 'Institutional Investor';
+
+export type OwnerUpdate = {
+    company?: (string | null);
+    owner_type?: (OwnerType | null);
+    country?: (string | null);
+    priority?: (OwnerPriority | null);
+    relationship?: (OwnerRelationship | null);
+    catchup_status?: (CatchupStatus | null);
+    next_catchup?: (string | null);
+    assets?: (string | null);
+    financial_health?: (string | null);
+    strategic_value?: (string | null);
 };
 
 export type PrivateUserCreate = {
@@ -325,6 +423,74 @@ export type LoginRecoverPasswordHtmlContentData = {
 };
 
 export type LoginRecoverPasswordHtmlContentResponse = (string);
+
+export type OwnersListOwnersData = {
+    catchupStatus?: (CatchupStatus | null);
+    limit?: number;
+    ownerType?: (OwnerType | null);
+    relationship?: (OwnerRelationship | null);
+    search?: (string | null);
+    skip?: number;
+};
+
+export type OwnersListOwnersResponse = (OwnersPublic);
+
+export type OwnersCreateOwnerData = {
+    requestBody: OwnerCreate;
+};
+
+export type OwnersCreateOwnerResponse = (OwnerPublic);
+
+export type OwnersGetOwnerData = {
+    id: string;
+};
+
+export type OwnersGetOwnerResponse = (OwnerPublic);
+
+export type OwnersUpdateOwnerData = {
+    id: string;
+    requestBody: OwnerUpdate;
+};
+
+export type OwnersUpdateOwnerResponse = (OwnerPublic);
+
+export type OwnersDeleteOwnerData = {
+    id: string;
+};
+
+export type OwnersDeleteOwnerResponse = (Message);
+
+export type OwnersListContactsData = {
+    id: string;
+};
+
+export type OwnersListContactsResponse = (Array<OwnerContactPublic>);
+
+export type OwnersAddContactData = {
+    id: string;
+    requestBody: OwnerContactCreate;
+};
+
+export type OwnersAddContactResponse = (OwnerContactPublic);
+
+export type OwnersListInteractionsData = {
+    id: string;
+};
+
+export type OwnersListInteractionsResponse = (Array<OwnerInteractionPublic>);
+
+export type OwnersAddInteractionData = {
+    id: string;
+    requestBody: OwnerInteractionCreate;
+};
+
+export type OwnersAddInteractionResponse = (OwnerInteractionPublic);
+
+export type OwnersDeleteContactData = {
+    contactId: string;
+};
+
+export type OwnersDeleteContactResponse = (Message);
 
 export type PrivateCreateUserData = {
     requestBody: PrivateUserCreate;
