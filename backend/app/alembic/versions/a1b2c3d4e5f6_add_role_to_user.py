@@ -18,23 +18,20 @@ depends_on = None
 
 
 def upgrade():
-    # Create enum type for PostgreSQL
-    user_role_enum = sa.Enum(
-        'CEO', 'COO', 'BD Director', 'BD Manager',
-        'Legal', 'Finance', 'IT Admin',
-        name='userrole'
-    )
-    user_role_enum.create(op.get_bind(), checkfirst=True)
-
+    op.execute("""
+        DO $$ BEGIN
+            CREATE TYPE userrole AS ENUM (
+                'CEO', 'COO', 'BD Director', 'BD Manager',
+                'Legal', 'Finance', 'IT Admin'
+            );
+        EXCEPTION WHEN duplicate_object THEN NULL;
+        END $$;
+    """)
     op.add_column(
         'user',
         sa.Column(
             'role',
-            sa.Enum(
-                'CEO', 'COO', 'BD Director', 'BD Manager',
-                'Legal', 'Finance', 'IT Admin',
-                name='userrole'
-            ),
+            sa.Enum(name='userrole', create_type=False),
             nullable=False,
             server_default='BD Manager',
         )
@@ -43,4 +40,4 @@ def upgrade():
 
 def downgrade():
     op.drop_column('user', 'role')
-    sa.Enum(name='userrole').drop(op.get_bind(), checkfirst=True)
+    op.execute('DROP TYPE IF EXISTS userrole')
