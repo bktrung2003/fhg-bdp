@@ -1,34 +1,22 @@
 import { Link } from "@tanstack/react-router"
 import { cn } from "@/lib/utils"
 
-// Fusion bird logo — SVG approximation of the orange+gray bird mark
+// Fusion bird mark — SVG matching brand colors
 function FusionMark({ size = 28 }: { size?: number }) {
   return (
     <svg
       width={size}
       height={size}
-      viewBox="0 0 56 48"
+      viewBox="0 0 60 52"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Orange upper petal */}
-      <path
-        d="M6 38 C4 18 22 4 40 8 C30 20 16 30 6 38Z"
-        fill="#F0A040"
-        opacity="0.95"
-      />
-      {/* Orange lower petal (lighter) */}
-      <path
-        d="M8 43 C12 22 32 12 48 18 C36 30 20 40 8 43Z"
-        fill="#F7C070"
-        opacity="0.9"
-      />
-      {/* Gray bird body / tail */}
-      <path
-        d="M38 8 C52 10 56 26 50 38 C46 44 36 46 28 40 C20 34 22 22 28 16 C34 10 38 8 38 8Z"
-        fill="#939393"
-        opacity="0.88"
-      />
+      {/* Upper wing — main orange */}
+      <ellipse cx="22" cy="18" rx="18" ry="14" transform="rotate(-20 22 18)" fill="#E8913A" opacity="0.95" />
+      {/* Lower wing — lighter orange */}
+      <ellipse cx="26" cy="28" rx="20" ry="12" transform="rotate(-15 26 28)" fill="#F5BC6C" opacity="0.9" />
+      {/* Body — gray */}
+      <path d="M38 8 C54 12 58 28 50 40 C44 48 34 48 28 42 C20 34 24 20 32 14 C36 10 38 8 38 8Z" fill="#8E8E8E" opacity="0.85" />
     </svg>
   )
 }
@@ -40,16 +28,18 @@ interface LogoProps {
 }
 
 export function Logo({ variant = "full", className, asLink = true }: LogoProps) {
-  const iconOnly = (
-    <FusionMark size={28} />
-  )
+  const iconOnly = <FusionMark size={28} />
 
   const fullLogo = (
     <div className={cn("flex items-center gap-2.5", className)}>
-      <FusionMark size={28} />
+      <FusionMark size={32} />
       <div className="leading-tight">
-        <p className="font-semibold text-sm tracking-tight text-foreground">fusion</p>
-        <p className="text-[10px] text-muted-foreground font-medium tracking-widest uppercase">BD CORE OS</p>
+        <p className="font-semibold text-[15px] tracking-tight" style={{ color: "#636363" }}>
+          fusion
+        </p>
+        <p className="text-[9.5px] font-medium tracking-[0.15em] uppercase" style={{ color: "#8E8E8E" }}>
+          BD CORE OS
+        </p>
       </div>
     </div>
   )
