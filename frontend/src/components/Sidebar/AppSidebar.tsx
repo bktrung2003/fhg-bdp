@@ -1,4 +1,4 @@
-import { Briefcase, Building2, CheckSquare, Home, UserCheck } from "lucide-react"
+import { Briefcase, Building2, CheckSquare, Home, UserCheck, Users } from "lucide-react"
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
 import { Logo } from "@/components/Common/Logo"
