@@ -10,9 +10,13 @@ import {
   type OwnerInteractionPublic,
 } from "@/client"
 import { AddOwner } from "@/components/Owners/AddOwner"
+import { AddContact } from "@/components/Owners/AddContact"
 import { EditOwner } from "@/components/Owners/EditOwner"
 import { DeleteOwner } from "@/components/Owners/DeleteOwner"
 import { LogInteraction } from "@/components/Owners/LogInteraction"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { Trash2 } from "lucide-react"
+import useCustomToast from "@/hooks/useCustomToast"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -54,6 +58,30 @@ function Badge({ label, colorMap }: { label?: string | null; colorMap: Record<st
     <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${cls}`}>
       {label}
     </span>
+  )
+}
+
+// ── Delete Contact Button ─────────────────────────────────────────────────────
+
+function DeleteContactBtn({ contactId, ownerId }: { contactId: string; ownerId: string }) {
+  const qc = useQueryClient()
+  const { showSuccessToast } = useCustomToast()
+  const del = useMutation({
+    mutationFn: () => OwnersService.deleteContact({ contactId }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["owner-contacts", ownerId] })
+      showSuccessToast("Contact removed.")
+    },
+  })
+  return (
+    <Button
+      variant="ghost" size="sm"
+      className="h-6 w-6 p-0 text-red-400 hover:text-red-600 hover:bg-red-50"
+      onClick={() => del.mutate()}
+      disabled={del.isPending}
+    >
+      <Trash2 className="h-3 w-3" />
+    </Button>
   )
 }
 
@@ -114,15 +142,16 @@ function OwnerDetail({ owner }: { owner: OwnerPublic }) {
 
       {/* Contacts table */}
       <div className="rounded-lg border bg-card p-4">
-        <h3 className="font-semibold text-sm mb-3">
-          Relationship Map · Fusion ↔ {owner.company}
-        </h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-sm">Relationship Map · Fusion ↔ {owner.company}</h3>
+          <AddContact ownerId={owner.id} />
+        </div>
         {contacts && contacts.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b">
-                  {["Fusion","Owner Contact","Strength","Last Met","Note"].map(h => (
+                  {["Fusion","Owner Contact","Strength","Last Met","Note",""].map(h => (
                     <th key={h} className="text-left text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground pb-2 pr-3">
                       {h}
                     </th>
@@ -131,7 +160,7 @@ function OwnerDetail({ owner }: { owner: OwnerPublic }) {
               </thead>
               <tbody>
                 {contacts.map((c: OwnerContactPublic) => (
-                  <tr key={c.id} className="border-b last:border-0">
+                  <tr key={c.id} className="border-b last:border-0 hover:bg-muted/20">
                     <td className="py-2 pr-3">
                       {c.senior_flag && (
                         <span className="inline-block bg-amber-100 text-amber-700 text-[9px] font-bold px-1 rounded mr-1">C</span>
@@ -143,14 +172,19 @@ function OwnerDetail({ owner }: { owner: OwnerPublic }) {
                       <Badge label={c.strength} colorMap={{ Strong: "bg-green-100 text-green-700", Warm: "bg-amber-100 text-amber-700", New: "bg-gray-100 text-gray-600" }} />
                     </td>
                     <td className="py-2 pr-3 text-muted-foreground">{c.last_met || "—"}</td>
-                    <td className="py-2 text-muted-foreground text-xs">{c.note || "—"}</td>
+                    <td className="py-2 pr-2 text-muted-foreground text-xs">{c.note || "—"}</td>
+                    <td className="py-2">
+                      <DeleteContactBtn contactId={c.id} ownerId={owner.id} />
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">No contacts yet.</p>
+          <div className="text-sm text-muted-foreground py-2">
+            No contacts yet. Click <span className="font-medium">Add Contact</span> to map the relationship.
+          </div>
         )}
       </div>
 
