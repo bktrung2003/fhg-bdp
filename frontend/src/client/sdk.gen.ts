@@ -3,7 +3,178 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { DealsListDealsData, DealsListDealsResponse, DealsCreateDealData, DealsCreateDealResponse, DealsGetDealData, DealsGetDealResponse, DealsUpdateDealData, DealsUpdateDealResponse, DealsDeleteDealData, DealsDeleteDealResponse, DealsChangeStageData, DealsChangeStageResponse, DealsGetDealAuditData, DealsGetDealAuditResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+
+export class DealsService {
+    /**
+     * List Deals
+     * List all deals with optional filters. BDM sees only their own deals.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @param data.search
+     * @param data.country
+     * @param data.region
+     * @param data.stage
+     * @param data.risk
+     * @param data.feasibility
+     * @param data.bdOwnerId
+     * @returns DealsPublic Successful Response
+     * @throws ApiError
+     */
+    public static listDeals(data: DealsListDealsData = {}): CancelablePromise<DealsListDealsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/deals/',
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                search: data.search,
+                country: data.country,
+                region: data.region,
+                stage: data.stage,
+                risk: data.risk,
+                feasibility: data.feasibility,
+                bd_owner_id: data.bdOwnerId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Deal
+     * Create a new deal.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns DealPublic Successful Response
+     * @throws ApiError
+     */
+    public static createDeal(data: DealsCreateDealData): CancelablePromise<DealsCreateDealResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/deals/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Deal
+     * Get single deal by ID.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns DealPublic Successful Response
+     * @throws ApiError
+     */
+    public static getDeal(data: DealsGetDealData): CancelablePromise<DealsGetDealResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/deals/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Deal
+     * Update deal fields (not stage — use PATCH /stage for that).
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns DealPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateDeal(data: DealsUpdateDealData): CancelablePromise<DealsUpdateDealResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/deals/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Deal
+     * Delete deal. Only BD Director, COO, CEO or superuser.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteDeal(data: DealsDeleteDealData): CancelablePromise<DealsDeleteDealResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/deals/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Change Stage
+     * Change deal stage — requires audit note.
+     * Stage change is tracked separately with mandatory reason.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns DealPublic Successful Response
+     * @throws ApiError
+     */
+    public static changeStage(data: DealsChangeStageData): CancelablePromise<DealsChangeStageResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/deals/{id}/stage',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Deal Audit
+     * Get full audit trail for a deal.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns DealAuditLogPublic Successful Response
+     * @throws ApiError
+     */
+    public static getDealAudit(data: DealsGetDealAuditData): CancelablePromise<DealsGetDealAuditResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/deals/{id}/audit',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
 
 export class ItemsService {
     /**
