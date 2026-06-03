@@ -1,5 +1,8 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import type { DealPublic } from "@/client"
+import { EditDeal } from "./EditDeal"
+import { DeleteDeal } from "./DeleteDeal"
+import { StageChange } from "./StageChange"
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -174,6 +177,17 @@ export const dealColumns: ColumnDef<DealPublic>[] = [
       <span className="text-sm text-muted-foreground whitespace-nowrap">
         {row.original.opening_target ?? "—"}
       </span>
+    ),
+  },
+  {
+    id: "actions",
+    header: "",
+    cell: ({ row }) => (
+      <div className="flex items-center gap-0.5">
+        <StageChange deal={row.original} />
+        <EditDeal deal={row.original} />
+        <DeleteDeal deal={row.original} />
+      </div>
     ),
   },
 ]
