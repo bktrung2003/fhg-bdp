@@ -220,12 +220,24 @@ echo.
 echo  Generating API client...
 echo  (Backend phai dang chay tai localhost:8000)
 echo.
+echo  Buoc 1: Download openapi.json tu backend...
 cd /D "%FRONTEND%"
+curl -s -o openapi.json http://localhost:8000/openapi.json
+if %errorlevel% neq 0 (
+    echo  LOI: Khong download duoc. Backend co dang chay khong?
+    pause
+    cd /D "%ROOT%"
+    goto MENU
+)
+echo  OK - openapi.json downloaded.
+echo.
+echo  Buoc 2: Generate client...
 bun run generate-client
 if %errorlevel% equ 0 (
     echo  OK - Client da duoc update tai src/client/
+    del openapi.json >nul 2>&1
 ) else (
-    echo  LOI - Chac chan backend dang chay truoc khi generate.
+    echo  LOI - Xem loi phia tren.
 )
 cd /D "%ROOT%"
 echo.
