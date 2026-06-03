@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ActivitiesListActivitiesData, ActivitiesListActivitiesResponse, ActivitiesCreateActivityData, ActivitiesCreateActivityResponse, ActivitiesDeleteActivityData, ActivitiesDeleteActivityResponse, DealsListDealsData, DealsListDealsResponse, DealsCreateDealData, DealsCreateDealResponse, DealsGetDealData, DealsGetDealResponse, DealsUpdateDealData, DealsUpdateDealResponse, DealsDeleteDealData, DealsDeleteDealResponse, DealsChangeStageData, DealsChangeStageResponse, DealsGetDealAuditData, DealsGetDealAuditResponse, DocumentsListDocumentsData, DocumentsListDocumentsResponse, DocumentsUploadDocumentData, DocumentsUploadDocumentResponse, DocumentsServeLocalFileData, DocumentsServeLocalFileResponse, DocumentsToggleConfidentialData, DocumentsToggleConfidentialResponse, DocumentsDeleteDocumentData, DocumentsDeleteDocumentResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, OwnersListOwnersData, OwnersListOwnersResponse, OwnersCreateOwnerData, OwnersCreateOwnerResponse, OwnersGetOwnerData, OwnersGetOwnerResponse, OwnersUpdateOwnerData, OwnersUpdateOwnerResponse, OwnersDeleteOwnerData, OwnersDeleteOwnerResponse, OwnersListContactsData, OwnersListContactsResponse, OwnersAddContactData, OwnersAddContactResponse, OwnersListInteractionsData, OwnersListInteractionsResponse, OwnersAddInteractionData, OwnersAddInteractionResponse, OwnersDeleteContactData, OwnersDeleteContactResponse, PrivateCreateUserData, PrivateCreateUserResponse, TasksListTasksData, TasksListTasksResponse, TasksCreateTaskData, TasksCreateTaskResponse, TasksUpdateTaskData, TasksUpdateTaskResponse, TasksDeleteTaskData, TasksDeleteTaskResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { ActivitiesListActivitiesData, ActivitiesListActivitiesResponse, ActivitiesCreateActivityData, ActivitiesCreateActivityResponse, ActivitiesDeleteActivityData, ActivitiesDeleteActivityResponse, DealsListDealsData, DealsListDealsResponse, DealsCreateDealData, DealsCreateDealResponse, DealsGetDealData, DealsGetDealResponse, DealsUpdateDealData, DealsUpdateDealResponse, DealsDeleteDealData, DealsDeleteDealResponse, DealsChangeStageData, DealsChangeStageResponse, DealsGetDealAuditData, DealsGetDealAuditResponse, DocumentsListDocumentsData, DocumentsListDocumentsResponse, DocumentsUploadDocumentData, DocumentsUploadDocumentResponse, DocumentsServeLocalFileData, DocumentsServeLocalFileResponse, DocumentsToggleConfidentialData, DocumentsToggleConfidentialResponse, DocumentsDeleteDocumentData, DocumentsDeleteDocumentResponse, FeasibilityListSnapshotsData, FeasibilityListSnapshotsResponse, FeasibilitySaveSnapshotData, FeasibilitySaveSnapshotResponse, FeasibilityDeleteSnapshotData, FeasibilityDeleteSnapshotResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MilestonesListMilestonesData, MilestonesListMilestonesResponse, MilestonesCreateMilestoneData, MilestonesCreateMilestoneResponse, MilestonesUpdateMilestoneData, MilestonesUpdateMilestoneResponse, MilestonesDeleteMilestoneData, MilestonesDeleteMilestoneResponse, OwnersListOwnersData, OwnersListOwnersResponse, OwnersCreateOwnerData, OwnersCreateOwnerResponse, OwnersGetOwnerData, OwnersGetOwnerResponse, OwnersUpdateOwnerData, OwnersUpdateOwnerResponse, OwnersDeleteOwnerData, OwnersDeleteOwnerResponse, OwnersListContactsData, OwnersListContactsResponse, OwnersAddContactData, OwnersAddContactResponse, OwnersListInteractionsData, OwnersListInteractionsResponse, OwnersAddInteractionData, OwnersAddInteractionResponse, OwnersDeleteContactData, OwnersDeleteContactResponse, PrivateCreateUserData, PrivateCreateUserResponse, TasksListTasksData, TasksListTasksResponse, TasksCreateTaskData, TasksCreateTaskResponse, TasksUpdateTaskData, TasksUpdateTaskResponse, TasksDeleteTaskData, TasksDeleteTaskResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class ActivitiesService {
     /**
@@ -354,6 +354,69 @@ export class DocumentsService {
     }
 }
 
+export class FeasibilityService {
+    /**
+     * List Snapshots
+     * @param data The data for the request.
+     * @param data.dealId
+     * @param data.limit
+     * @returns FeasibilitySnapshotPublic Successful Response
+     * @throws ApiError
+     */
+    public static listSnapshots(data: FeasibilityListSnapshotsData = {}): CancelablePromise<FeasibilityListSnapshotsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/feasibility/snapshots',
+            query: {
+                deal_id: data.dealId,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Save Snapshot
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns FeasibilitySnapshotPublic Successful Response
+     * @throws ApiError
+     */
+    public static saveSnapshot(data: FeasibilitySaveSnapshotData): CancelablePromise<FeasibilitySaveSnapshotResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/feasibility/snapshots',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Snapshot
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteSnapshot(data: FeasibilityDeleteSnapshotData): CancelablePromise<FeasibilityDeleteSnapshotResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/feasibility/snapshots/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
 export class ItemsService {
     /**
      * Read Items
@@ -554,6 +617,100 @@ export class LoginService {
             url: '/api/v1/password-recovery-html-content/{email}',
             path: {
                 email: data.email
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class MilestonesService {
+    /**
+     * List Milestones
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @param data.search
+     * @param data.dealId
+     * @param data.department
+     * @param data.status
+     * @returns MilestonesPublic Successful Response
+     * @throws ApiError
+     */
+    public static listMilestones(data: MilestonesListMilestonesData = {}): CancelablePromise<MilestonesListMilestonesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/milestones/',
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                search: data.search,
+                deal_id: data.dealId,
+                department: data.department,
+                status: data.status
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Milestone
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns MilestonePublic Successful Response
+     * @throws ApiError
+     */
+    public static createMilestone(data: MilestonesCreateMilestoneData): CancelablePromise<MilestonesCreateMilestoneResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/milestones/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Milestone
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns MilestonePublic Successful Response
+     * @throws ApiError
+     */
+    public static updateMilestone(data: MilestonesUpdateMilestoneData): CancelablePromise<MilestonesUpdateMilestoneResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/milestones/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Milestone
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteMilestone(data: MilestonesDeleteMilestoneData): CancelablePromise<MilestonesDeleteMilestoneResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/milestones/{id}',
+            path: {
+                id: data.id
             },
             errors: {
                 422: 'Validation Error'

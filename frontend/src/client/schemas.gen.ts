@@ -1137,6 +1137,128 @@ export const DocumentsPublicSchema = {
     title: 'DocumentsPublic'
 } as const;
 
+export const FeasibilitySnapshotCreateSchema = {
+    properties: {
+        deal_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Id'
+        },
+        deal_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Name'
+        },
+        label: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Label'
+        },
+        assumptions: {
+            type: 'string',
+            title: 'Assumptions'
+        },
+        outputs: {
+            type: 'string',
+            title: 'Outputs'
+        }
+    },
+    type: 'object',
+    required: ['assumptions', 'outputs'],
+    title: 'FeasibilitySnapshotCreate'
+} as const;
+
+export const FeasibilitySnapshotPublicSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        deal_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Id'
+        },
+        deal_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Name'
+        },
+        label: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Label'
+        },
+        assumptions: {
+            type: 'string',
+            title: 'Assumptions'
+        },
+        outputs: {
+            type: 'string',
+            title: 'Outputs'
+        },
+        created_by_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Created By Id'
+        },
+        created_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['id', 'deal_id', 'deal_name', 'label', 'assumptions', 'outputs', 'created_by_id', 'created_at'],
+    title: 'FeasibilitySnapshotPublic'
+} as const;
+
 export const HTTPValidationErrorSchema = {
     properties: {
         detail: {
@@ -1292,6 +1414,335 @@ export const MessageSchema = {
     type: 'object',
     required: ['message'],
     title: 'Message'
+} as const;
+
+export const MilestoneCreateSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Name'
+        },
+        deal_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Id'
+        },
+        deal_name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Name'
+        },
+        department: {
+            '$ref': '#/components/schemas/MilestoneDept',
+            default: 'Ops'
+        },
+        milestone_owner: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Milestone Owner'
+        },
+        due_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Due Date'
+        },
+        status: {
+            '$ref': '#/components/schemas/MilestoneGate',
+            default: 'Green'
+        },
+        blocker: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Blocker'
+        }
+    },
+    type: 'object',
+    required: ['name'],
+    title: 'MilestoneCreate'
+} as const;
+
+export const MilestoneDeptSchema = {
+    type: 'string',
+    enum: ['Ops', 'IT', 'Finance', 'Design', 'Legal', 'Procurement', 'HR', 'Marketing'],
+    title: 'MilestoneDept'
+} as const;
+
+export const MilestoneGateSchema = {
+    type: 'string',
+    enum: ['Green', 'Amber', 'Red'],
+    title: 'MilestoneGate'
+} as const;
+
+export const MilestonePublicSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Name'
+        },
+        deal_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Id'
+        },
+        deal_name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Name'
+        },
+        department: {
+            '$ref': '#/components/schemas/MilestoneDept',
+            default: 'Ops'
+        },
+        milestone_owner: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Milestone Owner'
+        },
+        due_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Due Date'
+        },
+        status: {
+            '$ref': '#/components/schemas/MilestoneGate',
+            default: 'Green'
+        },
+        blocker: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Blocker'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        created_by_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Created By Id'
+        },
+        created_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created At'
+        },
+        updated_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['name', 'id', 'created_by_id'],
+    title: 'MilestonePublic'
+} as const;
+
+export const MilestoneUpdateSchema = {
+    properties: {
+        name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255,
+                    minLength: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Name'
+        },
+        deal_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Id'
+        },
+        deal_name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Name'
+        },
+        department: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/MilestoneDept'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        milestone_owner: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Milestone Owner'
+        },
+        due_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Due Date'
+        },
+        status: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/MilestoneGate'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        blocker: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Blocker'
+        }
+    },
+    type: 'object',
+    title: 'MilestoneUpdate'
+} as const;
+
+export const MilestonesPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/MilestonePublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'MilestonesPublic'
 } as const;
 
 export const NewPasswordSchema = {

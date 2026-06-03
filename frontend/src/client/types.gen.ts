@@ -169,6 +169,25 @@ export type DocumentsPublic = {
     count: number;
 };
 
+export type FeasibilitySnapshotCreate = {
+    deal_id?: (string | null);
+    deal_name?: (string | null);
+    label?: (string | null);
+    assumptions: string;
+    outputs: string;
+};
+
+export type FeasibilitySnapshotPublic = {
+    id: string;
+    deal_id: (string | null);
+    deal_name: (string | null);
+    label: (string | null);
+    assumptions: string;
+    outputs: string;
+    created_by_id: string;
+    created_at: (string | null);
+};
+
 export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
@@ -200,6 +219,52 @@ export type ItemUpdate = {
 
 export type Message = {
     message: string;
+};
+
+export type MilestoneCreate = {
+    name: string;
+    deal_id?: (string | null);
+    deal_name?: (string | null);
+    department?: MilestoneDept;
+    milestone_owner?: (string | null);
+    due_date?: (string | null);
+    status?: MilestoneGate;
+    blocker?: (string | null);
+};
+
+export type MilestoneDept = 'Ops' | 'IT' | 'Finance' | 'Design' | 'Legal' | 'Procurement' | 'HR' | 'Marketing';
+
+export type MilestoneGate = 'Green' | 'Amber' | 'Red';
+
+export type MilestonePublic = {
+    name: string;
+    deal_id?: (string | null);
+    deal_name?: (string | null);
+    department?: MilestoneDept;
+    milestone_owner?: (string | null);
+    due_date?: (string | null);
+    status?: MilestoneGate;
+    blocker?: (string | null);
+    id: string;
+    created_by_id: string;
+    created_at?: (string | null);
+    updated_at?: (string | null);
+};
+
+export type MilestonesPublic = {
+    data: Array<MilestonePublic>;
+    count: number;
+};
+
+export type MilestoneUpdate = {
+    name?: (string | null);
+    deal_id?: (string | null);
+    deal_name?: (string | null);
+    department?: (MilestoneDept | null);
+    milestone_owner?: (string | null);
+    due_date?: (string | null);
+    status?: (MilestoneGate | null);
+    blocker?: (string | null);
 };
 
 export type NewPassword = {
@@ -534,6 +599,25 @@ export type DocumentsDeleteDocumentData = {
 
 export type DocumentsDeleteDocumentResponse = (Message);
 
+export type FeasibilityListSnapshotsData = {
+    dealId?: (string | null);
+    limit?: number;
+};
+
+export type FeasibilityListSnapshotsResponse = (Array<FeasibilitySnapshotPublic>);
+
+export type FeasibilitySaveSnapshotData = {
+    requestBody: FeasibilitySnapshotCreate;
+};
+
+export type FeasibilitySaveSnapshotResponse = (FeasibilitySnapshotPublic);
+
+export type FeasibilityDeleteSnapshotData = {
+    id: string;
+};
+
+export type FeasibilityDeleteSnapshotResponse = (Message);
+
 export type ItemsReadItemsData = {
     limit?: number;
     skip?: number;
@@ -591,6 +675,36 @@ export type LoginRecoverPasswordHtmlContentData = {
 };
 
 export type LoginRecoverPasswordHtmlContentResponse = (string);
+
+export type MilestonesListMilestonesData = {
+    dealId?: (string | null);
+    department?: (MilestoneDept | null);
+    limit?: number;
+    search?: (string | null);
+    skip?: number;
+    status?: (MilestoneGate | null);
+};
+
+export type MilestonesListMilestonesResponse = (MilestonesPublic);
+
+export type MilestonesCreateMilestoneData = {
+    requestBody: MilestoneCreate;
+};
+
+export type MilestonesCreateMilestoneResponse = (MilestonePublic);
+
+export type MilestonesUpdateMilestoneData = {
+    id: string;
+    requestBody: MilestoneUpdate;
+};
+
+export type MilestonesUpdateMilestoneResponse = (MilestonePublic);
+
+export type MilestonesDeleteMilestoneData = {
+    id: string;
+};
+
+export type MilestonesDeleteMilestoneResponse = (Message);
 
 export type OwnersListOwnersData = {
     catchupStatus?: (CatchupStatus | null);

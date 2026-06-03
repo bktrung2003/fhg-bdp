@@ -1,4 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table"
+import { useNavigate } from "@tanstack/react-router"
 import type { DealPublic } from "@/client"
 import { EditDeal } from "./EditDeal"
 import { DeleteDeal } from "./DeleteDeal"
@@ -67,6 +68,23 @@ function RiskDot({ risk }: { risk?: string }) {
   )
 }
 
+// ── Deal name cell (clickable → workspace) ────────────────────────────────────
+
+function DealNameCell({ deal }: { deal: DealPublic }) {
+  const navigate = useNavigate()
+  return (
+    <div
+      className="min-w-[180px] cursor-pointer group"
+      onClick={() => navigate({ to: "/deals/$dealId", params: { dealId: deal.id } })}
+    >
+      <p className="font-semibold text-sm leading-tight text-primary group-hover:underline">{deal.name}</p>
+      {deal.project_type && (
+        <p className="text-xs text-muted-foreground mt-0.5">{deal.project_type}</p>
+      )}
+    </div>
+  )
+}
+
 // ── Column definitions ────────────────────────────────────────────────────────
 
 export const dealColumns: ColumnDef<DealPublic>[] = [
@@ -100,14 +118,7 @@ export const dealColumns: ColumnDef<DealPublic>[] = [
   {
     id: "name",
     header: "Project Name",
-    cell: ({ row }) => (
-      <div className="min-w-[180px]">
-        <p className="font-semibold text-sm leading-tight">{row.original.name}</p>
-        {row.original.project_type && (
-          <p className="text-xs text-muted-foreground mt-0.5">{row.original.project_type}</p>
-        )}
-      </div>
-    ),
+    cell: ({ row }) => <DealNameCell deal={row.original} />,
   },
   {
     id: "probability",
