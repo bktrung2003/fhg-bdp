@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useCustomToast } from "@/hooks/useCustomToast"
+import useCustomToast from "@/hooks/useCustomToast"
 
 const STAGES = [
   "Lead", "NDA / Qualified", "Feasibility", "Proposal", "Negotiation",
