@@ -165,8 +165,42 @@ services:
 
       # Enable redirection for HTTP and HTTPS
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.middlewares=https-redirect
+  minio:
+    image: minio/minio:latest
+    restart: always
+    volumes:
+      - minio-data:/data
+    env_file:
+      - .env
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER?Variable not set}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD?Variable not set}
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    networks:
+      - traefik-public
+      - default
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-public
+      - traefik.constraint-label=traefik-public
+      - traefik.http.services.${STACK_NAME?Variable not set}-minio.loadbalancer.server.port=9000
+      - traefik.http.routers.${STACK_NAME?Variable not set}-minio-http.rule=Host(`minio.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.${STACK_NAME?Variable not set}-minio-http.entrypoints=http
+      - traefik.http.routers.${STACK_NAME?Variable not set}-minio-http.middlewares=https-redirect
+      - traefik.http.routers.${STACK_NAME?Variable not set}-minio-https.rule=Host(`minio.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.${STACK_NAME?Variable not set}-minio-https.entrypoints=https
+      - traefik.http.routers.${STACK_NAME?Variable not set}-minio-https.tls=true
+      - traefik.http.routers.${STACK_NAME?Variable not set}-minio-https.tls.certresolver=le
+
 volumes:
   app-db-data:
+  minio-data:
 
 networks:
   traefik-public:

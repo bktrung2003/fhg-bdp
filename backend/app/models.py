@@ -1,9 +1,20 @@
 import uuid
 from datetime import datetime, timezone
+from enum import Enum
 
 from pydantic import EmailStr
 from sqlalchemy import DateTime
 from sqlmodel import Field, Relationship, SQLModel
+
+
+class UserRole(str, Enum):
+    CEO = "CEO"
+    COO = "COO"
+    BD_DIRECTOR = "BD Director"
+    BD_MANAGER = "BD Manager"
+    LEGAL = "Legal"
+    FINANCE = "Finance"
+    IT_ADMIN = "IT Admin"
 
 
 def get_datetime_utc() -> datetime:
@@ -16,6 +27,7 @@ class UserBase(SQLModel):
     is_active: bool = True
     is_superuser: bool = False
     full_name: str | None = Field(default=None, max_length=255)
+    role: UserRole = Field(default=UserRole.BD_MANAGER)
 
 
 # Properties to receive via API on creation

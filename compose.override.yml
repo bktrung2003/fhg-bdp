@@ -87,6 +87,12 @@ services:
       SMTP_TLS: "false"
       EMAILS_FROM_EMAIL: "noreply@example.com"
 
+  minio:
+    restart: "no"
+    ports:
+      - "9000:9000"   # MinIO S3 API  → http://localhost:9000
+      - "9001:9001"   # MinIO Console → http://localhost:9001
+
   mailcatcher:
     image: schickling/mailcatcher
     ports:
