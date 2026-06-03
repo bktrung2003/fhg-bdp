@@ -3,9 +3,14 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional
 
-from pydantic import EmailStr
+from pydantic import ConfigDict, EmailStr
 from sqlalchemy import DateTime, String
 from sqlmodel import Field, Relationship, SQLModel
+
+
+class _EnumAsStr(SQLModel):
+    """Base that tells Pydantic to serialize enum fields as plain values."""
+    model_config = ConfigDict(use_enum_values=True)
 
 
 class UserRole(str, Enum):
@@ -200,7 +205,7 @@ class APACRegion(str, Enum):
 # DEAL — Models
 # ─────────────────────────────────────────────────────────────────────────────
 
-class DealBase(SQLModel):
+class DealBase(_EnumAsStr):
     name: str = Field(min_length=1, max_length=255)
     country: str = Field(max_length=100)
     region: APACRegion | None = Field(default=None, sa_type=String(50))
@@ -371,7 +376,7 @@ class OwnerPriority(str, Enum):
 # OWNER — Models
 # ─────────────────────────────────────────────────────────────────────────────
 
-class OwnerBase(SQLModel):
+class OwnerBase(_EnumAsStr):
     company: str = Field(min_length=1, max_length=255)
     owner_type: OwnerType = Field(default=OwnerType.DEVELOPER, sa_type=String(50))
     country: str = Field(max_length=100)
@@ -434,7 +439,7 @@ class OwnersPublic(SQLModel):
 # OWNER CONTACT — who from Fusion connects with whom on owner side
 # ─────────────────────────────────────────────────────────────────────────────
 
-class OwnerContactBase(SQLModel):
+class OwnerContactBase(_EnumAsStr):
     fusion_role: str = Field(max_length=100)   # "CEO", "BD Director VN"
     owner_contact: str = Field(max_length=100)  # "Owner Chairman"
     strength: ContactStrength = Field(default=ContactStrength.NEW, sa_type=String(20))
@@ -474,7 +479,7 @@ class InteractionType(str, Enum):
     OTHER = "Other"
 
 
-class OwnerInteractionBase(SQLModel):
+class OwnerInteractionBase(_EnumAsStr):
     interaction_type: InteractionType = Field(
         default=InteractionType.MEETING, sa_type=String(30)
     )
@@ -535,7 +540,7 @@ class ActivityType(str, Enum):
 
 # ── Task ──────────────────────────────────────────────────────────────────────
 
-class TaskBase(SQLModel):
+class TaskBase(_EnumAsStr):
     title: str = Field(min_length=1, max_length=500)
     deal_id: uuid.UUID | None = Field(default=None)
     deal_name: str | None = Field(default=None, max_length=255)   # denormalized for display
@@ -587,7 +592,7 @@ class TasksPublic(SQLModel):
 
 # ── Activity ──────────────────────────────────────────────────────────────────
 
-class ActivityBase(SQLModel):
+class ActivityBase(_EnumAsStr):
     activity_type: ActivityType = Field(
         default=ActivityType.MEETING, sa_type=String(30)
     )
@@ -642,7 +647,7 @@ class DocType(str, Enum):
     OTHER = "Other"
 
 
-class DocumentBase(SQLModel):
+class DocumentBase(_EnumAsStr):
     name: str = Field(min_length=1, max_length=255)
     doc_type: DocType = Field(default=DocType.OTHER, sa_type=String(30))
     permission: DocPermission = Field(default=DocPermission.INTERNAL, sa_type=String(30))
@@ -740,7 +745,7 @@ class MilestoneDept(str, Enum):
     MARKETING = "Marketing"
 
 
-class MilestoneBase(SQLModel):
+class MilestoneBase(_EnumAsStr):
     name: str = Field(min_length=1, max_length=255)
     deal_id: uuid.UUID | None = Field(default=None)
     deal_name: str | None = Field(default=None, max_length=255)

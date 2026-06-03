@@ -24,7 +24,7 @@ import { Route as LayoutDocumentsRouteImport } from './routes/_layout/documents'
 import { Route as LayoutDealsRouteImport } from './routes/_layout/deals'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
 import { Route as LayoutActivitiesRouteImport } from './routes/_layout/activities'
-import { Route as LayoutDealsDealIdRouteImport } from './routes/_layout/deals.$dealId'
+import { Route as LayoutDealsDealIdRouteImport } from './routes/_layout/deals_.$dealId'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -101,9 +101,9 @@ const LayoutActivitiesRoute = LayoutActivitiesRouteImport.update({
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutDealsDealIdRoute = LayoutDealsDealIdRouteImport.update({
-  id: '/$dealId',
-  path: '/$dealId',
-  getParentRoute: () => LayoutDealsRoute,
+  id: '/deals_/$dealId',
+  path: '/deals/$dealId',
+  getParentRoute: () => LayoutRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -114,7 +114,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/activities': typeof LayoutActivitiesRoute
   '/admin': typeof LayoutAdminRoute
-  '/deals': typeof LayoutDealsRouteWithChildren
+  '/deals': typeof LayoutDealsRoute
   '/documents': typeof LayoutDocumentsRoute
   '/feasibility': typeof LayoutFeasibilityRoute
   '/items': typeof LayoutItemsRoute
@@ -130,7 +130,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/activities': typeof LayoutActivitiesRoute
   '/admin': typeof LayoutAdminRoute
-  '/deals': typeof LayoutDealsRouteWithChildren
+  '/deals': typeof LayoutDealsRoute
   '/documents': typeof LayoutDocumentsRoute
   '/feasibility': typeof LayoutFeasibilityRoute
   '/items': typeof LayoutItemsRoute
@@ -149,7 +149,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/_layout/activities': typeof LayoutActivitiesRoute
   '/_layout/admin': typeof LayoutAdminRoute
-  '/_layout/deals': typeof LayoutDealsRouteWithChildren
+  '/_layout/deals': typeof LayoutDealsRoute
   '/_layout/documents': typeof LayoutDocumentsRoute
   '/_layout/feasibility': typeof LayoutFeasibilityRoute
   '/_layout/items': typeof LayoutItemsRoute
@@ -157,7 +157,7 @@ export interface FileRoutesById {
   '/_layout/preopening': typeof LayoutPreopeningRoute
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/': typeof LayoutIndexRoute
-  '/_layout/deals/$dealId': typeof LayoutDealsDealIdRoute
+  '/_layout/deals_/$dealId': typeof LayoutDealsDealIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -211,7 +211,7 @@ export interface FileRouteTypes {
     | '/_layout/preopening'
     | '/_layout/settings'
     | '/_layout/'
-    | '/_layout/deals/$dealId'
+    | '/_layout/deals_/$dealId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -329,32 +329,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutActivitiesRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/deals/$dealId': {
-      id: '/_layout/deals/$dealId'
-      path: '/$dealId'
+    '/_layout/deals_/$dealId': {
+      id: '/_layout/deals_/$dealId'
+      path: '/deals/$dealId'
       fullPath: '/deals/$dealId'
       preLoaderRoute: typeof LayoutDealsDealIdRouteImport
-      parentRoute: typeof LayoutDealsRoute
+      parentRoute: typeof LayoutRoute
     }
   }
 }
 
-interface LayoutDealsRouteChildren {
-  LayoutDealsDealIdRoute: typeof LayoutDealsDealIdRoute
-}
-
-const LayoutDealsRouteChildren: LayoutDealsRouteChildren = {
-  LayoutDealsDealIdRoute: LayoutDealsDealIdRoute,
-}
-
-const LayoutDealsRouteWithChildren = LayoutDealsRoute._addFileChildren(
-  LayoutDealsRouteChildren,
-)
-
 interface LayoutRouteChildren {
   LayoutActivitiesRoute: typeof LayoutActivitiesRoute
   LayoutAdminRoute: typeof LayoutAdminRoute
-  LayoutDealsRoute: typeof LayoutDealsRouteWithChildren
+  LayoutDealsRoute: typeof LayoutDealsRoute
   LayoutDocumentsRoute: typeof LayoutDocumentsRoute
   LayoutFeasibilityRoute: typeof LayoutFeasibilityRoute
   LayoutItemsRoute: typeof LayoutItemsRoute
@@ -362,12 +350,13 @@ interface LayoutRouteChildren {
   LayoutPreopeningRoute: typeof LayoutPreopeningRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
+  LayoutDealsDealIdRoute: typeof LayoutDealsDealIdRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutActivitiesRoute: LayoutActivitiesRoute,
   LayoutAdminRoute: LayoutAdminRoute,
-  LayoutDealsRoute: LayoutDealsRouteWithChildren,
+  LayoutDealsRoute: LayoutDealsRoute,
   LayoutDocumentsRoute: LayoutDocumentsRoute,
   LayoutFeasibilityRoute: LayoutFeasibilityRoute,
   LayoutItemsRoute: LayoutItemsRoute,
@@ -375,6 +364,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutPreopeningRoute: LayoutPreopeningRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutIndexRoute: LayoutIndexRoute,
+  LayoutDealsDealIdRoute: LayoutDealsDealIdRoute,
 }
 
 const LayoutRouteWithChildren =

@@ -14,15 +14,15 @@ import { Button } from "@/components/ui/button"
 import { EditDeal } from "@/components/Deals/EditDeal"
 import { StageChange } from "@/components/Deals/StageChange"
 
-export const Route = createFileRoute("/_layout/deals/$dealId")({
+export const Route = createFileRoute("/_layout/deals_/$dealId")({
   component: DealWorkspace,
   head: () => ({ meta: [{ title: "Deal Workspace — Fusion BD CORE OS" }] }),
 })
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const fmtMoney = (v?: number | null) => v != null ? `$${Math.round(v).toLocaleString("en-US")}` : "—"
-const fmtM = (v?: number | null) => v != null ? `$${(v / 1_000_000).toFixed(1)}M` : "—"
+const fmtMoney = (v?: number | null) => v != null ? `$${Math.round(v).toLocaleString(`en-US`)}` : `—`
+const fmtM = (v?: number | null) => v != null ? `$${(v / 1_000_000).toFixed(1)}M` : `—`
 
 const STAGE_COLOR: Record<string, string> = {
   "Lead":"bg-gray-100 text-gray-700","NDA / Qualified":"bg-blue-100 text-blue-700",
@@ -37,7 +37,7 @@ const STATUS_COLOR: Record<string, string> = { Open:"bg-blue-100 text-blue-700",
 
 function Badge({ label, map }: { label?: string | null; map: Record<string, string> }) {
   if (!label) return null
-  return <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${map[label] ?? "bg-gray-100 text-gray-600"}`}>{label}</span>
+  return <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${map[label] ?? `bg-gray-100 text-gray-600`}`}>{label}</span>
 }
 
 function Mini({ label, value, sub }: { label: string; value: string; sub?: string }) {
@@ -151,9 +151,9 @@ function DealWorkspace() {
       {/* KPI row */}
       <div className="grid grid-cols-6 gap-3">
         <Mini label="Stage" value={deal.stage ?? "—"} />
-        <Mini label="Days in Stage" value={`${deal.days_in_stage ?? 0}d`} />
+        <Mini label="Days in Stage" value={"${deal.days_in_stage ?? 0}d"} />
         <Mini label="Keys" value={deal.keys != null ? String(deal.keys) : "—"} />
-        <Mini label="Probability" value={deal.probability != null ? `${deal.probability}%` : "—"} />
+        <Mini label="Probability" value={deal.probability != null ? "${deal.probability}%" : "—"} />
         <Mini label="Pipeline Value" value={fmtM(deal.pipeline_value)} />
         <Mini label="Fee Forecast" value={fmtMoney(deal.fee_forecast)} sub="annual" />
       </div>
@@ -181,7 +181,7 @@ function DealWorkspace() {
               {tasks.map(t => (
                 <div key={t.id} className="rounded-md bg-muted/40 p-2.5">
                   <div className="flex items-start justify-between gap-2">
-                    <p className={`text-xs font-medium ${t.status === "Done" ? "line-through text-muted-foreground" : ""}`}>{t.title}</p>
+                    <p className={`text-xs font-medium ${t.status === `Done` ? `line-through text-muted-foreground` : ``}`}>{t.title}</p>
                     <Badge label={t.status} map={STATUS_COLOR} />
                   </div>
                   <p className="text-[10px] text-muted-foreground mt-1">

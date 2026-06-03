@@ -75,7 +75,7 @@ function DealNameCell({ deal }: { deal: DealPublic }) {
   return (
     <div
       className="min-w-[180px] cursor-pointer group"
-      onClick={() => navigate({ to: "/deals/$dealId", params: { dealId: deal.id } })}
+      onClick={() => navigate({ to: "/deals/$dealId" as any, params: { dealId: deal.id } })}
     >
       <p className="font-semibold text-sm leading-tight text-primary group-hover:underline">{deal.name}</p>
       {deal.project_type && (
