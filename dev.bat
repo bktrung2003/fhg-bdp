@@ -47,7 +47,7 @@ echo  Dang khoi dong Backend...
 start "FHG-Backend" /D "%BACKEND%" cmd /k "echo === FUSION BACKEND === && uv run fastapi run --reload app/main.py"
 timeout /t 2 /nobreak >nul
 echo  Dang khoi dong Frontend...
-start "FHG-Frontend" /D "%FRONTEND%" cmd /k "echo === FUSION FRONTEND === && bun dev"
+start "FHG-Frontend" /D "%FRONTEND%" cmd /k "echo === FUSION FRONTEND === && bun install && bun dev"
 echo.
 echo  Done! Xem cac cua so vua mo.
 echo  Backend  : http://localhost:8000
@@ -69,7 +69,7 @@ goto MENU
 
 :START_FRONTEND
 echo.
-start "FHG-Frontend" /D "%FRONTEND%" cmd /k "echo === FUSION FRONTEND === && bun dev"
+start "FHG-Frontend" /D "%FRONTEND%" cmd /k "echo === FUSION FRONTEND === && bun install && bun dev"
 echo  Frontend dang chay -> http://localhost:5173
 echo.
 pause
