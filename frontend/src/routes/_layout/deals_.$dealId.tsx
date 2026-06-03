@@ -151,9 +151,9 @@ function DealWorkspace() {
       {/* KPI row */}
       <div className="grid grid-cols-6 gap-3">
         <Mini label="Stage" value={deal.stage ?? "—"} />
-        <Mini label="Days in Stage" value={"${deal.days_in_stage ?? 0}d"} />
+        <Mini label="Days in Stage" value={`${deal.days_in_stage ?? 0}d`} />
         <Mini label="Keys" value={deal.keys != null ? String(deal.keys) : "—"} />
-        <Mini label="Probability" value={deal.probability != null ? "${deal.probability}%" : "—"} />
+        <Mini label="Probability" value={deal.probability != null ? `${deal.probability}%` : "—"} />
         <Mini label="Pipeline Value" value={fmtM(deal.pipeline_value)} />
         <Mini label="Fee Forecast" value={fmtMoney(deal.fee_forecast)} sub="annual" />
       </div>
