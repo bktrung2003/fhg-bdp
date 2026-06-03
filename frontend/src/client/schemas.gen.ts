@@ -159,6 +159,53 @@ export const ActivityTypeSchema = {
     title: 'ActivityType'
 } as const;
 
+export const Body_documents_upload_documentSchema = {
+    properties: {
+        file: {
+            type: 'string',
+            format: 'binary',
+            title: 'File'
+        },
+        name: {
+            type: 'string',
+            title: 'Name'
+        },
+        doc_type: {
+            type: 'string',
+            title: 'Doc Type',
+            default: 'Other'
+        },
+        permission: {
+            type: 'string',
+            title: 'Permission',
+            default: 'Internal Only'
+        },
+        deal_id: {
+            type: 'string',
+            title: 'Deal Id',
+            default: ''
+        },
+        deal_name: {
+            type: 'string',
+            title: 'Deal Name',
+            default: ''
+        },
+        version: {
+            type: 'string',
+            title: 'Version',
+            default: 'v1.0'
+        },
+        note: {
+            type: 'string',
+            title: 'Note',
+            default: ''
+        }
+    },
+    type: 'object',
+    required: ['file', 'name'],
+    title: 'Body_documents-upload_document'
+} as const;
+
 export const Body_login_login_access_tokenSchema = {
     properties: {
         grant_type: {
@@ -926,6 +973,153 @@ export const DealsPublicSchema = {
     type: 'object',
     required: ['data', 'count'],
     title: 'DealsPublic'
+} as const;
+
+export const DocPermissionSchema = {
+    type: 'string',
+    enum: ['Internal Only', 'Shared with Owner', 'Restricted'],
+    title: 'DocPermission'
+} as const;
+
+export const DocTypeSchema = {
+    type: 'string',
+    enum: ['NDA', 'Proposal', 'Feasibility', 'HMA Draft', 'Contract', 'Technical Drawings', 'Legal Document', 'Presentation', 'Other'],
+    title: 'DocType'
+} as const;
+
+export const DocumentPublicSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Name'
+        },
+        doc_type: {
+            '$ref': '#/components/schemas/DocType',
+            default: 'Other'
+        },
+        permission: {
+            '$ref': '#/components/schemas/DocPermission',
+            default: 'Internal Only'
+        },
+        deal_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Id'
+        },
+        deal_name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Name'
+        },
+        version: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Version',
+            default: 'v1.0'
+        },
+        note: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Note'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        original_filename: {
+            type: 'string',
+            title: 'Original Filename'
+        },
+        file_size: {
+            type: 'integer',
+            title: 'File Size'
+        },
+        content_type: {
+            type: 'string',
+            title: 'Content Type'
+        },
+        uploaded_by_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Uploaded By Id'
+        },
+        uploaded_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Uploaded At'
+        },
+        download_url: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Download Url'
+        }
+    },
+    type: 'object',
+    required: ['name', 'id', 'original_filename', 'file_size', 'content_type', 'uploaded_by_id'],
+    title: 'DocumentPublic'
+} as const;
+
+export const DocumentsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/DocumentPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'DocumentsPublic'
 } as const;
 
 export const HTTPValidationErrorSchema = {

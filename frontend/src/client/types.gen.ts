@@ -28,6 +28,17 @@ export type ActivityType = 'Meeting' | 'Dinner' | 'Site visit' | 'Phone call' | 
 
 export type APACRegion = 'Vietnam' | 'Thailand' | 'Southeast Asia' | 'Greater China' | 'North Asia' | 'South Asia' | 'Australia / Pacific' | 'Europe' | 'Americas' | 'Middle East & Africa';
 
+export type Body_documents_upload_document = {
+    file: (Blob | File);
+    name: string;
+    doc_type?: string;
+    permission?: string;
+    deal_id?: string;
+    deal_name?: string;
+    version?: string;
+    note?: string;
+};
+
 export type Body_login_login_access_token = {
     grant_type?: (string | null);
     username: string;
@@ -127,6 +138,32 @@ export type DealUpdate = {
     feasibility?: (DealFeasibility | null);
     next_action?: (string | null);
     bd_owner_id?: (string | null);
+};
+
+export type DocPermission = 'Internal Only' | 'Shared with Owner' | 'Restricted';
+
+export type DocType = 'NDA' | 'Proposal' | 'Feasibility' | 'HMA Draft' | 'Contract' | 'Technical Drawings' | 'Legal Document' | 'Presentation' | 'Other';
+
+export type DocumentPublic = {
+    name: string;
+    doc_type?: DocType;
+    permission?: DocPermission;
+    deal_id?: (string | null);
+    deal_name?: (string | null);
+    version?: (string | null);
+    note?: (string | null);
+    id: string;
+    original_filename: string;
+    file_size: number;
+    content_type: string;
+    uploaded_by_id: string;
+    uploaded_at?: (string | null);
+    download_url?: (string | null);
+};
+
+export type DocumentsPublic = {
+    data: Array<DocumentPublic>;
+    count: number;
 };
 
 export type HTTPValidationError = {
@@ -458,6 +495,35 @@ export type DealsGetDealAuditData = {
 };
 
 export type DealsGetDealAuditResponse = (Array<DealAuditLogPublic>);
+
+export type DocumentsListDocumentsData = {
+    dealId?: (string | null);
+    docType?: (DocType | null);
+    limit?: number;
+    permission?: (DocPermission | null);
+    search?: (string | null);
+    skip?: number;
+};
+
+export type DocumentsListDocumentsResponse = (DocumentsPublic);
+
+export type DocumentsUploadDocumentData = {
+    formData: Body_documents_upload_document;
+};
+
+export type DocumentsUploadDocumentResponse = (DocumentPublic);
+
+export type DocumentsServeLocalFileData = {
+    key: string;
+};
+
+export type DocumentsServeLocalFileResponse = (unknown);
+
+export type DocumentsDeleteDocumentData = {
+    id: string;
+};
+
+export type DocumentsDeleteDocumentResponse = (Message);
 
 export type ItemsReadItemsData = {
     limit?: number;

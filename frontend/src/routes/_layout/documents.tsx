@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { FileText, Trash2, Upload, Eye, Search, X } from "lucide-react"
+import { FileText, Trash2, Upload, Eye, EyeOff, Lock, Search, X } from "lucide-react"
 import { useRef, useState } from "react"
 
 import { DocumentsService, DealsService, type DocumentPublic } from "@/client"
@@ -13,7 +13,25 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import useCustomToast from "@/hooks/useCustomToast"
+
+// ── Preview helper — fetch with auth then open blob ───────────────────────────
+async function previewDocument(url: string, filename: string) {
+  const { OpenAPI } = await import("@/client")
+  const token = typeof OpenAPI.TOKEN === "function" ? await OpenAPI.TOKEN() : OpenAPI.TOKEN
+
+  const res = await fetch(url, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  })
+  if (!res.ok) { alert("Cannot open file — access denied or file not found."); return }
+
+  const blob = await res.blob()
+  const blobUrl = URL.createObjectURL(blob)
+  window.open(blobUrl, "_blank")
+  // Revoke after 30s
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 30_000)
+}
 
 export const Route = createFileRoute("/_layout/documents")({
   component: DocumentsPage,
@@ -56,6 +74,7 @@ function UploadDocument() {
   const [selectedDealId, setSelectedDealId] = useState("")
   const [selectedDealName, setSelectedDealName] = useState("")
   const [version, setVersion] = useState("v1.0")
+  const [isConfidential, setIsConfidential] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
   const qc = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -99,6 +118,7 @@ function UploadDocument() {
       fd.append("deal_id", selectedDealId)
       fd.append("deal_name", selectedDealName)
       fd.append("version", version)
+      fd.append("is_confidential", String(isConfidential))
 
       const { OpenAPI } = await import("@/client")
       const token = typeof OpenAPI.TOKEN === "function" ? await OpenAPI.TOKEN() : OpenAPI.TOKEN
@@ -113,7 +133,7 @@ function UploadDocument() {
       showSuccessToast("Document uploaded.")
       setOpen(false)
       setFile(null); setName(""); setSelectedDealId(""); setSelectedDealName("")
-      setVersion("v1.0"); setDocType("Other"); setPermission("Internal Only")
+      setVersion("v1.0"); setDocType("Other"); setPermission("Internal Only"); setIsConfidential(false)
     } catch {
       showErrorToast("Upload failed.")
     } finally {
@@ -197,6 +217,20 @@ function UploadDocument() {
               </div>
             </div>
 
+            {/* Confidential toggle */}
+            <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
+              <Checkbox
+                id="confidential"
+                checked={isConfidential}
+                onCheckedChange={v => setIsConfidential(v === true)}
+              />
+              <label htmlFor="confidential" className="text-sm cursor-pointer flex items-center gap-1.5">
+                <Lock className="h-3.5 w-3.5 text-amber-600" />
+                <span className="font-medium text-amber-800">Confidential</span>
+                <span className="text-amber-600 text-xs">— chỉ bạn + BDD/COO/CEO xem được</span>
+              </label>
+            </div>
+
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
               <Button onClick={handleUpload} disabled={!file || !name || uploading}>
@@ -221,16 +255,29 @@ function DocRow({ doc }: { doc: DocumentPublic }) {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["documents"] }); showSuccessToast("Deleted.") },
   })
 
+  const toggleConf = useMutation({
+    mutationFn: () => DocumentsService.toggleConfidential({ id: doc.id }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["documents"] }); showSuccessToast(doc.is_confidential ? "Confidential removed." : "Marked confidential.") },
+  })
+
   const typeColor = TYPE_COLOR[doc.doc_type ?? ""] ?? "bg-gray-100 text-gray-600"
   const permColor = PERM_COLOR[doc.permission ?? ""] ?? "bg-gray-100 text-gray-600"
 
   return (
-    <tr className="border-b last:border-0 hover:bg-muted/20 transition-colors">
+    <tr className={`border-b last:border-0 hover:bg-muted/20 transition-colors ${doc.is_confidential ? "bg-amber-50/40" : ""}`}>
       <td className="py-3 pr-3 pl-3">
         <div className="flex items-center gap-2">
-          <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+          {doc.is_confidential
+            ? <Lock className="h-4 w-4 text-amber-500 flex-shrink-0" />
+            : <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+          }
           <div>
-            <p className="text-sm font-medium">{doc.name}</p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-sm font-medium">{doc.name}</p>
+              {doc.is_confidential && (
+                <span className="text-[9px] font-bold bg-amber-100 text-amber-700 px-1 rounded">CONFIDENTIAL</span>
+              )}
+            </div>
             <p className="text-xs text-muted-foreground">{doc.original_filename}</p>
           </div>
         </div>
@@ -240,32 +287,45 @@ function DocRow({ doc }: { doc: DocumentPublic }) {
           {doc.doc_type}
         </span>
       </td>
-      <td className="py-3 pr-3 text-sm text-muted-foreground">
-        {doc.deal_name || "—"}
-      </td>
-      <td className="py-3 pr-3 text-sm font-mono text-muted-foreground">
-        {doc.version}
-      </td>
+      <td className="py-3 pr-3 text-sm text-muted-foreground">{doc.deal_name || "—"}</td>
+      <td className="py-3 pr-3 text-sm font-mono text-muted-foreground">{doc.version}</td>
       <td className="py-3 pr-3">
         <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${permColor}`}>
           {doc.permission}
         </span>
       </td>
-      <td className="py-3 pr-3 text-xs text-muted-foreground">
-        {fmtSize(doc.file_size)}
-      </td>
+      <td className="py-3 pr-3 text-xs text-muted-foreground">{fmtSize(doc.file_size)}</td>
       <td className="py-3 pr-3 text-xs text-muted-foreground whitespace-nowrap">
         {doc.uploaded_at ? new Date(doc.uploaded_at).toLocaleDateString("en-GB") : "—"}
       </td>
       <td className="py-3 pr-2">
         <div className="flex items-center gap-0.5">
-          {doc.download_url && (
-            <a href={doc.download_url} target="_blank" rel="noopener noreferrer">
-              <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-                <Eye className="h-3.5 w-3.5" />
-              </Button>
-            </a>
-          )}
+          {/* Preview — blob URL approach (works with auth) */}
+          {doc.can_view && doc.download_url ? (
+            <Button
+              variant="ghost" size="sm" className="h-7 w-7 p-0"
+              onClick={() => previewDocument(doc.download_url!, doc.original_filename)}
+              title="Preview"
+            >
+              <Eye className="h-3.5 w-3.5" />
+            </Button>
+          ) : !doc.can_view ? (
+            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-amber-400 cursor-not-allowed" title="Confidential — no access" disabled>
+              <EyeOff className="h-3.5 w-3.5" />
+            </Button>
+          ) : null}
+
+          {/* Toggle confidential */}
+          <Button
+            variant="ghost" size="sm"
+            className={`h-7 w-7 p-0 ${doc.is_confidential ? "text-amber-500 hover:text-amber-700" : "text-muted-foreground hover:text-amber-500"}`}
+            onClick={() => toggleConf.mutate()}
+            disabled={toggleConf.isPending}
+            title={doc.is_confidential ? "Remove confidential" : "Mark as confidential"}
+          >
+            <Lock className="h-3.5 w-3.5" />
+          </Button>
+
           <Button
             variant="ghost" size="sm"
             className="h-7 w-7 p-0 text-red-400 hover:text-red-600 hover:bg-red-50"

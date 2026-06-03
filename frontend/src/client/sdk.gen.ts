@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ActivitiesListActivitiesData, ActivitiesListActivitiesResponse, ActivitiesCreateActivityData, ActivitiesCreateActivityResponse, ActivitiesDeleteActivityData, ActivitiesDeleteActivityResponse, DealsListDealsData, DealsListDealsResponse, DealsCreateDealData, DealsCreateDealResponse, DealsGetDealData, DealsGetDealResponse, DealsUpdateDealData, DealsUpdateDealResponse, DealsDeleteDealData, DealsDeleteDealResponse, DealsChangeStageData, DealsChangeStageResponse, DealsGetDealAuditData, DealsGetDealAuditResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, OwnersListOwnersData, OwnersListOwnersResponse, OwnersCreateOwnerData, OwnersCreateOwnerResponse, OwnersGetOwnerData, OwnersGetOwnerResponse, OwnersUpdateOwnerData, OwnersUpdateOwnerResponse, OwnersDeleteOwnerData, OwnersDeleteOwnerResponse, OwnersListContactsData, OwnersListContactsResponse, OwnersAddContactData, OwnersAddContactResponse, OwnersListInteractionsData, OwnersListInteractionsResponse, OwnersAddInteractionData, OwnersAddInteractionResponse, OwnersDeleteContactData, OwnersDeleteContactResponse, PrivateCreateUserData, PrivateCreateUserResponse, TasksListTasksData, TasksListTasksResponse, TasksCreateTaskData, TasksCreateTaskResponse, TasksUpdateTaskData, TasksUpdateTaskResponse, TasksDeleteTaskData, TasksDeleteTaskResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { ActivitiesListActivitiesData, ActivitiesListActivitiesResponse, ActivitiesCreateActivityData, ActivitiesCreateActivityResponse, ActivitiesDeleteActivityData, ActivitiesDeleteActivityResponse, DealsListDealsData, DealsListDealsResponse, DealsCreateDealData, DealsCreateDealResponse, DealsGetDealData, DealsGetDealResponse, DealsUpdateDealData, DealsUpdateDealResponse, DealsDeleteDealData, DealsDeleteDealResponse, DealsChangeStageData, DealsChangeStageResponse, DealsGetDealAuditData, DealsGetDealAuditResponse, DocumentsListDocumentsData, DocumentsListDocumentsResponse, DocumentsUploadDocumentData, DocumentsUploadDocumentResponse, DocumentsServeLocalFileData, DocumentsServeLocalFileResponse, DocumentsDeleteDocumentData, DocumentsDeleteDocumentResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, OwnersListOwnersData, OwnersListOwnersResponse, OwnersCreateOwnerData, OwnersCreateOwnerResponse, OwnersGetOwnerData, OwnersGetOwnerResponse, OwnersUpdateOwnerData, OwnersUpdateOwnerResponse, OwnersDeleteOwnerData, OwnersDeleteOwnerResponse, OwnersListContactsData, OwnersListContactsResponse, OwnersAddContactData, OwnersAddContactResponse, OwnersListInteractionsData, OwnersListInteractionsResponse, OwnersAddInteractionData, OwnersAddInteractionResponse, OwnersDeleteContactData, OwnersDeleteContactResponse, PrivateCreateUserData, PrivateCreateUserResponse, TasksListTasksData, TasksListTasksResponse, TasksCreateTaskData, TasksCreateTaskResponse, TasksUpdateTaskData, TasksUpdateTaskResponse, TasksDeleteTaskData, TasksDeleteTaskResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class ActivitiesService {
     /**
@@ -231,6 +231,98 @@ export class DealsService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/deals/{id}/audit',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class DocumentsService {
+    /**
+     * List Documents
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @param data.search
+     * @param data.dealId
+     * @param data.docType
+     * @param data.permission
+     * @returns DocumentsPublic Successful Response
+     * @throws ApiError
+     */
+    public static listDocuments(data: DocumentsListDocumentsData = {}): CancelablePromise<DocumentsListDocumentsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/documents/',
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                search: data.search,
+                deal_id: data.dealId,
+                doc_type: data.docType,
+                permission: data.permission
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Upload Document
+     * @param data The data for the request.
+     * @param data.formData
+     * @returns DocumentPublic Successful Response
+     * @throws ApiError
+     */
+    public static uploadDocument(data: DocumentsUploadDocumentData): CancelablePromise<DocumentsUploadDocumentResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/documents/upload',
+            formData: data.formData,
+            mediaType: 'multipart/form-data',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Serve Local File
+     * Serve locally stored files in development.
+     * @param data The data for the request.
+     * @param data.key
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static serveLocalFile(data: DocumentsServeLocalFileData): CancelablePromise<DocumentsServeLocalFileResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/documents/serve/{key}',
+            path: {
+                key: data.key
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Document
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteDocument(data: DocumentsDeleteDocumentData): CancelablePromise<DocumentsDeleteDocumentResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/documents/{id}',
             path: {
                 id: data.id
             },

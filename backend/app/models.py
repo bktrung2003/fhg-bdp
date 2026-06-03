@@ -650,6 +650,7 @@ class DocumentBase(SQLModel):
     deal_name: str | None = Field(default=None, max_length=255)
     version: str | None = Field(default="v1.0", max_length=20)
     note: str | None = Field(default=None, max_length=500)
+    is_confidential: bool = Field(default=False)  # Only uploader + BDD/COO/CEO can view
 
 
 class Document(DocumentBase, table=True):
@@ -671,7 +672,8 @@ class DocumentPublic(DocumentBase):
     content_type: str
     uploaded_by_id: uuid.UUID
     uploaded_at: datetime | None = None
-    download_url: str | None = None   # presigned or local URL
+    download_url: str | None = None
+    can_view: bool = True   # computed based on role + confidential flag
 
 
 class DocumentsPublic(SQLModel):
