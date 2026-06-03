@@ -500,3 +500,121 @@ class OwnerInteractionPublic(OwnerInteractionBase):
     id: uuid.UUID
     owner_id: uuid.UUID
     created_at: datetime | None = None
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TASKS & ACTIVITIES
+# ─────────────────────────────────────────────────────────────────────────────
+
+class TaskStatus(str, Enum):
+    OPEN = "Open"
+    IN_PROGRESS = "In Progress"
+    BLOCKED = "Blocked"
+    DONE = "Done"
+
+
+class TaskPriority(str, Enum):
+    HIGH = "High"
+    MEDIUM = "Medium"
+    LOW = "Low"
+
+
+class ActivityType(str, Enum):
+    MEETING = "Meeting"
+    DINNER = "Dinner"
+    SITE_VISIT = "Site visit"
+    PHONE_CALL = "Phone call"
+    WHATSAPP = "WhatsApp summary"
+    PROPOSAL_SENT = "Proposal sent"
+    NDA_SIGNED = "NDA signed"
+    LOI_SIGNED = "LOI signed"
+    HMA_SIGNED = "HMA signed"
+    PRE_OPENING_REVIEW = "Pre-opening review"
+    OTHER = "Other"
+
+
+# ── Task ──────────────────────────────────────────────────────────────────────
+
+class TaskBase(SQLModel):
+    title: str = Field(min_length=1, max_length=500)
+    deal_id: uuid.UUID | None = Field(default=None)
+    deal_name: str | None = Field(default=None, max_length=255)   # denormalized for display
+    task_owner: str | None = Field(default=None, max_length=100)  # free text e.g. "COO", "Legal"
+    due_date: str | None = Field(default=None, max_length=20)     # "2026-06-15"
+    priority: TaskPriority = Field(default=TaskPriority.MEDIUM, sa_type=String(20))
+    status: TaskStatus = Field(default=TaskStatus.OPEN, sa_type=String(20))
+    note: str | None = Field(default=None, max_length=1000)
+
+
+class TaskCreate(TaskBase):
+    pass
+
+
+class TaskUpdate(SQLModel):
+    title: str | None = Field(default=None, min_length=1, max_length=500)
+    deal_id: uuid.UUID | None = None
+    deal_name: str | None = Field(default=None, max_length=255)
+    task_owner: str | None = Field(default=None, max_length=100)
+    due_date: str | None = Field(default=None, max_length=20)
+    priority: TaskPriority | None = None
+    status: TaskStatus | None = None
+    note: str | None = Field(default=None, max_length=1000)
+
+
+class Task(TaskBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    created_by_id: uuid.UUID = Field(foreign_key="user.id", ondelete="CASCADE")
+    created_at: datetime | None = Field(
+        default_factory=get_datetime_utc, sa_type=DateTime(timezone=True)
+    )
+    updated_at: datetime | None = Field(
+        default_factory=get_datetime_utc, sa_type=DateTime(timezone=True)
+    )
+
+
+class TaskPublic(TaskBase):
+    id: uuid.UUID
+    created_by_id: uuid.UUID
+    is_overdue: bool = False   # computed
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+class TasksPublic(SQLModel):
+    data: list[TaskPublic]
+    count: int
+
+
+# ── Activity ──────────────────────────────────────────────────────────────────
+
+class ActivityBase(SQLModel):
+    activity_type: ActivityType = Field(
+        default=ActivityType.MEETING, sa_type=String(30)
+    )
+    date: str = Field(max_length=20)          # "2026-06-03"
+    deal_id: uuid.UUID | None = Field(default=None)
+    deal_name: str | None = Field(default=None, max_length=255)
+    note: str | None = Field(default=None, max_length=1000)
+
+
+class ActivityCreate(ActivityBase):
+    pass
+
+
+class Activity(ActivityBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    created_by_id: uuid.UUID = Field(foreign_key="user.id", ondelete="CASCADE")
+    created_at: datetime | None = Field(
+        default_factory=get_datetime_utc, sa_type=DateTime(timezone=True)
+    )
+
+
+class ActivityPublic(ActivityBase):
+    id: uuid.UUID
+    created_by_id: uuid.UUID
+    created_at: datetime | None = None
+
+
+class ActivitiesPublic(SQLModel):
+    data: list[ActivityPublic]
+    count: int
