@@ -199,6 +199,11 @@ export const Body_documents_upload_documentSchema = {
             type: 'string',
             title: 'Note',
             default: ''
+        },
+        is_confidential: {
+            type: 'boolean',
+            title: 'Is Confidential',
+            default: false
         }
     },
     type: 'object',
@@ -1052,6 +1057,11 @@ export const DocumentPublicSchema = {
             ],
             title: 'Note'
         },
+        is_confidential: {
+            type: 'boolean',
+            title: 'Is Confidential',
+            default: false
+        },
         id: {
             type: 'string',
             format: 'uuid',
@@ -1096,6 +1106,11 @@ export const DocumentPublicSchema = {
                 }
             ],
             title: 'Download Url'
+        },
+        can_view: {
+            type: 'boolean',
+            title: 'Can View',
+            default: true
         }
     },
     type: 'object',

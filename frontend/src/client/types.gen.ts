@@ -37,6 +37,7 @@ export type Body_documents_upload_document = {
     deal_name?: string;
     version?: string;
     note?: string;
+    is_confidential?: boolean;
 };
 
 export type Body_login_login_access_token = {
@@ -152,6 +153,7 @@ export type DocumentPublic = {
     deal_name?: (string | null);
     version?: (string | null);
     note?: (string | null);
+    is_confidential?: boolean;
     id: string;
     original_filename: string;
     file_size: number;
@@ -159,6 +161,7 @@ export type DocumentPublic = {
     uploaded_by_id: string;
     uploaded_at?: (string | null);
     download_url?: (string | null);
+    can_view?: boolean;
 };
 
 export type DocumentsPublic = {
@@ -518,6 +521,12 @@ export type DocumentsServeLocalFileData = {
 };
 
 export type DocumentsServeLocalFileResponse = (unknown);
+
+export type DocumentsToggleConfidentialData = {
+    id: string;
+};
+
+export type DocumentsToggleConfidentialResponse = (DocumentPublic);
 
 export type DocumentsDeleteDocumentData = {
     id: string;

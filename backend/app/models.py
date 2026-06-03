@@ -679,3 +679,41 @@ class DocumentPublic(DocumentBase):
 class DocumentsPublic(SQLModel):
     data: list[DocumentPublic]
     count: int
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FEASIBILITY SNAPSHOTS
+# ─────────────────────────────────────────────────────────────────────────────
+
+class FeasibilitySnapshot(SQLModel, table=True):
+    __tablename__ = "feasibility_snapshot"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    deal_id: uuid.UUID | None = Field(default=None)
+    deal_name: str | None = Field(default=None, max_length=255)
+    label: str | None = Field(default=None, max_length=100)  # e.g. "Base case", "Optimistic"
+    # Store assumptions + outputs as JSON strings
+    assumptions: str = Field(max_length=2000)   # JSON
+    outputs: str = Field(max_length=2000)        # JSON
+    created_by_id: uuid.UUID = Field(foreign_key="user.id", ondelete="CASCADE")
+    created_at: datetime | None = Field(
+        default_factory=get_datetime_utc, sa_type=DateTime(timezone=True)
+    )
+
+
+class FeasibilitySnapshotCreate(SQLModel):
+    deal_id: uuid.UUID | None = None
+    deal_name: str | None = None
+    label: str | None = None
+    assumptions: str
+    outputs: str
+
+
+class FeasibilitySnapshotPublic(SQLModel):
+    id: uuid.UUID
+    deal_id: uuid.UUID | None
+    deal_name: str | None
+    label: str | None
+    assumptions: str
+    outputs: str
+    created_by_id: uuid.UUID
+    created_at: datetime | None

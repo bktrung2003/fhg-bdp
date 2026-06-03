@@ -18,6 +18,7 @@ import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
 import { Route as LayoutOwnersRouteImport } from './routes/_layout/owners'
 import { Route as LayoutItemsRouteImport } from './routes/_layout/items'
+import { Route as LayoutFeasibilityRouteImport } from './routes/_layout/feasibility'
 import { Route as LayoutDocumentsRouteImport } from './routes/_layout/documents'
 import { Route as LayoutDealsRouteImport } from './routes/_layout/deals'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
@@ -67,6 +68,11 @@ const LayoutItemsRoute = LayoutItemsRouteImport.update({
   path: '/items',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutFeasibilityRoute = LayoutFeasibilityRouteImport.update({
+  id: '/feasibility',
+  path: '/feasibility',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutDocumentsRoute = LayoutDocumentsRouteImport.update({
   id: '/documents',
   path: '/documents',
@@ -98,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof LayoutAdminRoute
   '/deals': typeof LayoutDealsRoute
   '/documents': typeof LayoutDocumentsRoute
+  '/feasibility': typeof LayoutFeasibilityRoute
   '/items': typeof LayoutItemsRoute
   '/owners': typeof LayoutOwnersRoute
   '/settings': typeof LayoutSettingsRoute
@@ -111,6 +118,7 @@ export interface FileRoutesByTo {
   '/admin': typeof LayoutAdminRoute
   '/deals': typeof LayoutDealsRoute
   '/documents': typeof LayoutDocumentsRoute
+  '/feasibility': typeof LayoutFeasibilityRoute
   '/items': typeof LayoutItemsRoute
   '/owners': typeof LayoutOwnersRoute
   '/settings': typeof LayoutSettingsRoute
@@ -127,6 +135,7 @@ export interface FileRoutesById {
   '/_layout/admin': typeof LayoutAdminRoute
   '/_layout/deals': typeof LayoutDealsRoute
   '/_layout/documents': typeof LayoutDocumentsRoute
+  '/_layout/feasibility': typeof LayoutFeasibilityRoute
   '/_layout/items': typeof LayoutItemsRoute
   '/_layout/owners': typeof LayoutOwnersRoute
   '/_layout/settings': typeof LayoutSettingsRoute
@@ -144,6 +153,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/deals'
     | '/documents'
+    | '/feasibility'
     | '/items'
     | '/owners'
     | '/settings'
@@ -157,6 +167,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/deals'
     | '/documents'
+    | '/feasibility'
     | '/items'
     | '/owners'
     | '/settings'
@@ -172,6 +183,7 @@ export interface FileRouteTypes {
     | '/_layout/admin'
     | '/_layout/deals'
     | '/_layout/documents'
+    | '/_layout/feasibility'
     | '/_layout/items'
     | '/_layout/owners'
     | '/_layout/settings'
@@ -251,6 +263,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutItemsRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/feasibility': {
+      id: '/_layout/feasibility'
+      path: '/feasibility'
+      fullPath: '/feasibility'
+      preLoaderRoute: typeof LayoutFeasibilityRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/documents': {
       id: '/_layout/documents'
       path: '/documents'
@@ -287,6 +306,7 @@ interface LayoutRouteChildren {
   LayoutAdminRoute: typeof LayoutAdminRoute
   LayoutDealsRoute: typeof LayoutDealsRoute
   LayoutDocumentsRoute: typeof LayoutDocumentsRoute
+  LayoutFeasibilityRoute: typeof LayoutFeasibilityRoute
   LayoutItemsRoute: typeof LayoutItemsRoute
   LayoutOwnersRoute: typeof LayoutOwnersRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
@@ -298,6 +318,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutAdminRoute: LayoutAdminRoute,
   LayoutDealsRoute: LayoutDealsRoute,
   LayoutDocumentsRoute: LayoutDocumentsRoute,
+  LayoutFeasibilityRoute: LayoutFeasibilityRoute,
   LayoutItemsRoute: LayoutItemsRoute,
   LayoutOwnersRoute: LayoutOwnersRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
