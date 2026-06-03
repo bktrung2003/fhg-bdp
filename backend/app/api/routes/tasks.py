@@ -11,7 +11,7 @@ from app.models import (
     Message, Task, TaskCreate, TaskPublic, TasksPublic, TaskStatus, TaskUpdate,
 )
 
-router = APIRouter(tags=["tasks"])
+router = APIRouter()
 
 TODAY = datetime.now(timezone.utc).date().isoformat()
 
@@ -27,7 +27,7 @@ def _task_public(t: Task) -> TaskPublic:
 
 # ── TASKS ─────────────────────────────────────────────────────────────────────
 
-task_router = APIRouter(prefix="/tasks")
+task_router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 
 @task_router.get("/", response_model=TasksPublic)
@@ -99,7 +99,7 @@ def delete_task(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -
 
 # ── ACTIVITIES ────────────────────────────────────────────────────────────────
 
-activity_router = APIRouter(prefix="/activities")
+activity_router = APIRouter(prefix="/activities", tags=["activities"])
 
 
 @activity_router.get("/", response_model=ActivitiesPublic)
