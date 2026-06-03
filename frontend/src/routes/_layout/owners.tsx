@@ -10,6 +10,8 @@ import {
   type OwnerInteractionPublic,
 } from "@/client"
 import { AddOwner } from "@/components/Owners/AddOwner"
+import { EditOwner } from "@/components/Owners/EditOwner"
+import { DeleteOwner } from "@/components/Owners/DeleteOwner"
 import { LogInteraction } from "@/components/Owners/LogInteraction"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -79,9 +81,11 @@ function OwnerDetail({ owner }: { owner: OwnerPublic }) {
               {owner.owner_type} · {owner.country} · Priority: {owner.priority}
             </p>
           </div>
-          <div className="flex flex-wrap gap-1.5 justify-end">
+          <div className="flex items-center gap-1">
             <Badge label={owner.relationship} colorMap={REL_COLOR} />
             <Badge label={owner.financial_health ? `Financial: ${owner.financial_health}` : null} colorMap={FH_COLOR} />
+            <EditOwner owner={owner} />
+            <DeleteOwner owner={owner} />
           </div>
         </div>
 
@@ -245,28 +249,36 @@ function OwnersPage() {
           {/* Owner list */}
           <div className="flex flex-col gap-1.5 overflow-y-auto">
             {owners.map(o => (
-              <button
+              <div
                 key={o.id}
-                onClick={() => setSelectedId(o.id)}
-                className={`text-left rounded-lg border p-3 transition-colors ${
+                className={`relative rounded-lg border p-3 transition-colors cursor-pointer ${
                   (selected?.id === o.id)
                     ? "border-primary bg-primary/5"
                     : "bg-card hover:border-foreground/20"
                 }`}
+                onClick={() => setSelectedId(o.id)}
               >
-                <div className="flex items-center justify-between">
-                  <p className="font-semibold text-sm">{o.company}</p>
-                  {o.deal_count > 0 && (
-                    <span className="text-[10px] font-bold bg-blue-100 text-blue-700 rounded-full px-1.5 py-0.5">
-                      {o.deal_count} deal{o.deal_count > 1 ? "s" : ""}
-                    </span>
-                  )}
+                <div className="flex items-start justify-between gap-1">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <p className="font-semibold text-sm truncate">{o.company}</p>
+                      {o.deal_count > 0 && (
+                        <span className="text-[10px] font-bold bg-blue-100 text-blue-700 rounded-full px-1.5 py-0.5 flex-shrink-0">
+                          {o.deal_count}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">{o.owner_type} · {o.country}</p>
+                    <div className="mt-1.5">
+                      <Badge label={o.catchup_status} colorMap={CATCHUP_COLOR} />
+                    </div>
+                  </div>
+                  <div className="flex gap-0.5 flex-shrink-0" onClick={e => e.stopPropagation()}>
+                    <EditOwner owner={o} />
+                    <DeleteOwner owner={o} onDeleted={() => setSelectedId(null)} />
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground mt-0.5">{o.owner_type} · {o.country}</p>
-                <div className="mt-1.5">
-                  <Badge label={o.catchup_status} colorMap={CATCHUP_COLOR} />
-                </div>
-              </button>
+              </div>
             ))}
           </div>
 

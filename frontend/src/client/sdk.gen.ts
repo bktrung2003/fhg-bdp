@@ -3,7 +3,72 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { DealsListDealsData, DealsListDealsResponse, DealsCreateDealData, DealsCreateDealResponse, DealsGetDealData, DealsGetDealResponse, DealsUpdateDealData, DealsUpdateDealResponse, DealsDeleteDealData, DealsDeleteDealResponse, DealsChangeStageData, DealsChangeStageResponse, DealsGetDealAuditData, DealsGetDealAuditResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, OwnersListOwnersData, OwnersListOwnersResponse, OwnersCreateOwnerData, OwnersCreateOwnerResponse, OwnersGetOwnerData, OwnersGetOwnerResponse, OwnersUpdateOwnerData, OwnersUpdateOwnerResponse, OwnersDeleteOwnerData, OwnersDeleteOwnerResponse, OwnersListContactsData, OwnersListContactsResponse, OwnersAddContactData, OwnersAddContactResponse, OwnersListInteractionsData, OwnersListInteractionsResponse, OwnersAddInteractionData, OwnersAddInteractionResponse, OwnersDeleteContactData, OwnersDeleteContactResponse, PrivateCreateUserData, PrivateCreateUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { ActivitiesListActivitiesData, ActivitiesListActivitiesResponse, ActivitiesCreateActivityData, ActivitiesCreateActivityResponse, ActivitiesDeleteActivityData, ActivitiesDeleteActivityResponse, DealsListDealsData, DealsListDealsResponse, DealsCreateDealData, DealsCreateDealResponse, DealsGetDealData, DealsGetDealResponse, DealsUpdateDealData, DealsUpdateDealResponse, DealsDeleteDealData, DealsDeleteDealResponse, DealsChangeStageData, DealsChangeStageResponse, DealsGetDealAuditData, DealsGetDealAuditResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, OwnersListOwnersData, OwnersListOwnersResponse, OwnersCreateOwnerData, OwnersCreateOwnerResponse, OwnersGetOwnerData, OwnersGetOwnerResponse, OwnersUpdateOwnerData, OwnersUpdateOwnerResponse, OwnersDeleteOwnerData, OwnersDeleteOwnerResponse, OwnersListContactsData, OwnersListContactsResponse, OwnersAddContactData, OwnersAddContactResponse, OwnersListInteractionsData, OwnersListInteractionsResponse, OwnersAddInteractionData, OwnersAddInteractionResponse, OwnersDeleteContactData, OwnersDeleteContactResponse, PrivateCreateUserData, PrivateCreateUserResponse, TasksListTasksData, TasksListTasksResponse, TasksCreateTaskData, TasksCreateTaskResponse, TasksUpdateTaskData, TasksUpdateTaskResponse, TasksDeleteTaskData, TasksDeleteTaskResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+
+export class ActivitiesService {
+    /**
+     * List Activities
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @param data.dealId
+     * @returns ActivitiesPublic Successful Response
+     * @throws ApiError
+     */
+    public static listActivities(data: ActivitiesListActivitiesData = {}): CancelablePromise<ActivitiesListActivitiesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/activities/',
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                deal_id: data.dealId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Activity
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns ActivityPublic Successful Response
+     * @throws ApiError
+     */
+    public static createActivity(data: ActivitiesCreateActivityData): CancelablePromise<ActivitiesCreateActivityResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/activities/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Activity
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteActivity(data: ActivitiesDeleteActivityData): CancelablePromise<ActivitiesDeleteActivityResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/activities/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
 
 export class DealsService {
     /**
@@ -619,6 +684,100 @@ export class PrivateService {
             url: '/api/v1/private/users/',
             body: data.requestBody,
             mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class TasksService {
+    /**
+     * List Tasks
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @param data.search
+     * @param data.status
+     * @param data.dealId
+     * @param data.overdueOnly
+     * @returns TasksPublic Successful Response
+     * @throws ApiError
+     */
+    public static listTasks(data: TasksListTasksData = {}): CancelablePromise<TasksListTasksResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/tasks/',
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                search: data.search,
+                status: data.status,
+                deal_id: data.dealId,
+                overdue_only: data.overdueOnly
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Task
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns TaskPublic Successful Response
+     * @throws ApiError
+     */
+    public static createTask(data: TasksCreateTaskData): CancelablePromise<TasksCreateTaskResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/tasks/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Task
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns TaskPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateTask(data: TasksUpdateTaskData): CancelablePromise<TasksUpdateTaskResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/tasks/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Task
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteTask(data: TasksDeleteTaskData): CancelablePromise<TasksDeleteTaskResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/tasks/{id}',
+            path: {
+                id: data.id
+            },
             errors: {
                 422: 'Validation Error'
             }

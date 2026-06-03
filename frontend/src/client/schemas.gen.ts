@@ -6,6 +6,159 @@ export const APACRegionSchema = {
     title: 'APACRegion'
 } as const;
 
+export const ActivitiesPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/ActivityPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'ActivitiesPublic'
+} as const;
+
+export const ActivityCreateSchema = {
+    properties: {
+        activity_type: {
+            '$ref': '#/components/schemas/ActivityType',
+            default: 'Meeting'
+        },
+        date: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Date'
+        },
+        deal_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Id'
+        },
+        deal_name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Name'
+        },
+        note: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Note'
+        }
+    },
+    type: 'object',
+    required: ['date'],
+    title: 'ActivityCreate'
+} as const;
+
+export const ActivityPublicSchema = {
+    properties: {
+        activity_type: {
+            '$ref': '#/components/schemas/ActivityType',
+            default: 'Meeting'
+        },
+        date: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Date'
+        },
+        deal_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Id'
+        },
+        deal_name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Name'
+        },
+        note: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Note'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        created_by_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Created By Id'
+        },
+        created_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['date', 'id', 'created_by_id'],
+    title: 'ActivityPublic'
+} as const;
+
+export const ActivityTypeSchema = {
+    type: 'string',
+    enum: ['Meeting', 'Dinner', 'Site visit', 'Phone call', 'WhatsApp summary', 'Proposal sent', 'NDA signed', 'LOI signed', 'HMA signed', 'Pre-opening review', 'Other'],
+    title: 'ActivityType'
+} as const;
+
 export const Body_login_login_access_tokenSchema = {
     properties: {
         grant_type: {
@@ -1578,6 +1731,340 @@ export const StageChangeRequestSchema = {
     type: 'object',
     required: ['new_stage', 'note'],
     title: 'StageChangeRequest'
+} as const;
+
+export const TaskCreateSchema = {
+    properties: {
+        title: {
+            type: 'string',
+            maxLength: 500,
+            minLength: 1,
+            title: 'Title'
+        },
+        deal_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Id'
+        },
+        deal_name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Name'
+        },
+        task_owner: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Task Owner'
+        },
+        due_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Due Date'
+        },
+        priority: {
+            '$ref': '#/components/schemas/TaskPriority',
+            default: 'Medium'
+        },
+        status: {
+            '$ref': '#/components/schemas/TaskStatus',
+            default: 'Open'
+        },
+        note: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Note'
+        }
+    },
+    type: 'object',
+    required: ['title'],
+    title: 'TaskCreate'
+} as const;
+
+export const TaskPrioritySchema = {
+    type: 'string',
+    enum: ['High', 'Medium', 'Low'],
+    title: 'TaskPriority'
+} as const;
+
+export const TaskPublicSchema = {
+    properties: {
+        title: {
+            type: 'string',
+            maxLength: 500,
+            minLength: 1,
+            title: 'Title'
+        },
+        deal_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Id'
+        },
+        deal_name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Name'
+        },
+        task_owner: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Task Owner'
+        },
+        due_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Due Date'
+        },
+        priority: {
+            '$ref': '#/components/schemas/TaskPriority',
+            default: 'Medium'
+        },
+        status: {
+            '$ref': '#/components/schemas/TaskStatus',
+            default: 'Open'
+        },
+        note: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Note'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        created_by_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Created By Id'
+        },
+        is_overdue: {
+            type: 'boolean',
+            title: 'Is Overdue',
+            default: false
+        },
+        created_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created At'
+        },
+        updated_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['title', 'id', 'created_by_id'],
+    title: 'TaskPublic'
+} as const;
+
+export const TaskStatusSchema = {
+    type: 'string',
+    enum: ['Open', 'In Progress', 'Blocked', 'Done'],
+    title: 'TaskStatus'
+} as const;
+
+export const TaskUpdateSchema = {
+    properties: {
+        title: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500,
+                    minLength: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Title'
+        },
+        deal_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Id'
+        },
+        deal_name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Name'
+        },
+        task_owner: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Task Owner'
+        },
+        due_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Due Date'
+        },
+        priority: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/TaskPriority'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        status: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/TaskStatus'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        note: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Note'
+        }
+    },
+    type: 'object',
+    title: 'TaskUpdate'
+} as const;
+
+export const TasksPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/TaskPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'TasksPublic'
 } as const;
 
 export const TokenSchema = {
