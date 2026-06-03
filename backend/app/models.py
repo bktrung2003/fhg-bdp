@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from enum import Enum
 
 from pydantic import EmailStr
-from sqlalchemy import DateTime
+from sqlalchemy import DateTime, String
 from sqlmodel import Field, Relationship, SQLModel
 
 
@@ -27,7 +27,7 @@ class UserBase(SQLModel):
     is_active: bool = True
     is_superuser: bool = False
     full_name: str | None = Field(default=None, max_length=255)
-    role: UserRole = Field(default=UserRole.BD_MANAGER)
+    role: UserRole = Field(default=UserRole.BD_MANAGER, sa_type=String(50))
 
 
 # Properties to receive via API on creation
@@ -210,19 +210,19 @@ class APACRegion(str, Enum):
 class DealBase(SQLModel):
     name: str = Field(min_length=1, max_length=255)
     country: str = Field(max_length=100)
-    region: APACRegion | None = Field(default=None)
+    region: APACRegion | None = Field(default=None, sa_type=String(50))
     city: str | None = Field(default=None, max_length=100)
     owner_name: str | None = Field(default=None, max_length=255)
     brand: str | None = Field(default=None, max_length=100)
-    project_type: ProjectType | None = Field(default=None)
-    stage: DealStage = Field(default=DealStage.LEAD)
-    opening_target: str | None = Field(default=None, max_length=20)  # "Q3 2026"
+    project_type: ProjectType | None = Field(default=None, sa_type=String(80))
+    stage: DealStage = Field(default=DealStage.LEAD, sa_type=String(30))
+    opening_target: str | None = Field(default=None, max_length=20)
     keys: int | None = Field(default=None, ge=0)
     probability: int | None = Field(default=None, ge=0, le=100)
-    pipeline_value: int | None = Field(default=None, ge=0)   # USD
-    fee_forecast: int | None = Field(default=None, ge=0)     # USD/year
-    risk: DealRisk = Field(default=DealRisk.GREEN)
-    feasibility: DealFeasibility = Field(default=DealFeasibility.TBD)
+    pipeline_value: int | None = Field(default=None, ge=0)
+    fee_forecast: int | None = Field(default=None, ge=0)
+    risk: DealRisk = Field(default=DealRisk.GREEN, sa_type=String(20))
+    feasibility: DealFeasibility = Field(default=DealFeasibility.TBD, sa_type=String(20))
     next_action: str | None = Field(default=None, max_length=500)
 
 

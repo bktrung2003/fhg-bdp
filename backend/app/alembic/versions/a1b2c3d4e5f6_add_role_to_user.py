@@ -18,26 +18,11 @@ depends_on = None
 
 
 def upgrade():
-    op.execute("""
-        DO $$ BEGIN
-            CREATE TYPE userrole AS ENUM (
-                'CEO', 'COO', 'BD Director', 'BD Manager',
-                'Legal', 'Finance', 'IT Admin'
-            );
-        EXCEPTION WHEN duplicate_object THEN NULL;
-        END $$;
-    """)
     op.add_column(
         'user',
-        sa.Column(
-            'role',
-            sa.Enum(name='userrole', create_type=False),
-            nullable=False,
-            server_default='BD Manager',
-        )
+        sa.Column('role', sa.String(length=50), nullable=False, server_default='BD Manager')
     )
 
 
 def downgrade():
     op.drop_column('user', 'role')
-    op.execute('DROP TYPE IF EXISTS userrole')

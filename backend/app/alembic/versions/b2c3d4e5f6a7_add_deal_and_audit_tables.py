@@ -17,57 +17,28 @@ branch_labels = None
 depends_on = None
 
 
-def _create_enum_safe(name: str, values: list[str]) -> None:
-    """Create PostgreSQL enum type, skip if already exists."""
-    vals = ", ".join(f"'{v}'" for v in values)
-    op.execute(f"""
-        DO $$ BEGIN
-            CREATE TYPE {name} AS ENUM ({vals});
-        EXCEPTION WHEN duplicate_object THEN NULL;
-        END $$;
-    """)
-
-
 def upgrade():
-    # ── Enums (safe create) ──────────────────────────────────────────────────
-    _create_enum_safe('dealstage', [
-        'Lead', 'NDA / Qualified', 'Feasibility', 'Proposal', 'Negotiation',
-        'LOI Signed', 'HMA Signed', 'Pre-opening', 'Opened', 'Lost',
-    ])
-    _create_enum_safe('dealrisk', ['Green', 'Amber', 'Red'])
-    _create_enum_safe('dealfeasibility', ['TBD', 'Weak', 'Medium', 'Strong', 'Updated'])
-    _create_enum_safe('projecttype', [
-        'Hotel New Build (Greenfield)', 'Hotel Re-Brand',
-        'Hotel Conversion (Takeover)', 'Hotel Adaptive Re-Use',
-        'Serviced Apartment New Build', 'Wellness / Spa Resort', 'Branded Residences',
-    ])
-    _create_enum_safe('apacregion', [
-        'Vietnam', 'Thailand', 'Southeast Asia', 'Greater China',
-        'North Asia', 'South Asia', 'Australia / Pacific',
-        'Europe', 'Americas', 'Middle East & Africa',
-    ])
-
-    # ── deal table ───────────────────────────────────────────────────────────
+    # ── deal ─────────────────────────────────────────────────────────────────
     op.create_table(
         'deal',
         sa.Column('id', sa.Uuid(), nullable=False),
         sa.Column('deal_number', sa.Integer(), nullable=True),
-        sa.Column('name', sqlmodel.sql.sqltypes.AutoString(length=255), nullable=False),
-        sa.Column('country', sqlmodel.sql.sqltypes.AutoString(length=100), nullable=False),
-        sa.Column('region', sa.Enum(name='apacregion', create_type=False), nullable=True),
-        sa.Column('city', sqlmodel.sql.sqltypes.AutoString(length=100), nullable=True),
-        sa.Column('owner_name', sqlmodel.sql.sqltypes.AutoString(length=255), nullable=True),
-        sa.Column('brand', sqlmodel.sql.sqltypes.AutoString(length=100), nullable=True),
-        sa.Column('project_type', sa.Enum(name='projecttype', create_type=False), nullable=True),
-        sa.Column('stage', sa.Enum(name='dealstage', create_type=False), nullable=False, server_default='Lead'),
-        sa.Column('opening_target', sqlmodel.sql.sqltypes.AutoString(length=20), nullable=True),
+        sa.Column('name', sa.String(length=255), nullable=False),
+        sa.Column('country', sa.String(length=100), nullable=False),
+        sa.Column('region', sa.String(length=50), nullable=True),
+        sa.Column('city', sa.String(length=100), nullable=True),
+        sa.Column('owner_name', sa.String(length=255), nullable=True),
+        sa.Column('brand', sa.String(length=100), nullable=True),
+        sa.Column('project_type', sa.String(length=80), nullable=True),
+        sa.Column('stage', sa.String(length=30), nullable=False, server_default='Lead'),
+        sa.Column('opening_target', sa.String(length=20), nullable=True),
         sa.Column('keys', sa.Integer(), nullable=True),
         sa.Column('probability', sa.Integer(), nullable=True),
         sa.Column('pipeline_value', sa.Integer(), nullable=True),
         sa.Column('fee_forecast', sa.Integer(), nullable=True),
-        sa.Column('risk', sa.Enum(name='dealrisk', create_type=False), nullable=False, server_default='Green'),
-        sa.Column('feasibility', sa.Enum(name='dealfeasibility', create_type=False), nullable=False, server_default='TBD'),
-        sa.Column('next_action', sqlmodel.sql.sqltypes.AutoString(length=500), nullable=True),
+        sa.Column('risk', sa.String(length=20), nullable=False, server_default='Green'),
+        sa.Column('feasibility', sa.String(length=20), nullable=False, server_default='TBD'),
+        sa.Column('next_action', sa.String(length=500), nullable=True),
         sa.Column('bd_owner_id', sa.Uuid(), nullable=True),
         sa.Column('created_by_id', sa.Uuid(), nullable=False),
         sa.Column('stage_changed_at', sa.DateTime(timezone=True), nullable=True),
@@ -79,16 +50,16 @@ def upgrade():
     )
     op.create_index('ix_deal_deal_number', 'deal', ['deal_number'])
 
-    # ── deal_audit_log table ─────────────────────────────────────────────────
+    # ── deal_audit_log ────────────────────────────────────────────────────────
     op.create_table(
         'deal_audit_log',
         sa.Column('id', sa.Uuid(), nullable=False),
         sa.Column('deal_id', sa.Uuid(), nullable=False),
         sa.Column('user_id', sa.Uuid(), nullable=False),
-        sa.Column('field', sqlmodel.sql.sqltypes.AutoString(length=100), nullable=False),
-        sa.Column('old_value', sqlmodel.sql.sqltypes.AutoString(length=500), nullable=True),
-        sa.Column('new_value', sqlmodel.sql.sqltypes.AutoString(length=500), nullable=False),
-        sa.Column('note', sqlmodel.sql.sqltypes.AutoString(length=1000), nullable=True),
+        sa.Column('field', sa.String(length=100), nullable=False),
+        sa.Column('old_value', sa.String(length=500), nullable=True),
+        sa.Column('new_value', sa.String(length=500), nullable=False),
+        sa.Column('note', sa.String(length=1000), nullable=True),
         sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(['deal_id'], ['deal.id'], ondelete='CASCADE'),
         sa.ForeignKeyConstraint(['user_id'], ['user.id'], ondelete='CASCADE'),
@@ -100,5 +71,3 @@ def downgrade():
     op.drop_table('deal_audit_log')
     op.drop_index('ix_deal_deal_number', table_name='deal')
     op.drop_table('deal')
-    for name in ['apacregion', 'projecttype', 'dealfeasibility', 'dealrisk', 'dealstage']:
-        op.execute(f'DROP TYPE IF EXISTS {name}')
