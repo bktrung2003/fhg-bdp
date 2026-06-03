@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import { FileText, Trash2, Upload, Eye, Search, X } from "lucide-react"
 import { useRef, useState } from "react"
 
-import { DocumentsService, type DocumentPublic } from "@/client"
+import { DocumentsService, DealsService, type DocumentPublic } from "@/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -53,16 +53,38 @@ function UploadDocument() {
   const [docType, setDocType] = useState("Other")
   const [permission, setPermission] = useState("Internal Only")
   const [name, setName] = useState("")
-  const [dealName, setDealName] = useState("")
+  const [selectedDealId, setSelectedDealId] = useState("")
+  const [selectedDealName, setSelectedDealName] = useState("")
   const [version, setVersion] = useState("v1.0")
   const fileRef = useRef<HTMLInputElement>(null)
   const qc = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [uploading, setUploading] = useState(false)
 
+  // Fetch all active deals for dropdown
+  const { data: dealsData } = useQuery({
+    queryKey: ["deals-picker"],
+    queryFn: () => DealsService.listDeals({ limit: 500 }),
+    enabled: open,
+  })
+  const deals = dealsData?.data ?? []
+
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]
     if (f) { setFile(f); if (!name) setName(f.name.replace(/\.[^.]+$/, "")) }
+  }
+
+  const handleDealSelect = (value: string) => {
+    if (value === "__none__") {
+      setSelectedDealId("")
+      setSelectedDealName("")
+      return
+    }
+    const deal = deals.find(d => d.id === value)
+    if (deal) {
+      setSelectedDealId(deal.id)
+      setSelectedDealName(deal.name)
+    }
   }
 
   const handleUpload = async () => {
@@ -74,14 +96,15 @@ function UploadDocument() {
       fd.append("name", name)
       fd.append("doc_type", docType)
       fd.append("permission", permission)
-      fd.append("deal_name", dealName)
+      fd.append("deal_id", selectedDealId)
+      fd.append("deal_name", selectedDealName)
       fd.append("version", version)
 
-      // Use fetch directly for multipart
       const { OpenAPI } = await import("@/client")
+      const token = typeof OpenAPI.TOKEN === "function" ? await OpenAPI.TOKEN() : OpenAPI.TOKEN
       const res = await fetch(`${OpenAPI.BASE}/api/v1/documents/upload`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${OpenAPI.TOKEN}` },
+        headers: { Authorization: `Bearer ${token}` },
         body: fd,
       })
       if (!res.ok) throw new Error(await res.text())
@@ -89,8 +112,8 @@ function UploadDocument() {
       qc.invalidateQueries({ queryKey: ["documents"] })
       showSuccessToast("Document uploaded.")
       setOpen(false)
-      setFile(null); setName(""); setDealName(""); setVersion("v1.0")
-      setDocType("Other"); setPermission("Internal Only")
+      setFile(null); setName(""); setSelectedDealId(""); setSelectedDealName("")
+      setVersion("v1.0"); setDocType("Other"); setPermission("Internal Only")
     } catch {
       showErrorToast("Upload failed.")
     } finally {
@@ -107,6 +130,7 @@ function UploadDocument() {
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>Upload Document</DialogTitle></DialogHeader>
           <div className="space-y-4">
+            {/* Drop zone */}
             <div
               className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary transition-colors"
               onClick={() => fileRef.current?.click()}
@@ -147,10 +171,26 @@ function UploadDocument() {
                   <SelectContent>{PERMISSIONS.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1.5">
+
+              {/* Deal dropdown — fetched from API */}
+              <div className="col-span-2 space-y-1.5">
                 <Label>Related Deal</Label>
-                <Input value={dealName} onChange={e => setDealName(e.target.value)} placeholder="Deal name" />
+                <Select value={selectedDealId || "__none__"} onValueChange={handleDealSelect}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a deal (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— No deal —</SelectItem>
+                    {deals.map(d => (
+                      <SelectItem key={d.id} value={d.id}>
+                        <span className="font-medium">{d.name}</span>
+                        <span className="text-muted-foreground ml-2 text-xs">{d.country} · {d.stage}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+
               <div className="space-y-1.5">
                 <Label>Version</Label>
                 <Input value={version} onChange={e => setVersion(e.target.value)} placeholder="v1.0" />
