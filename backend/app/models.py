@@ -329,3 +329,174 @@ class DealAuditLogPublic(SQLModel):
     note: str | None
     user_id: uuid.UUID
     created_at: datetime
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# OWNER CRM — Enums
+# ─────────────────────────────────────────────────────────────────────────────
+
+class OwnerType(str, Enum):
+    DEVELOPER = "Developer"
+    FAMILY_OFFICE = "Family Office"
+    REIT = "REIT"
+    ASSET_OWNER = "Asset Owner"
+    INSTITUTIONAL = "Institutional Investor"
+
+class OwnerRelationship(str, Enum):
+    NEW = "New"
+    WARM = "Warm"
+    STRONG = "Strong"
+    STRATEGIC = "Strategic Partner"
+    AT_RISK = "Risk / Unstable"
+
+class CatchupStatus(str, Enum):
+    ON_TRACK = "On track"
+    DUE_THIS_WEEK = "Due this week"
+    OVERDUE = "Overdue"
+    NO_CADENCE = "No cadence"
+
+class ContactStrength(str, Enum):
+    NEW = "New"
+    WARM = "Warm"
+    STRONG = "Strong"
+
+class OwnerPriority(str, Enum):
+    STRATEGIC = "Strategic"
+    HIGH = "High"
+    MEDIUM = "Medium"
+    LOW = "Low"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# OWNER — Models
+# ─────────────────────────────────────────────────────────────────────────────
+
+class OwnerBase(SQLModel):
+    company: str = Field(min_length=1, max_length=255)
+    owner_type: OwnerType = Field(default=OwnerType.DEVELOPER, sa_type=String(50))
+    country: str = Field(max_length=100)
+    priority: OwnerPriority = Field(default=OwnerPriority.MEDIUM, sa_type=String(20))
+    relationship: OwnerRelationship = Field(default=OwnerRelationship.NEW, sa_type=String(30))
+    catchup_status: CatchupStatus = Field(default=CatchupStatus.NO_CADENCE, sa_type=String(30))
+    next_catchup: str | None = Field(default=None, max_length=20)   # "2026-06-15"
+    assets: str | None = Field(default=None, max_length=500)
+    financial_health: str | None = Field(default=None, max_length=20)  # Strong/Moderate/Unknown
+    strategic_value: str | None = Field(default=None, max_length=1000)
+
+
+class OwnerCreate(OwnerBase):
+    pass
+
+
+class OwnerUpdate(SQLModel):
+    company: str | None = Field(default=None, min_length=1, max_length=255)
+    owner_type: OwnerType | None = None
+    country: str | None = Field(default=None, max_length=100)
+    priority: OwnerPriority | None = None
+    relationship: OwnerRelationship | None = None
+    catchup_status: CatchupStatus | None = None
+    next_catchup: str | None = Field(default=None, max_length=20)
+    assets: str | None = Field(default=None, max_length=500)
+    financial_health: str | None = Field(default=None, max_length=20)
+    strategic_value: str | None = Field(default=None, max_length=1000)
+
+
+class Owner(OwnerBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    created_at: datetime | None = Field(
+        default_factory=get_datetime_utc, sa_type=DateTime(timezone=True)
+    )
+    updated_at: datetime | None = Field(
+        default_factory=get_datetime_utc, sa_type=DateTime(timezone=True)
+    )
+    contacts: list["OwnerContact"] = Relationship(
+        back_populates="owner", cascade_delete=True
+    )
+    interactions: list["OwnerInteraction"] = Relationship(
+        back_populates="owner", cascade_delete=True
+    )
+
+
+class OwnerPublic(OwnerBase):
+    id: uuid.UUID
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+    deal_count: int = 0          # computed
+    last_interaction: str | None = None   # latest interaction date
+
+
+class OwnersPublic(SQLModel):
+    data: list[OwnerPublic]
+    count: int
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# OWNER CONTACT — who from Fusion connects with whom on owner side
+# ─────────────────────────────────────────────────────────────────────────────
+
+class OwnerContactBase(SQLModel):
+    fusion_role: str = Field(max_length=100)   # "CEO", "BD Director VN"
+    owner_contact: str = Field(max_length=100)  # "Owner Chairman"
+    strength: ContactStrength = Field(default=ContactStrength.NEW, sa_type=String(20))
+    last_met: str | None = Field(default=None, max_length=20)  # "2026-05-10"
+    senior_flag: bool = Field(default=False)    # C-Suite involved
+    note: str | None = Field(default=None, max_length=500)
+
+
+class OwnerContactCreate(OwnerContactBase):
+    owner_id: uuid.UUID
+
+
+class OwnerContact(OwnerContactBase, table=True):
+    __tablename__ = "owner_contact"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    owner_id: uuid.UUID = Field(foreign_key="owner.id", ondelete="CASCADE")
+    owner: Optional["Owner"] = Relationship(back_populates="contacts")
+
+
+class OwnerContactPublic(OwnerContactBase):
+    id: uuid.UUID
+    owner_id: uuid.UUID
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# OWNER INTERACTION — meeting, dinner, site visit, etc.
+# ─────────────────────────────────────────────────────────────────────────────
+
+class InteractionType(str, Enum):
+    MEETING = "Meeting"
+    DINNER = "Dinner"
+    SITE_VISIT = "Site visit"
+    PHONE_CALL = "Phone call"
+    WHATSAPP = "WhatsApp summary"
+    PROPOSAL_SENT = "Proposal sent"
+    NDA_SIGNED = "NDA signed"
+    OTHER = "Other"
+
+
+class OwnerInteractionBase(SQLModel):
+    interaction_type: InteractionType = Field(
+        default=InteractionType.MEETING, sa_type=String(30)
+    )
+    date: str = Field(max_length=20)    # "2026-05-10"
+    note: str | None = Field(default=None, max_length=1000)
+
+
+class OwnerInteractionCreate(OwnerInteractionBase):
+    owner_id: uuid.UUID
+
+
+class OwnerInteraction(OwnerInteractionBase, table=True):
+    __tablename__ = "owner_interaction"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    owner_id: uuid.UUID = Field(foreign_key="owner.id", ondelete="CASCADE")
+    created_at: datetime | None = Field(
+        default_factory=get_datetime_utc, sa_type=DateTime(timezone=True)
+    )
+    owner: Optional["Owner"] = Relationship(back_populates="interactions")
+
+
+class OwnerInteractionPublic(OwnerInteractionBase):
+    id: uuid.UUID
+    owner_id: uuid.UUID
+    created_at: datetime | None = None
