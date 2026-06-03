@@ -222,7 +222,7 @@ echo  (Backend phai dang chay tai localhost:8000)
 echo.
 echo  Buoc 1: Download openapi.json tu backend...
 cd /D "%FRONTEND%"
-curl -s -o openapi.json http://localhost:8000/openapi.json
+curl -s -o openapi.json http://localhost:8000/api/v1/openapi.json
 if %errorlevel% neq 0 (
     echo  LOI: Khong download duoc. Backend co dang chay khong?
     pause
