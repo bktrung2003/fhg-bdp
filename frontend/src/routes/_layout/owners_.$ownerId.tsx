@@ -137,7 +137,7 @@ function OwnerWorkspace() {
   const interactionCount = interactions?.length ?? 0
 
   return (
-    <div className="flex flex-col gap-5 max-w-[1400px]">
+    <div className="flex flex-col gap-5 max-w-[1400px] mx-auto w-full">
       {/* Back link */}
       <Link to="/owners" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground self-start">
         <ArrowLeft className="h-3 w-3" />Back to Owners

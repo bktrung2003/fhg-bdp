@@ -110,7 +110,7 @@ function DealWorkspace() {
   const auditLogs: DealAuditLogPublic[] = audit ?? []
 
   return (
-    <div className="flex flex-col gap-5 max-w-[1200px]">
+    <div className="flex flex-col gap-5 max-w-[1200px] mx-auto w-full">
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
