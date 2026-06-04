@@ -341,6 +341,22 @@ export const DealCreateSchema = {
             minLength: 1,
             title: 'Name'
         },
+        project_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Project Id'
+        },
+        deal_type: {
+            '$ref': '#/components/schemas/DealType',
+            default: 'HMA'
+        },
         country: {
             type: 'string',
             maxLength: 100,
@@ -518,6 +534,22 @@ export const DealPublicSchema = {
             maxLength: 255,
             minLength: 1,
             title: 'Name'
+        },
+        project_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Project Id'
+        },
+        deal_type: {
+            '$ref': '#/components/schemas/DealType',
+            default: 'HMA'
         },
         country: {
             type: 'string',
@@ -766,6 +798,12 @@ export const DealStageSchema = {
     type: 'string',
     enum: ['Lead', 'NDA / Qualified', 'Feasibility', 'Proposal', 'Negotiation', 'LOI Signed', 'HMA Signed', 'Pre-opening', 'Opened', 'Lost'],
     title: 'DealStage'
+} as const;
+
+export const DealTypeSchema = {
+    type: 'string',
+    enum: ['HMA', 'TSA', 'Franchise', 'Consulting', 'Pre-opening', 'Other'],
+    title: 'DealType'
 } as const;
 
 export const DealUpdateSchema = {
@@ -1825,6 +1863,54 @@ export const OwnerContactCreateSchema = {
             maxLength: 100,
             title: 'Owner Contact'
         },
+        contact_title: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Contact Title'
+        },
+        email: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Email'
+        },
+        phone: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Phone'
+        },
+        seniority: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Seniority'
+        },
         strength: {
             '$ref': '#/components/schemas/ContactStrength',
             default: 'New'
@@ -1880,6 +1966,54 @@ export const OwnerContactPublicSchema = {
             type: 'string',
             maxLength: 100,
             title: 'Owner Contact'
+        },
+        contact_title: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Contact Title'
+        },
+        email: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Email'
+        },
+        phone: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Phone'
+        },
+        seniority: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Seniority'
         },
         strength: {
             '$ref': '#/components/schemas/ContactStrength',
@@ -2215,6 +2349,11 @@ export const OwnerPublicSchema = {
             title: 'Deal Count',
             default: 0
         },
+        project_count: {
+            type: 'integer',
+            title: 'Project Count',
+            default: 0
+        },
         last_interaction: {
             anyOf: [
                 {
@@ -2408,10 +2547,424 @@ export const PrivateUserCreateSchema = {
     title: 'PrivateUserCreate'
 } as const;
 
+export const ProjectCreateSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Name'
+        },
+        owner_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Owner Id'
+        },
+        country: {
+            type: 'string',
+            maxLength: 100,
+            title: 'Country'
+        },
+        region: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/APACRegion'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        city: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'City'
+        },
+        project_type: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/ProjectType'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        keys: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Keys'
+        },
+        opening_target: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Opening Target'
+        },
+        status: {
+            '$ref': '#/components/schemas/ProjectStatus',
+            default: 'Prospect'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        }
+    },
+    type: 'object',
+    required: ['name', 'country'],
+    title: 'ProjectCreate'
+} as const;
+
+export const ProjectPublicSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Name'
+        },
+        owner_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Owner Id'
+        },
+        country: {
+            type: 'string',
+            maxLength: 100,
+            title: 'Country'
+        },
+        region: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/APACRegion'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        city: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'City'
+        },
+        project_type: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/ProjectType'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        keys: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Keys'
+        },
+        opening_target: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Opening Target'
+        },
+        status: {
+            '$ref': '#/components/schemas/ProjectStatus',
+            default: 'Prospect'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        project_number: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Project Number'
+        },
+        owner_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Owner Name'
+        },
+        deal_count: {
+            type: 'integer',
+            title: 'Deal Count',
+            default: 0
+        },
+        active_pipeline_value: {
+            type: 'integer',
+            title: 'Active Pipeline Value',
+            default: 0
+        },
+        created_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created At'
+        },
+        updated_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['name', 'country', 'id', 'project_number'],
+    title: 'ProjectPublic'
+} as const;
+
+export const ProjectStatusSchema = {
+    type: 'string',
+    enum: ['Prospect', 'Active', 'On Hold', 'Operating', 'Lost', 'Closed'],
+    title: 'ProjectStatus'
+} as const;
+
 export const ProjectTypeSchema = {
     type: 'string',
     enum: ['Hotel New Build (Greenfield)', 'Hotel Re-Brand', 'Hotel Conversion (Takeover)', 'Hotel Adaptive Re-Use', 'Serviced Apartment New Build', 'Wellness / Spa Resort', 'Branded Residences'],
     title: 'ProjectType'
+} as const;
+
+export const ProjectUpdateSchema = {
+    properties: {
+        name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255,
+                    minLength: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Name'
+        },
+        owner_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Owner Id'
+        },
+        country: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Country'
+        },
+        region: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/APACRegion'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        city: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'City'
+        },
+        project_type: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/ProjectType'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        keys: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Keys'
+        },
+        opening_target: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Opening Target'
+        },
+        status: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/ProjectStatus'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        }
+    },
+    type: 'object',
+    title: 'ProjectUpdate'
+} as const;
+
+export const ProjectsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/ProjectPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'ProjectsPublic'
 } as const;
 
 export const StageChangeRequestSchema = {

@@ -3,7 +3,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { ArrowLeft, Building2, MapPin, Bed } from "lucide-react"
 
 import { ProjectsService, type DealPublic } from "@/client"
+import { AddDeal } from "@/components/Deals/AddDeal"
 import { Button } from "@/components/ui/button"
+import { Plus } from "lucide-react"
 
 export const Route = createFileRoute("/_layout/projects_/$projectId")({
   component: ProjectWorkspace,
@@ -124,6 +126,10 @@ function ProjectWorkspace() {
               All commercial opportunities (HMA, TSA, consulting...) linked to this asset
             </p>
           </div>
+          <AddDeal
+            defaultProjectId={project.id}
+            trigger={<Button size="sm"><Plus className="h-4 w-4 mr-1" />Add Deal</Button>}
+          />
         </div>
         {deals.length === 0 ? (
           <p className="text-sm text-muted-foreground p-6 text-center">No deals on this project yet.</p>

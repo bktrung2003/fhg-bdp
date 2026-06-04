@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { type SubmitHandler, useForm } from "react-hook-form"
-import { Pencil } from "lucide-react"
+import { Pencil, Briefcase } from "lucide-react"
 import { useEffect, useState } from "react"
 
-import { DealsService, OwnersService, UsersService, type DealPublic, type DealUpdate } from "@/client"
+import { DealsService, ProjectsService, UsersService, type DealPublic, type DealUpdate } from "@/client"
 import { Button } from "@/components/ui/button"
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
@@ -21,24 +21,22 @@ interface Props { deal: DealPublic }
 export function EditDeal({ deal }: Props) {
   const [open, setOpen] = useState(false)
   const queryClient = useQueryClient()
-
-  // Master data
-  const RISKS = useMasterData(MD.DEAL_RISK)
-  const PROJECT_TYPES = useMasterData(MD.PROJECT_TYPE)
-  const REGIONS = useMasterData(MD.REGION)
-  const COUNTRIES = useMasterData(MD.COUNTRY)
-  const OPENING_TARGETS = useMasterData(MD.OPENING_TARGET)
-  const BRANDS = useMasterData(MD.BRAND)
-  const FEASIBILITY = useMasterData(MD.FEASIBILITY_STATUS)
   const { showSuccessToast } = useCustomToast()
 
-  // Owners + Users for dropdowns
-  const { data: ownersData } = useQuery({
-    queryKey: ["owners-picker"],
-    queryFn: () => OwnersService.listOwners({ limit: 500 }),
+  const RISKS = useMasterData(MD.DEAL_RISK)
+  const DEAL_TYPES = useMasterData("deal_type")
+  const BRANDS = useMasterData(MD.BRAND)
+  const FEASIBILITY = useMasterData(MD.FEASIBILITY_STATUS)
+
+  // Project info (read-only, can change link)
+  const { data: projectsData } = useQuery({
+    queryKey: ["projects-picker"],
+    queryFn: () => ProjectsService.listProjects({ limit: 500 }),
     enabled: open,
   })
-  const owners = ownersData?.data ?? []
+  const projects = projectsData?.data ?? []
+  const [projectId, setProjectId] = useState(deal.project_id ?? "")
+
   const { data: usersData } = useQuery({
     queryKey: ["users-team"],
     queryFn: () => UsersService.listTeam(),
@@ -54,16 +52,13 @@ export function EditDeal({ deal }: Props) {
     if (open) {
       reset({
         name: deal.name,
-        country: deal.country,
-        city: deal.city ?? undefined,
-        owner_name: deal.owner_name ?? undefined,
         brand: deal.brand ?? undefined,
-        keys: deal.keys ?? undefined,
         probability: deal.probability ?? undefined,
         pipeline_value: deal.pipeline_value ?? undefined,
         fee_forecast: deal.fee_forecast ?? undefined,
         next_action: deal.next_action ?? undefined,
       })
+      setProjectId(deal.project_id ?? "")
       setBdOwnerId(deal.bd_owner_id ?? "")
     }
   }, [open, deal, reset])
@@ -73,13 +68,18 @@ export function EditDeal({ deal }: Props) {
       DealsService.updateDeal({ id: deal.id, requestBody: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["deals"] })
+      queryClient.invalidateQueries({ queryKey: ["deal", deal.id] })
       showSuccessToast("Deal updated.")
       setOpen(false)
     },
   })
 
   const onSubmit: SubmitHandler<DealUpdate> = (data) =>
-    mutation.mutate({ ...data, bd_owner_id: bdOwnerId || undefined })
+    mutation.mutate({
+      ...data,
+      project_id: projectId || undefined,
+      bd_owner_id: bdOwnerId || undefined,
+    })
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -88,45 +88,47 @@ export function EditDeal({ deal }: Props) {
           <Pencil className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Deal — {deal.name}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2 space-y-1.5">
-              <Label>Project Name</Label>
-              <Input {...register("name")} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Country</Label>
-              <Select defaultValue={deal.country ?? ""} onValueChange={(v) => setValue("country", v)}>
-                <SelectTrigger><SelectValue placeholder="Select country..." /></SelectTrigger>
-                <SelectContent>
-                  {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label>City</Label>
-              <Input {...register("city")} />
-            </div>
+          {/* Project (rare to change) */}
+          <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
+            <Label className="flex items-center gap-1.5 text-xs">
+              <Briefcase className="h-3.5 w-3.5" />
+              Linked Project
+            </Label>
+            <Select value={projectId} onValueChange={setProjectId}>
+              <SelectTrigger><SelectValue placeholder="Select project..." /></SelectTrigger>
+              <SelectContent>
+                {projects.map(p => (
+                  <SelectItem key={p.id} value={p.id}>{p.name} · {p.city ?? p.country}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-[10px] text-muted-foreground">
+              Location, keys, project type come from the linked project.
+            </p>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="col-span-2 space-y-1.5">
+              <Label>Deal Name</Label>
+              <Input {...register("name")} />
+            </div>
+
             <div className="space-y-1.5">
-              <Label>Developer / Owner</Label>
-              <Select defaultValue={deal.owner_name ?? ""} onValueChange={(v) => setValue("owner_name", v === "__none__" ? "" : v)}>
-                <SelectTrigger><SelectValue placeholder="Select owner..." /></SelectTrigger>
+              <Label>Deal Type</Label>
+              <Select defaultValue={(deal as any).deal_type ?? "HMA"} onValueChange={(v) => setValue("deal_type", v as DealUpdate["deal_type"])}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__none__">— None —</SelectItem>
-                  {owners.map(o => (
-                    <SelectItem key={o.id} value={o.company}>{o.company}</SelectItem>
-                  ))}
+                  {DEAL_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
+
             <div className="space-y-1.5">
               <Label>Brand</Label>
               <Select defaultValue={deal.brand ?? ""} onValueChange={(v) => setValue("brand", v === "__none__" ? "" : v)}>
@@ -137,6 +139,27 @@ export function EditDeal({ deal }: Props) {
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="space-y-1.5">
+              <Label>Risk</Label>
+              <Select defaultValue={deal.risk ?? "Green"} onValueChange={(v) => setValue("risk", v as DealUpdate["risk"])}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {RISKS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Feasibility</Label>
+              <Select defaultValue={deal.feasibility ?? "TBD"} onValueChange={(v) => setValue("feasibility", v as DealUpdate["feasibility"])}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {FEASIBILITY.map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-1.5">
               <Label>Development Lead</Label>
               <Select value={bdOwnerId || "__none__"} onValueChange={(v) => setBdOwnerId(v === "__none__" ? "" : v)}>
@@ -155,53 +178,6 @@ export function EditDeal({ deal }: Props) {
           </div>
 
           <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-1.5">
-              <Label>Risk</Label>
-              <Select defaultValue={deal.risk ?? "Green"} onValueChange={(v) => setValue("risk", v as DealUpdate["risk"])}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{RISKS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label>Region</Label>
-              <Select defaultValue={deal.region ?? ""} onValueChange={(v) => setValue("region", v as DealUpdate["region"])}>
-                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-                <SelectContent>{REGIONS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label>Project Type</Label>
-              <Select defaultValue={deal.project_type ?? ""} onValueChange={(v) => setValue("project_type", v as DealUpdate["project_type"])}>
-                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-                <SelectContent>{PROJECT_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label>Opening Target</Label>
-              <Select defaultValue={deal.opening_target ?? ""} onValueChange={(v) => setValue("opening_target", v)}>
-                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-                <SelectContent>{OPENING_TARGETS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label>Feasibility</Label>
-              <Select defaultValue={deal.feasibility ?? "TBD"} onValueChange={(v) => setValue("feasibility", v as DealUpdate["feasibility"])}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {FEASIBILITY.map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-4 gap-4">
-            <div className="space-y-1.5">
-              <Label>Keys</Label>
-              <Input {...register("keys")} type="number" min={0} />
-            </div>
             <div className="space-y-1.5">
               <Label>Probability %</Label>
               <Input {...register("probability")} type="number" min={0} max={100} />

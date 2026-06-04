@@ -72,14 +72,18 @@ function RiskDot({ risk }: { risk?: string }) {
 
 function DealNameCell({ deal }: { deal: DealPublic }) {
   const navigate = useNavigate()
+  const projectName = (deal as any).project_name
   return (
     <div
-      className="min-w-[180px] cursor-pointer group"
+      className="min-w-[200px] cursor-pointer group"
       onClick={() => navigate({ to: "/deals/$dealId" as any, params: { dealId: deal.id } })}
     >
       <p className="font-semibold text-sm leading-tight text-primary group-hover:underline">{deal.name}</p>
+      {projectName && projectName !== deal.name && (
+        <p className="text-[11px] text-muted-foreground mt-0.5 truncate">📁 {projectName}</p>
+      )}
       {deal.project_type && (
-        <p className="text-xs text-muted-foreground mt-0.5">{deal.project_type}</p>
+        <p className="text-[10px] text-muted-foreground">{deal.project_type}</p>
       )}
     </div>
   )
@@ -117,8 +121,20 @@ export const dealColumns: ColumnDef<DealPublic>[] = [
   },
   {
     id: "name",
-    header: "Project Name",
+    header: "Deal",
     cell: ({ row }) => <DealNameCell deal={row.original} />,
+  },
+  {
+    id: "deal_type",
+    header: "Type",
+    cell: ({ row }) => {
+      const t = (row.original as any).deal_type ?? "HMA"
+      return (
+        <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-semibold bg-purple-100 text-purple-700 whitespace-nowrap">
+          {t}
+        </span>
+      )
+    },
   },
   {
     id: "probability",

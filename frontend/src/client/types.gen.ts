@@ -65,6 +65,8 @@ export type DealAuditLogPublic = {
 
 export type DealCreate = {
     name: string;
+    project_id?: (string | null);
+    deal_type?: DealType;
     country: string;
     region?: (APACRegion | null);
     city?: (string | null);
@@ -87,6 +89,8 @@ export type DealFeasibility = 'TBD' | 'Weak' | 'Medium' | 'Strong' | 'Updated';
 
 export type DealPublic = {
     name: string;
+    project_id?: (string | null);
+    deal_type?: DealType;
     country: string;
     region?: (APACRegion | null);
     city?: (string | null);
@@ -121,6 +125,8 @@ export type DealsPublic = {
 };
 
 export type DealStage = 'Lead' | 'NDA / Qualified' | 'Feasibility' | 'Proposal' | 'Negotiation' | 'LOI Signed' | 'HMA Signed' | 'Pre-opening' | 'Opened' | 'Lost';
+
+export type DealType = 'HMA' | 'TSA' | 'Franchise' | 'Consulting' | 'Pre-opening' | 'Other';
 
 export type DealUpdate = {
     name?: (string | null);
@@ -289,6 +295,10 @@ export type NewPassword = {
 export type OwnerContactCreate = {
     fusion_role: string;
     owner_contact: string;
+    contact_title?: (string | null);
+    email?: (string | null);
+    phone?: (string | null);
+    seniority?: (string | null);
     strength?: ContactStrength;
     last_met?: (string | null);
     senior_flag?: boolean;
@@ -299,6 +309,10 @@ export type OwnerContactCreate = {
 export type OwnerContactPublic = {
     fusion_role: string;
     owner_contact: string;
+    contact_title?: (string | null);
+    email?: (string | null);
+    phone?: (string | null);
+    seniority?: (string | null);
     strength?: ContactStrength;
     last_met?: (string | null);
     senior_flag?: boolean;
@@ -353,6 +367,7 @@ export type OwnerPublic = {
     created_at?: (string | null);
     updated_at?: (string | null);
     deal_count?: number;
+    project_count?: number;
     last_interaction?: (string | null);
 };
 
@@ -385,7 +400,60 @@ export type PrivateUserCreate = {
     is_verified?: boolean;
 };
 
+export type ProjectCreate = {
+    name: string;
+    owner_id?: (string | null);
+    country: string;
+    region?: (APACRegion | null);
+    city?: (string | null);
+    project_type?: (ProjectType | null);
+    keys?: (number | null);
+    opening_target?: (string | null);
+    status?: ProjectStatus;
+    description?: (string | null);
+};
+
+export type ProjectPublic = {
+    name: string;
+    owner_id?: (string | null);
+    country: string;
+    region?: (APACRegion | null);
+    city?: (string | null);
+    project_type?: (ProjectType | null);
+    keys?: (number | null);
+    opening_target?: (string | null);
+    status?: ProjectStatus;
+    description?: (string | null);
+    id: string;
+    project_number: (number | null);
+    owner_name?: (string | null);
+    deal_count?: number;
+    active_pipeline_value?: number;
+    created_at?: (string | null);
+    updated_at?: (string | null);
+};
+
+export type ProjectsPublic = {
+    data: Array<ProjectPublic>;
+    count: number;
+};
+
+export type ProjectStatus = 'Prospect' | 'Active' | 'On Hold' | 'Operating' | 'Lost' | 'Closed';
+
 export type ProjectType = 'Hotel New Build (Greenfield)' | 'Hotel Re-Brand' | 'Hotel Conversion (Takeover)' | 'Hotel Adaptive Re-Use' | 'Serviced Apartment New Build' | 'Wellness / Spa Resort' | 'Branded Residences';
+
+export type ProjectUpdate = {
+    name?: (string | null);
+    owner_id?: (string | null);
+    country?: (string | null);
+    region?: (APACRegion | null);
+    city?: (string | null);
+    project_type?: (ProjectType | null);
+    keys?: (number | null);
+    opening_target?: (string | null);
+    status?: (ProjectStatus | null);
+    description?: (string | null);
+};
 
 export type StageChangeRequest = {
     new_stage: DealStage;
@@ -812,6 +880,18 @@ export type OwnersAddInteractionData = {
 
 export type OwnersAddInteractionResponse = (OwnerInteractionPublic);
 
+export type OwnersListOwnerProjectsData = {
+    id: string;
+};
+
+export type OwnersListOwnerProjectsResponse = (unknown);
+
+export type OwnersListOwnerDealsData = {
+    id: string;
+};
+
+export type OwnersListOwnerDealsResponse = (unknown);
+
 export type OwnersDeleteContactData = {
     contactId: string;
 };
@@ -823,6 +903,48 @@ export type PrivateCreateUserData = {
 };
 
 export type PrivateCreateUserResponse = (UserPublic);
+
+export type ProjectsListProjectsData = {
+    country?: (string | null);
+    limit?: number;
+    ownerId?: (string | null);
+    search?: (string | null);
+    skip?: number;
+    status?: (ProjectStatus | null);
+};
+
+export type ProjectsListProjectsResponse = (ProjectsPublic);
+
+export type ProjectsCreateProjectData = {
+    requestBody: ProjectCreate;
+};
+
+export type ProjectsCreateProjectResponse = (ProjectPublic);
+
+export type ProjectsGetProjectData = {
+    id: string;
+};
+
+export type ProjectsGetProjectResponse = (ProjectPublic);
+
+export type ProjectsUpdateProjectData = {
+    id: string;
+    requestBody: ProjectUpdate;
+};
+
+export type ProjectsUpdateProjectResponse = (ProjectPublic);
+
+export type ProjectsDeleteProjectData = {
+    id: string;
+};
+
+export type ProjectsDeleteProjectResponse = (Message);
+
+export type ProjectsListProjectDealsData = {
+    id: string;
+};
+
+export type ProjectsListProjectDealsResponse = (unknown);
 
 export type SeedLoadSeedDataData = {
     requestBody: {
