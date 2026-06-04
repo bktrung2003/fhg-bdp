@@ -302,6 +302,7 @@ class DealPublic(DealBase):
     # Enriched from Project relationship
     project_name: str | None = None
     project_number: int | None = None
+    owner_id: uuid.UUID | None = None   # from project.owner_id for navigation
 
 
 class DealsPublic(SQLModel):

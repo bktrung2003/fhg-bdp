@@ -36,6 +36,7 @@ const DEAL_COLUMN_SPECS: ColumnSpec[] = [
   { id: "deal_number", label: "Record #" },
   { id: "updated_at", label: "Modified" },
   { id: "owner_name", label: "Developer / Owner" },
+  { id: "project_id", label: "Project ID" },
   { id: "name", label: "Deal" },
   { id: "deal_type", label: "Type" },
   { id: "probability", label: "Probability" },

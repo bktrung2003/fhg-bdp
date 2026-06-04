@@ -89,6 +89,50 @@ function DealNameCell({ deal }: { deal: DealPublic }) {
   )
 }
 
+function projectIdFmt(n?: number | null) {
+  return n != null ? `FUS-P-${String(n).padStart(5, "0")}` : "—"
+}
+
+// Project ID cell → click → /projects/{id}
+function ProjectIdCell({ deal }: { deal: DealPublic }) {
+  const navigate = useNavigate()
+  const projectId = (deal as any).project_id
+  const projectNumber = (deal as any).project_number
+  if (!projectId) {
+    return <span className="font-mono text-xs text-muted-foreground">—</span>
+  }
+  return (
+    <button
+      onClick={(e) => { e.stopPropagation(); navigate({ to: "/projects/$projectId" as any, params: { projectId } }) }}
+      className="font-mono text-xs text-primary hover:underline cursor-pointer"
+      title="Open project"
+    >
+      {projectIdFmt(projectNumber)}
+    </button>
+  )
+}
+
+// Owner name cell → click → /owners/{ownerId}
+function OwnerNameCell({ deal }: { deal: DealPublic }) {
+  const navigate = useNavigate()
+  const ownerId = (deal as any).owner_id
+  if (!deal.owner_name) {
+    return <span className="text-muted-foreground text-sm">—</span>
+  }
+  if (!ownerId) {
+    return <span className="font-medium text-sm">{deal.owner_name}</span>
+  }
+  return (
+    <button
+      onClick={(e) => { e.stopPropagation(); navigate({ to: "/owners/$ownerId" as any, params: { ownerId } }) }}
+      className="font-medium text-sm text-primary hover:underline cursor-pointer text-left"
+      title="Open owner profile"
+    >
+      {deal.owner_name}
+    </button>
+  )
+}
+
 // ── Column definitions ────────────────────────────────────────────────────────
 
 export const dealColumns: ColumnDef<DealPublic>[] = [
@@ -113,11 +157,12 @@ export const dealColumns: ColumnDef<DealPublic>[] = [
   {
     id: "owner_name",
     header: "Developer / Owner",
-    cell: ({ row }) => (
-      <span className="font-medium text-sm">
-        {row.original.owner_name ?? <span className="text-muted-foreground">—</span>}
-      </span>
-    ),
+    cell: ({ row }) => <OwnerNameCell deal={row.original} />,
+  },
+  {
+    id: "project_id",
+    header: "Project ID",
+    cell: ({ row }) => <ProjectIdCell deal={row.original} />,
   },
   {
     id: "name",

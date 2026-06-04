@@ -44,11 +44,22 @@ def _to_public(deal: Deal, session: SessionDep | None = None) -> DealPublic:
     # Enrich from Project if linked
     project_name = None
     project_number = None
+    owner_id = None
     if deal.project_id and session is not None:
         project = session.get(Project, deal.project_id)
         if project:
             project_name = project.name
             project_number = project.project_number
+            owner_id = project.owner_id
+
+    # Fallback: if no project link but owner_name set, find owner by name
+    if owner_id is None and deal.owner_name and session is not None:
+        from sqlmodel import select as sel
+        owner = session.exec(
+            sel(Owner).where(Owner.company == deal.owner_name)
+        ).first()
+        if owner:
+            owner_id = owner.id
 
     return DealPublic(
         **deal.model_dump(),
@@ -56,6 +67,7 @@ def _to_public(deal: Deal, session: SessionDep | None = None) -> DealPublic:
         bd_owner_name=bd_owner_name,
         project_name=project_name,
         project_number=project_number,
+        owner_id=owner_id,
     )
 
 
