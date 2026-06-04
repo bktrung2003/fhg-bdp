@@ -49,6 +49,16 @@ export type Body_login_login_access_token = {
     client_secret?: (string | null);
 };
 
+export type BulkTaskDelete = {
+    task_ids: Array<(string)>;
+};
+
+export type BulkTaskUpdate = {
+    task_ids: Array<(string)>;
+    status?: (TaskStatus | null);
+    task_owner_id?: (string | null);
+};
+
 export type CatchupStatus = 'On track' | 'Due this week' | 'Overdue' | 'No cadence';
 
 export type ContactStrength = 'New' | 'Warm' | 'Strong';
@@ -616,8 +626,11 @@ export type ValidationError = {
 };
 
 export type ActivitiesListActivitiesData = {
+    dateFrom?: (string | null);
+    dateTo?: (string | null);
     dealId?: (string | null);
     limit?: number;
+    search?: (string | null);
     skip?: number;
 };
 
@@ -1006,11 +1019,15 @@ export type SeedClearAllDataResponse = (Message);
 
 export type TasksListTasksData = {
     dealId?: (string | null);
+    dueFrom?: (string | null);
+    dueTo?: (string | null);
+    hideArchived?: boolean;
     limit?: number;
     overdueOnly?: boolean;
     search?: (string | null);
     skip?: number;
     status?: (TaskStatus | null);
+    taskOwnerId?: (string | null);
 };
 
 export type TasksListTasksResponse = (TasksPublic);
@@ -1020,6 +1037,18 @@ export type TasksCreateTaskData = {
 };
 
 export type TasksCreateTaskResponse = (TaskPublic);
+
+export type TasksBulkUpdateTasksData = {
+    requestBody: BulkTaskUpdate;
+};
+
+export type TasksBulkUpdateTasksResponse = (Message);
+
+export type TasksBulkDeleteTasksData = {
+    requestBody: BulkTaskDelete;
+};
+
+export type TasksBulkDeleteTasksResponse = (Message);
 
 export type TasksUpdateTaskData = {
     id: string;

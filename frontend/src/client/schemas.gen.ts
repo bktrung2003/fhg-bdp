@@ -268,6 +268,60 @@ export const Body_login_login_access_tokenSchema = {
     title: 'Body_login-login_access_token'
 } as const;
 
+export const BulkTaskDeleteSchema = {
+    properties: {
+        task_ids: {
+            items: {
+                type: 'string',
+                format: 'uuid'
+            },
+            type: 'array',
+            title: 'Task Ids'
+        }
+    },
+    type: 'object',
+    required: ['task_ids'],
+    title: 'BulkTaskDelete'
+} as const;
+
+export const BulkTaskUpdateSchema = {
+    properties: {
+        task_ids: {
+            items: {
+                type: 'string',
+                format: 'uuid'
+            },
+            type: 'array',
+            title: 'Task Ids'
+        },
+        status: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/TaskStatus'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        task_owner_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Task Owner Id'
+        }
+    },
+    type: 'object',
+    required: ['task_ids'],
+    title: 'BulkTaskUpdate'
+} as const;
+
 export const CatchupStatusSchema = {
     type: 'string',
     enum: ['On track', 'Due this week', 'Overdue', 'No cadence'],

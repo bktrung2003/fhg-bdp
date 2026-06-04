@@ -609,7 +609,13 @@ function ActivitiesPage() {
   const [priorityFilter, setPriorityFilter] = useState("")
   const [dueRange, setDueRange] = useState<"all" | "overdue" | "today" | "this_week" | "this_month">("all")
   const [myTasksOnly, setMyTasksOnly] = useState(false)
+  const [assigneeFilter, setAssigneeFilter] = useState<string>("")  // task_owner_id
   const [showArchived, setShowArchived] = useState(false)  // include Done > 30 days
+
+  // Mutually exclusive: My Tasks vs Assigned To
+  const effectiveOwnerId = myTasksOnly
+    ? currentUser?.id ?? undefined
+    : (assigneeFilter || undefined)
 
   // Activity filters
   const [actTypeFilter, setActTypeFilter] = useState("")
@@ -632,10 +638,10 @@ function ActivitiesPage() {
 
   // Fetch tasks with server-side filters
   const { data: tasksData } = useQuery({
-    queryKey: ["tasks", { statusFilter, myTasksOnly, showArchived, currentUserId: currentUser?.id }],
+    queryKey: ["tasks", { statusFilter, effectiveOwnerId, showArchived }],
     queryFn: () => TasksService.listTasks({
       status: (statusFilter as any) || undefined,
-      taskOwnerId: (myTasksOnly && currentUser?.id) || undefined,
+      taskOwnerId: effectiveOwnerId,
       hideArchived: !showArchived,
       limit: 500,
     }),
@@ -786,7 +792,7 @@ function ActivitiesPage() {
   const blockedCount = allTasks.filter(t => t.status === "Blocked").length
   const doneToday = allTasks.filter(t => t.status === "Done" && t.due_date === today()).length
 
-  const hasFilters = !!(search || statusFilter || priorityFilter || myTasksOnly || dueRange !== "all")
+  const hasFilters = !!(search || statusFilter || priorityFilter || myTasksOnly || assigneeFilter || dueRange !== "all")
   const selectedCount = selectedTaskIds.size
 
   return (
@@ -835,11 +841,37 @@ function ActivitiesPage() {
               variant={myTasksOnly ? "default" : "outline"}
               size="sm"
               className="h-9"
-              onClick={() => setMyTasksOnly(v => !v)}
+              onClick={() => {
+                setMyTasksOnly(v => !v)
+                if (!myTasksOnly) setAssigneeFilter("")  // clear assignee filter when turning on
+              }}
             >
               <UserIcon className="h-3.5 w-3.5 mr-1.5" />
               My Tasks
             </Button>
+
+            {/* Assigned To dropdown — mutually exclusive with My Tasks */}
+            <Select
+              value={assigneeFilter || "__none__"}
+              onValueChange={v => {
+                const next = v === "__none__" ? "" : v
+                setAssigneeFilter(next)
+                if (next) setMyTasksOnly(false)
+              }}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Assigned to..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">— Anyone —</SelectItem>
+                {users.map(u => (
+                  <SelectItem key={u.id} value={u.id}>
+                    {u.full_name || u.email}
+                    <span className="text-muted-foreground text-xs ml-1">· {u.role}</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[130px]"><SelectValue placeholder="All status" /></SelectTrigger>
@@ -851,7 +883,7 @@ function ActivitiesPage() {
             </Select>
 
             {hasFilters && (
-              <Button variant="ghost" size="sm" onClick={() => { setSearch(""); setStatusFilter(""); setPriorityFilter(""); setMyTasksOnly(false); setDueRange("all") }}>
+              <Button variant="ghost" size="sm" onClick={() => { setSearch(""); setStatusFilter(""); setPriorityFilter(""); setMyTasksOnly(false); setAssigneeFilter(""); setDueRange("all") }}>
                 <X className="h-4 w-4 mr-1" />Clear
               </Button>
             )}
