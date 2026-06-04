@@ -18,12 +18,29 @@ from app.models import (
     DealsPublic,
     DealStage,
     DealUpdate,
+    MasterData,
     Message,
     Owner,
     Project,
     StageChangeRequest,
     UserRole,
 )
+
+
+def _get_default_probability(session: SessionDep, stage: str) -> int | None:
+    """Look up default probability for a stage from master_data."""
+    entries = session.exec(
+        select(MasterData).where(MasterData.category == "stage_probability")
+    ).all()
+    for e in entries:
+        if ":" in e.value:
+            s, p = e.value.split(":", 1)
+            if s.strip() == stage:
+                try:
+                    return int(p.strip())
+                except ValueError:
+                    return None
+    return None
 
 router = APIRouter(prefix="/deals", tags=["deals"])
 
@@ -177,6 +194,14 @@ def create_deal(
         "updated_at": now,
     })
 
+    # Auto-set probability from stage if not specified
+    if payload.get("probability") is None and payload.get("stage"):
+        stage_str = payload["stage"] if isinstance(payload["stage"], str) else payload["stage"].value
+        default_prob = _get_default_probability(session, stage_str)
+        if default_prob is not None:
+            payload["probability"] = default_prob
+            payload["probability_source"] = "auto"
+
     deal = Deal(**payload)
     session.add(deal)
 
@@ -212,6 +237,10 @@ def update_deal(
     _check_write_permission(current_user, deal)
 
     update_data = deal_in.model_dump(exclude_unset=True)
+
+    # If user explicitly changed probability, mark source as manual
+    if "probability" in update_data and update_data["probability"] != deal.probability:
+        update_data["probability_source"] = "manual"
 
     # Track changed fields in audit log
     for field, new_val in update_data.items():
@@ -259,12 +288,20 @@ def change_stage(
 
     now = datetime.now(timezone.utc)
     old_stage = deal.stage
+    old_prob = deal.probability
 
+    new_stage_str = req.new_stage if isinstance(req.new_stage, str) else req.new_stage.value
     deal.stage = req.new_stage
     deal.stage_changed_at = now
     deal.updated_at = now
     if req.next_action:
         deal.next_action = req.next_action
+
+    # Auto-update probability if source is "auto"
+    if (deal.probability_source or "auto") == "auto":
+        default_prob = _get_default_probability(session, new_stage_str)
+        if default_prob is not None:
+            deal.probability = default_prob
 
     session.add(deal)
     session.add(
@@ -273,10 +310,22 @@ def change_stage(
             user_id=current_user.id,
             field="stage",
             old_value=old_stage if isinstance(old_stage, str) else old_stage.value,
-            new_value=req.new_stage if isinstance(req.new_stage, str) else req.new_stage.value,
+            new_value=new_stage_str,
             note=req.note,
         )
     )
+    # Audit probability change if it changed automatically
+    if old_prob != deal.probability:
+        session.add(
+            DealAuditLog(
+                deal_id=deal.id,
+                user_id=current_user.id,
+                field="probability",
+                old_value=str(old_prob) if old_prob is not None else None,
+                new_value=str(deal.probability) if deal.probability is not None else "",
+                note=f"Auto-updated from stage change to {new_stage_str}",
+            )
+        )
     session.commit()
     session.refresh(deal)
     return _to_public(deal, session)

@@ -34,6 +34,7 @@ const GROUPS: CategoryGroup[] = [
       { key: "deal_risk", label: "Deal Risk" },
       { key: "feasibility_status", label: "Feasibility Status" },
       { key: "opening_target", label: "Opening Targets" },
+      { key: "stage_probability", label: "Stage → Probability (Stage:Prob format)" },
     ],
   },
   {

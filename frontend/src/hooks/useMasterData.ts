@@ -16,6 +16,31 @@ export function useMasterData(category: string): string[] {
 }
 
 /**
+ * Hook for stage→probability lookup.
+ * Returns: { probabilityForStage: (stage: string) => number | undefined }
+ */
+export function useStageProbabilities() {
+  const { data } = useQuery({
+    queryKey: ["master-data", "stage_probability"],
+    queryFn: () => MasterDataService.listByCategory({ category: "stage_probability", activeOnly: true }),
+    staleTime: 1000 * 60 * 5,
+  })
+  const mapping = new Map<string, number>()
+  ;(data ?? []).forEach(entry => {
+    const parts = entry.value.split(":")
+    if (parts.length === 2) {
+      const stage = parts[0].trim()
+      const prob = parseInt(parts[1].trim(), 10)
+      if (!Number.isNaN(prob)) mapping.set(stage, prob)
+    }
+  })
+  return {
+    probabilityForStage: (stage: string) => mapping.get(stage),
+    stageProbabilities: mapping,
+  }
+}
+
+/**
  * Master data category keys — typed for autocomplete.
  */
 export const MD = {

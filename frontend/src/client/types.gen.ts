@@ -35,6 +35,8 @@ export type Body_documents_upload_document = {
     permission?: string;
     deal_id?: string;
     deal_name?: string;
+    project_id?: string;
+    project_name?: string;
     version?: string;
     note?: string;
     is_confidential?: boolean;
@@ -170,6 +172,8 @@ export type DocumentPublic = {
     permission?: DocPermission;
     deal_id?: (string | null);
     deal_name?: (string | null);
+    project_id?: (string | null);
+    project_name?: (string | null);
     version?: (string | null);
     note?: (string | null);
     is_confidential?: boolean;
@@ -705,6 +709,7 @@ export type DocumentsListDocumentsData = {
     docType?: (DocType | null);
     limit?: number;
     permission?: (DocPermission | null);
+    projectId?: (string | null);
     search?: (string | null);
     skip?: number;
 };
@@ -1000,6 +1005,12 @@ export type ProjectsListProjectDealsData = {
 };
 
 export type ProjectsListProjectDealsResponse = (unknown);
+
+export type ProjectsListProjectDocumentsData = {
+    id: string;
+};
+
+export type ProjectsListProjectDocumentsResponse = (unknown);
 
 export type ProjectsListProjectMilestonesData = {
     id: string;

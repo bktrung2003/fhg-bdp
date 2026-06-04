@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ActivitiesListActivitiesData, ActivitiesListActivitiesResponse, ActivitiesCreateActivityData, ActivitiesCreateActivityResponse, ActivitiesDeleteActivityData, ActivitiesDeleteActivityResponse, DealsListDealsData, DealsListDealsResponse, DealsCreateDealData, DealsCreateDealResponse, DealsGetDealData, DealsGetDealResponse, DealsUpdateDealData, DealsUpdateDealResponse, DealsDeleteDealData, DealsDeleteDealResponse, DealsChangeStageData, DealsChangeStageResponse, DealsGetDealAuditData, DealsGetDealAuditResponse, DocumentsListDocumentsData, DocumentsListDocumentsResponse, DocumentsUploadDocumentData, DocumentsUploadDocumentResponse, DocumentsServeLocalFileData, DocumentsServeLocalFileResponse, DocumentsToggleConfidentialData, DocumentsToggleConfidentialResponse, DocumentsDeleteDocumentData, DocumentsDeleteDocumentResponse, FeasibilityListSnapshotsData, FeasibilityListSnapshotsResponse, FeasibilitySaveSnapshotData, FeasibilitySaveSnapshotResponse, FeasibilityDeleteSnapshotData, FeasibilityDeleteSnapshotResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MasterDataListAllResponse, MasterDataCreateEntryData, MasterDataCreateEntryResponse, MasterDataListByCategoryData, MasterDataListByCategoryResponse, MasterDataUpdateEntryData, MasterDataUpdateEntryResponse, MasterDataDeleteEntryData, MasterDataDeleteEntryResponse, MilestonesListMilestonesData, MilestonesListMilestonesResponse, MilestonesCreateMilestoneData, MilestonesCreateMilestoneResponse, MilestonesUpdateMilestoneData, MilestonesUpdateMilestoneResponse, MilestonesDeleteMilestoneData, MilestonesDeleteMilestoneResponse, OwnersListOwnersData, OwnersListOwnersResponse, OwnersCreateOwnerData, OwnersCreateOwnerResponse, OwnersGetOwnerData, OwnersGetOwnerResponse, OwnersUpdateOwnerData, OwnersUpdateOwnerResponse, OwnersDeleteOwnerData, OwnersDeleteOwnerResponse, OwnersListContactsData, OwnersListContactsResponse, OwnersAddContactData, OwnersAddContactResponse, OwnersListInteractionsData, OwnersListInteractionsResponse, OwnersAddInteractionData, OwnersAddInteractionResponse, OwnersListOwnerProjectsData, OwnersListOwnerProjectsResponse, OwnersListOwnerDealsData, OwnersListOwnerDealsResponse, OwnersDeleteContactData, OwnersDeleteContactResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProjectsListProjectsData, ProjectsListProjectsResponse, ProjectsCreateProjectData, ProjectsCreateProjectResponse, ProjectsGetProjectData, ProjectsGetProjectResponse, ProjectsUpdateProjectData, ProjectsUpdateProjectResponse, ProjectsDeleteProjectData, ProjectsDeleteProjectResponse, ProjectsListProjectDealsData, ProjectsListProjectDealsResponse, ProjectsListProjectMilestonesData, ProjectsListProjectMilestonesResponse, SeedLoadSeedDataData, SeedLoadSeedDataResponse, SeedClearAllDataResponse, TasksListTasksData, TasksListTasksResponse, TasksCreateTaskData, TasksCreateTaskResponse, TasksBulkUpdateTasksData, TasksBulkUpdateTasksResponse, TasksBulkDeleteTasksData, TasksBulkDeleteTasksResponse, TasksUpdateTaskData, TasksUpdateTaskResponse, TasksDeleteTaskData, TasksDeleteTaskResponse, UsersListTeamResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { ActivitiesListActivitiesData, ActivitiesListActivitiesResponse, ActivitiesCreateActivityData, ActivitiesCreateActivityResponse, ActivitiesDeleteActivityData, ActivitiesDeleteActivityResponse, DealsListDealsData, DealsListDealsResponse, DealsCreateDealData, DealsCreateDealResponse, DealsGetDealData, DealsGetDealResponse, DealsUpdateDealData, DealsUpdateDealResponse, DealsDeleteDealData, DealsDeleteDealResponse, DealsChangeStageData, DealsChangeStageResponse, DealsGetDealAuditData, DealsGetDealAuditResponse, DocumentsListDocumentsData, DocumentsListDocumentsResponse, DocumentsUploadDocumentData, DocumentsUploadDocumentResponse, DocumentsServeLocalFileData, DocumentsServeLocalFileResponse, DocumentsToggleConfidentialData, DocumentsToggleConfidentialResponse, DocumentsDeleteDocumentData, DocumentsDeleteDocumentResponse, FeasibilityListSnapshotsData, FeasibilityListSnapshotsResponse, FeasibilitySaveSnapshotData, FeasibilitySaveSnapshotResponse, FeasibilityDeleteSnapshotData, FeasibilityDeleteSnapshotResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MasterDataListAllResponse, MasterDataCreateEntryData, MasterDataCreateEntryResponse, MasterDataListByCategoryData, MasterDataListByCategoryResponse, MasterDataUpdateEntryData, MasterDataUpdateEntryResponse, MasterDataDeleteEntryData, MasterDataDeleteEntryResponse, MilestonesListMilestonesData, MilestonesListMilestonesResponse, MilestonesCreateMilestoneData, MilestonesCreateMilestoneResponse, MilestonesUpdateMilestoneData, MilestonesUpdateMilestoneResponse, MilestonesDeleteMilestoneData, MilestonesDeleteMilestoneResponse, OwnersListOwnersData, OwnersListOwnersResponse, OwnersCreateOwnerData, OwnersCreateOwnerResponse, OwnersGetOwnerData, OwnersGetOwnerResponse, OwnersUpdateOwnerData, OwnersUpdateOwnerResponse, OwnersDeleteOwnerData, OwnersDeleteOwnerResponse, OwnersListContactsData, OwnersListContactsResponse, OwnersAddContactData, OwnersAddContactResponse, OwnersListInteractionsData, OwnersListInteractionsResponse, OwnersAddInteractionData, OwnersAddInteractionResponse, OwnersListOwnerProjectsData, OwnersListOwnerProjectsResponse, OwnersListOwnerDealsData, OwnersListOwnerDealsResponse, OwnersDeleteContactData, OwnersDeleteContactResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProjectsListProjectsData, ProjectsListProjectsResponse, ProjectsCreateProjectData, ProjectsCreateProjectResponse, ProjectsGetProjectData, ProjectsGetProjectResponse, ProjectsUpdateProjectData, ProjectsUpdateProjectResponse, ProjectsDeleteProjectData, ProjectsDeleteProjectResponse, ProjectsListProjectDealsData, ProjectsListProjectDealsResponse, ProjectsListProjectDocumentsData, ProjectsListProjectDocumentsResponse, ProjectsListProjectMilestonesData, ProjectsListProjectMilestonesResponse, SeedLoadSeedDataData, SeedLoadSeedDataResponse, SeedClearAllDataResponse, TasksListTasksData, TasksListTasksResponse, TasksCreateTaskData, TasksCreateTaskResponse, TasksBulkUpdateTasksData, TasksBulkUpdateTasksResponse, TasksBulkDeleteTasksData, TasksBulkDeleteTasksResponse, TasksUpdateTaskData, TasksUpdateTaskResponse, TasksDeleteTaskData, TasksDeleteTaskResponse, UsersListTeamResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class ActivitiesService {
     /**
@@ -255,6 +255,7 @@ export class DocumentsService {
      * @param data.limit
      * @param data.search
      * @param data.dealId
+     * @param data.projectId
      * @param data.docType
      * @param data.permission
      * @returns DocumentsPublic Successful Response
@@ -269,6 +270,7 @@ export class DocumentsService {
                 limit: data.limit,
                 search: data.search,
                 deal_id: data.dealId,
+                project_id: data.projectId,
                 doc_type: data.docType,
                 permission: data.permission
             },
@@ -1245,6 +1247,27 @@ export class ProjectsService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/projects/{id}/deals',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * List Project Documents
+     * All docs for this project — both project-linked and deal-linked where deal belongs to project.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static listProjectDocuments(data: ProjectsListProjectDocumentsData): CancelablePromise<ProjectsListProjectDocumentsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/projects/{id}/documents',
             path: {
                 id: data.id
             },

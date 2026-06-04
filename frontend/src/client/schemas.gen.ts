@@ -190,6 +190,16 @@ export const Body_documents_upload_documentSchema = {
             title: 'Deal Name',
             default: ''
         },
+        project_id: {
+            type: 'string',
+            title: 'Project Id',
+            default: ''
+        },
+        project_name: {
+            type: 'string',
+            title: 'Project Name',
+            default: ''
+        },
         version: {
             type: 'string',
             title: 'Version',
@@ -1157,6 +1167,30 @@ export const DocumentPublicSchema = {
                 }
             ],
             title: 'Deal Name'
+        },
+        project_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Project Id'
+        },
+        project_name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Project Name'
         },
         version: {
             anyOf: [

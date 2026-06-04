@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import useCustomToast from "@/hooks/useCustomToast"
-import { MD, useMasterData } from "@/hooks/useMasterData"
+import { MD, useMasterData, useStageProbabilities } from "@/hooks/useMasterData"
 import { AddProject } from "@/components/Projects/AddProject"
 
 type FormData = {
@@ -50,6 +50,7 @@ export function AddDeal({ defaultProjectId, trigger }: Props) {
 
   // Master data
   const STAGES = useMasterData(MD.DEAL_STAGE)
+  const { probabilityForStage } = useStageProbabilities()
   const RISKS = useMasterData(MD.DEAL_RISK)
   const DEAL_TYPES = useMasterData("deal_type")
   const FEASIBILITY = useMasterData(MD.FEASIBILITY_STATUS)
@@ -248,7 +249,12 @@ export function AddDeal({ defaultProjectId, trigger }: Props) {
 
               <div className="space-y-1.5">
                 <Label>Stage *</Label>
-                <Select defaultValue="Lead" onValueChange={(v) => setValue("stage_str", v)}>
+                <Select defaultValue="Lead" onValueChange={(v) => {
+                  setValue("stage_str", v)
+                  // Auto-fill probability from stage mapping
+                  const prob = probabilityForStage(v)
+                  if (prob !== undefined) setValue("probability", prob)
+                }}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {STAGES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
@@ -306,8 +312,12 @@ export function AddDeal({ defaultProjectId, trigger }: Props) {
 
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-1.5">
-                <Label>Probability %</Label>
+                <Label className="flex items-center gap-1.5">
+                  Probability %
+                  <span className="text-[9px] font-semibold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">AUTO</span>
+                </Label>
                 <Input {...register("probability")} type="number" min={0} max={100} placeholder="50" />
+                <p className="text-[10px] text-muted-foreground">Auto-set from stage. Override to mark as manual.</p>
               </div>
               <div className="space-y-1.5">
                 <Label>Pipeline Value (USD)</Label>

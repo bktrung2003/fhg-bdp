@@ -228,6 +228,7 @@ class DealBase(_EnumAsStr):
     opening_target: str | None = Field(default=None, max_length=20)
     keys: int | None = Field(default=None, ge=0)
     probability: int | None = Field(default=None, ge=0, le=100)
+    probability_source: str = Field(default="auto", max_length=10)  # "auto" or "manual"
     pipeline_value: int | None = Field(default=None, ge=0)
     fee_forecast: int | None = Field(default=None, ge=0)
     risk: DealRisk = Field(default=DealRisk.GREEN, sa_type=String(20))
@@ -241,6 +242,8 @@ class DealCreate(DealBase):
 
 class DealUpdate(SQLModel):
     name: str | None = Field(default=None, min_length=1, max_length=255)
+    project_id: uuid.UUID | None = None
+    deal_type: str | None = Field(default=None, max_length=20)
     country: str | None = Field(default=None, max_length=100)
     region: APACRegion | None = None
     city: str | None = Field(default=None, max_length=100)
@@ -250,6 +253,7 @@ class DealUpdate(SQLModel):
     opening_target: str | None = Field(default=None, max_length=20)
     keys: int | None = Field(default=None, ge=0)
     probability: int | None = Field(default=None, ge=0, le=100)
+    probability_source: str | None = Field(default=None, max_length=10)
     pipeline_value: int | None = Field(default=None, ge=0)
     fee_forecast: int | None = Field(default=None, ge=0)
     risk: DealRisk | None = None

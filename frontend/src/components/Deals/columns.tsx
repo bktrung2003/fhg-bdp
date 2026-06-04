@@ -193,10 +193,15 @@ export const dealColumns: ColumnDef<DealPublic>[] = [
     header: "Prob.",
     cell: ({ row }) => {
       const p = row.original.probability
+      const source = (row.original as any).probability_source
+      if (p == null) return <span className="text-muted-foreground">—</span>
       return (
-        <span className="text-sm font-medium tabular-nums">
-          {p != null ? `${p}%` : "—"}
-        </span>
+        <div className="flex items-center gap-1">
+          <span className="text-sm font-medium tabular-nums">{p}%</span>
+          {source === "manual" && (
+            <span title="Manually overridden" className="text-[9px] font-bold bg-amber-100 text-amber-700 px-1 rounded">M</span>
+          )}
+        </div>
       )
     },
   },

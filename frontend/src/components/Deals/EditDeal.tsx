@@ -14,7 +14,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import useCustomToast from "@/hooks/useCustomToast"
-import { MD, useMasterData } from "@/hooks/useMasterData"
+import { MD, useMasterData, useStageProbabilities } from "@/hooks/useMasterData"
 
 interface Props { deal: DealPublic }
 
@@ -27,6 +27,7 @@ export function EditDeal({ deal }: Props) {
   const DEAL_TYPES = useMasterData("deal_type")
   const BRANDS = useMasterData(MD.BRAND)
   const FEASIBILITY = useMasterData(MD.FEASIBILITY_STATUS)
+  const { probabilityForStage } = useStageProbabilities()
 
   // Project info (read-only, can change link)
   const { data: projectsData } = useQuery({
@@ -179,8 +180,31 @@ export function EditDeal({ deal }: Props) {
 
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-1.5">
-              <Label>Probability %</Label>
+              <div className="flex items-center justify-between">
+                <Label className="flex items-center gap-1.5">
+                  Probability %
+                  {(deal as any).probability_source === "manual" ? (
+                    <span className="text-[9px] font-semibold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">MANUAL</span>
+                  ) : (
+                    <span className="text-[9px] font-semibold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">AUTO</span>
+                  )}
+                </Label>
+                {(deal as any).probability_source === "manual" && (
+                  <button type="button"
+                    className="text-[10px] text-blue-600 hover:underline"
+                    onClick={() => {
+                      const auto = probabilityForStage(deal.stage ?? "")
+                      if (auto !== undefined) {
+                        setValue("probability", auto)
+                        setValue("probability_source" as any, "auto")
+                      }
+                    }}>
+                    Reset to auto ({probabilityForStage(deal.stage ?? "") ?? "—"}%)
+                  </button>
+                )}
+              </div>
               <Input {...register("probability")} type="number" min={0} max={100} />
+              <p className="text-[10px] text-muted-foreground">Changing this marks as manual. Stage changes won't auto-update.</p>
             </div>
             <div className="space-y-1.5">
               <Label>Pipeline Value</Label>

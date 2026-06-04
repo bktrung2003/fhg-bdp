@@ -15,7 +15,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import useCustomToast from "@/hooks/useCustomToast"
-import { MD, useMasterData } from "@/hooks/useMasterData"
+import { MD, useMasterData, useStageProbabilities } from "@/hooks/useMasterData"
 
 const STAGE_COLOR: Record<string, string> = {
   "Lead":           "bg-gray-100 text-gray-700",
@@ -38,6 +38,7 @@ export function StageChange({ deal, size = "icon" }: Props) {
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const STAGES = useMasterData(MD.DEAL_STAGE)
+  const { probabilityForStage } = useStageProbabilities()
 
   // Track new_stage as local state — cleaner than form integration
   const [newStage, setNewStage] = useState<string>("")
@@ -124,6 +125,28 @@ export function StageChange({ deal, size = "icon" }: Props) {
             {newStage}
           </span>
         </div>
+
+        {/* Suggested probability info */}
+        {(() => {
+          const suggestedProb = probabilityForStage(newStage)
+          if (suggestedProb === undefined) return null
+          const currentSource = (deal as any).probability_source ?? "auto"
+          return (
+            <div className="rounded-md bg-blue-50 border border-blue-200 px-3 py-2 text-xs">
+              {currentSource === "auto" ? (
+                <p className="text-blue-700">
+                  <span className="font-semibold">Probability will auto-update to {suggestedProb}%</span>
+                  {" "}— current source is auto.
+                </p>
+              ) : (
+                <p className="text-amber-700">
+                  <span className="font-semibold">Suggested: {suggestedProb}%</span>
+                  {" "}— but probability is manually set to {deal.probability ?? "—"}%, won't change.
+                </p>
+              )}
+            </div>
+          )
+        })()}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1.5">
