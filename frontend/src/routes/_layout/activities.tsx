@@ -335,33 +335,53 @@ function LogActivity() {
       <DialogTrigger asChild>
         <Button size="sm" variant="outline"><Plus className="h-4 w-4 mr-1" />Log Activity</Button>
       </DialogTrigger>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="max-w-lg">
         <DialogHeader><DialogTitle>Log Activity</DialogTitle></DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-          <div className="space-y-1.5">
-            <Label>Type</Label>
-            <Select defaultValue="Meeting" onValueChange={v => setValue("type_s", v)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{ACT_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5">
-            <Label>Date</Label>
-            <Input {...register("date", { required: true })} type="date" />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Related Deal</Label>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Step 1 — Related Deal */}
+          <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold">1</span>
+              <Label className="text-xs uppercase tracking-wider">Related Deal (optional)</Label>
+            </div>
             <Select value={dealId || "__none__"} onValueChange={handleDeal}>
               <SelectTrigger><SelectValue placeholder="Select deal..." /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__">— No deal —</SelectItem>
-                {deals.map(d => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}
+                <SelectItem value="__none__">— Standalone activity —</SelectItem>
+                {deals.map(d => <SelectItem key={d.id} value={d.id}>{d.name} · {d.country}</SelectItem>)}
               </SelectContent>
             </Select>
+            <p className="text-[10px] text-muted-foreground">
+              Linking to a Deal builds relationship history. Standalone activities = internal ops only.
+            </p>
           </div>
-          <div className="space-y-1.5">
-            <Label>Note</Label>
-            <Input {...register("note")} placeholder="What happened?" />
+
+          {/* Step 2 — Details */}
+          <div className="rounded-lg border p-3 space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold">2</span>
+              <Label className="text-xs uppercase tracking-wider">Activity Details</Label>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Type *</Label>
+                <Select defaultValue="Meeting" onValueChange={v => setValue("type_s", v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{ACT_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Date *</Label>
+                <Input {...register("date", { required: true })} type="date" />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Note</Label>
+              <Input {...register("note")} placeholder="What happened? Context, outcome, next signals..." autoFocus />
+              <p className="text-[10px] text-muted-foreground">
+                Tip: capture context (who/what/why) — this becomes relationship memory for the team.
+              </p>
+            </div>
           </div>
           <div className="flex justify-end gap-2 pt-1">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
