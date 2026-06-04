@@ -293,12 +293,15 @@ class DealPublic(DealBase):
     id: uuid.UUID
     deal_number: int | None = None
     bd_owner_id: uuid.UUID | None = None
-    bd_owner_name: str | None = None   # flattened for frontend
+    bd_owner_name: str | None = None
     created_by_id: uuid.UUID
-    days_in_stage: int = 0             # computed from stage_changed_at
+    days_in_stage: int = 0
     stage_changed_at: datetime | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
+    # Enriched from Project relationship
+    project_name: str | None = None
+    project_number: int | None = None
 
 
 class DealsPublic(SQLModel):

@@ -19,6 +19,8 @@ from app.models import (
     DealStage,
     DealUpdate,
     Message,
+    Owner,
+    Project,
     StageChangeRequest,
     UserRole,
 )
@@ -26,8 +28,8 @@ from app.models import (
 router = APIRouter(prefix="/deals", tags=["deals"])
 
 
-def _to_public(deal: Deal) -> DealPublic:
-    """Convert Deal DB model → DealPublic with computed fields."""
+def _to_public(deal: Deal, session: SessionDep | None = None) -> DealPublic:
+    """Convert Deal DB model → DealPublic with computed fields + project enrichment."""
     days = 0
     if deal.stage_changed_at:
         delta = datetime.now(timezone.utc) - deal.stage_changed_at.replace(
@@ -39,10 +41,21 @@ def _to_public(deal: Deal) -> DealPublic:
     if deal.bd_owner:
         bd_owner_name = deal.bd_owner.full_name or deal.bd_owner.email
 
+    # Enrich from Project if linked
+    project_name = None
+    project_number = None
+    if deal.project_id and session is not None:
+        project = session.get(Project, deal.project_id)
+        if project:
+            project_name = project.name
+            project_number = project.project_number
+
     return DealPublic(
         **deal.model_dump(),
         days_in_stage=days,
         bd_owner_name=bd_owner_name,
+        project_name=project_name,
+        project_number=project_number,
     )
 
 
@@ -103,7 +116,7 @@ def list_deals(
     statement = statement.order_by(col(Deal.updated_at).desc()).offset(skip).limit(limit)
     deals = session.exec(statement).all()
 
-    return DealsPublic(data=[_to_public(d) for d in deals], count=count)
+    return DealsPublic(data=[_to_public(d, session) for d in deals], count=count)
 
 
 # ── GET /deals/{id} ───────────────────────────────────────────────────────────
@@ -115,7 +128,7 @@ def get_deal(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> A
     if not deal:
         raise HTTPException(status_code=404, detail="Deal not found")
     _check_read_permission(current_user, deal)
-    return _to_public(deal)
+    return _to_public(deal, session)
 
 
 # ── POST /deals ───────────────────────────────────────────────────────────────
@@ -124,18 +137,35 @@ def get_deal(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> A
 def create_deal(
     *, session: SessionDep, current_user: CurrentUser, deal_in: DealCreate
 ) -> Any:
-    """Create a new deal."""
+    """Create a new deal. If linked to a Project, denormalize project fields."""
     now = datetime.now(timezone.utc)
-    deal = Deal.model_validate(
-        deal_in,
-        update={
-            "created_by_id": current_user.id,
-            "deal_number": _next_deal_number(session),
-            "stage_changed_at": now,
-            "created_at": now,
-            "updated_at": now,
-        },
-    )
+
+    # Build the deal payload from input
+    payload = deal_in.model_dump()
+
+    # If linked to a project, copy project's denormalized fields when deal doesn't override
+    if payload.get("project_id"):
+        project = session.get(Project, payload["project_id"])
+        if project:
+            # Copy from project unless explicitly overridden
+            for field in ("country", "region", "city", "project_type", "keys", "opening_target"):
+                if not payload.get(field):
+                    payload[field] = getattr(project, field, None)
+            # Owner name from project's owner
+            if not payload.get("owner_name") and project.owner_id:
+                owner = session.get(Owner, project.owner_id)
+                if owner:
+                    payload["owner_name"] = owner.company
+
+    payload.update({
+        "created_by_id": current_user.id,
+        "deal_number": _next_deal_number(session),
+        "stage_changed_at": now,
+        "created_at": now,
+        "updated_at": now,
+    })
+
+    deal = Deal(**payload)
     session.add(deal)
 
     # Audit log — creation
@@ -150,7 +180,7 @@ def create_deal(
     session.add(log)
     session.commit()
     session.refresh(deal)
-    return _to_public(deal)
+    return _to_public(deal, session)
 
 
 # ── PUT /deals/{id} ───────────────────────────────────────────────────────────
@@ -190,7 +220,7 @@ def update_deal(
     session.add(deal)
     session.commit()
     session.refresh(deal)
-    return _to_public(deal)
+    return _to_public(deal, session)
 
 
 # ── PATCH /deals/{id}/stage ───────────────────────────────────────────────────
@@ -237,7 +267,7 @@ def change_stage(
     )
     session.commit()
     session.refresh(deal)
-    return _to_public(deal)
+    return _to_public(deal, session)
 
 
 # ── GET /deals/{id}/audit ─────────────────────────────────────────────────────
