@@ -144,7 +144,7 @@ def create_deal(
         user_id=current_user.id,
         field="stage",
         old_value=None,
-        new_value=deal.stage.value,
+        new_value=deal.stage if isinstance(deal.stage, str) else deal.stage.value,
         note="Deal created",
     )
     session.add(log)
@@ -230,8 +230,8 @@ def change_stage(
             deal_id=deal.id,
             user_id=current_user.id,
             field="stage",
-            old_value=old_stage.value,
-            new_value=req.new_stage.value,
+            old_value=old_stage if isinstance(old_stage, str) else old_stage.value,
+            new_value=req.new_stage if isinstance(req.new_stage, str) else req.new_stage.value,
             note=req.note,
         )
     )
