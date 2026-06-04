@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select"
 import useCustomToast from "@/hooks/useCustomToast"
 import { MD, useMasterData } from "@/hooks/useMasterData"
+import { usePagination, PaginationControls } from "@/components/Common/Pagination"
 
 export const Route = createFileRoute("/_layout/activities")({
   component: ActivitiesPage,
@@ -412,6 +413,7 @@ function ActivitiesPage() {
   })
 
   const tasks = tasksData?.data ?? []
+  const { page, setPage, pageSize, setPageSize, totalPages, paginated, total } = usePagination(tasks, 10)
   const activities = actsData?.data ?? []
   const overdue = tasks.filter(t => t.is_overdue).length
 
@@ -460,8 +462,14 @@ function ActivitiesPage() {
                     ))}
                   </tr>
                 </thead>
-                <tbody>{tasks.map(t => <TaskRow key={t.id} task={t} />)}</tbody>
+                <tbody>{paginated.map(t => <TaskRow key={t.id} task={t} />)}</tbody>
               </table>
+            )}
+            {tasks.length > 0 && (
+              <PaginationControls
+                page={page} totalPages={totalPages} pageSize={pageSize} total={total}
+                onPageChange={setPage} onPageSizeChange={setPageSize}
+              />
             )}
           </div>
         </div>

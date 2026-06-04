@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import useCustomToast from "@/hooks/useCustomToast"
 import { MD, useMasterData } from "@/hooks/useMasterData"
+import { usePagination, PaginationControls } from "@/components/Common/Pagination"
 
 // ── Preview helper — fetch with auth then open blob ───────────────────────────
 async function previewDocument(url: string, filename: string) {
@@ -361,6 +362,7 @@ function DocumentsPage() {
   })
 
   const docs = data?.data ?? []
+  const { page, setPage, pageSize, setPageSize, totalPages, paginated, total } = usePagination(docs, 10)
   const total = data?.count ?? 0
   const hasFilters = search || typeFilter || permFilter
 
@@ -418,9 +420,15 @@ function DocumentsPage() {
               </tr>
             </thead>
             <tbody>
-              {docs.map(d => <DocRow key={d.id} doc={d} />)}
+              {paginated.map(d => <DocRow key={d.id} doc={d} />)}
             </tbody>
           </table>
+        )}
+        {docs.length > 0 && (
+          <PaginationControls
+            page={page} totalPages={totalPages} pageSize={pageSize} total={total}
+            onPageChange={setPage} onPageSizeChange={setPageSize}
+          />
         )}
       </div>
     </div>

@@ -55,6 +55,7 @@ export function DataTable<TData, TValue>({
     onColumnVisibilityChange: onColumnVisibilityChange as any,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    initialState: { pagination: { pageSize: 10, pageIndex: 0 } },
   })
 
   // Sync external visibility into table
@@ -124,7 +125,7 @@ export function DataTable<TData, TValue>({
         </TableBody>
       </Table>
 
-      {table.getPageCount() > 1 && (
+      {data.length > 0 && table.getPageCount() >= 1 && (
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 border-t bg-muted/20">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="text-sm text-muted-foreground">

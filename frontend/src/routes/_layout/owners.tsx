@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select"
 import useCustomToast from "@/hooks/useCustomToast"
 import { MD, useMasterData } from "@/hooks/useMasterData"
+import { usePagination, PaginationControls } from "@/components/Common/Pagination"
 
 export const Route = createFileRoute("/_layout/owners")({
   component: OwnersPage,
@@ -169,6 +170,9 @@ function OwnersPage() {
     return sortOwners(result, sortField, sortDir)
   }, [data, country, priority, financial, sortField, sortDir])
 
+  // Pagination
+  const { page, setPage, pageSize, setPageSize, totalPages, paginated, total } = usePagination(filtered, 10)
+
   const hasFilters = !!(search || country || type || priority || relationship || catchup || financial)
 
   function clearFilters() {
@@ -305,7 +309,7 @@ function OwnersPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((o) => (
+              {paginated.map((o) => (
                 <tr key={o.id}
                   className="border-b last:border-0 hover:bg-muted/30 cursor-pointer transition-colors"
                   onClick={() => navigate({ to: "/owners/$ownerId" as any, params: { ownerId: o.id } })}
@@ -362,6 +366,10 @@ function OwnersPage() {
               ))}
             </tbody>
           </table>
+          <PaginationControls
+            page={page} totalPages={totalPages} pageSize={pageSize} total={total}
+            onPageChange={setPage} onPageSizeChange={setPageSize}
+          />
         </div>
       )}
     </div>

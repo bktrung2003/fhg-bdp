@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select"
 import useCustomToast from "@/hooks/useCustomToast"
 import { MD, useMasterData } from "@/hooks/useMasterData"
+import { usePagination, PaginationControls } from "@/components/Common/Pagination"
 
 export const Route = createFileRoute("/_layout/preopening")({
   component: PreopeningPage,
@@ -195,6 +196,7 @@ function PreopeningPage() {
   })
 
   const milestones = data?.data ?? []
+  const { page, setPage, pageSize, setPageSize, totalPages, paginated, total } = usePagination(milestones, 10)
   const total = data?.count ?? 0
   const redCount = milestones.filter(m => m.status === "Red").length
   const amberCount = milestones.filter(m => m.status === "Amber").length
@@ -295,7 +297,7 @@ function PreopeningPage() {
                 </tr>
               </thead>
               <tbody>
-                {milestones.map(m => (
+                {paginated.map(m => (
                   <tr key={m.id} className={`border-b last:border-0 hover:bg-muted/20 transition-colors ${m.status === "Red" ? "bg-red-50/30" : m.status === "Amber" ? "bg-amber-50/20" : ""}`}>
                     <td className="py-2.5 pr-3 pl-3 text-xs text-muted-foreground">{(m as any).project_name || m.deal_name || "—"}</td>
                     <td className="py-2.5 pr-3 font-medium">{m.name}</td>
@@ -321,6 +323,12 @@ function PreopeningPage() {
               </tbody>
             </table>
           </div>
+        )}
+        {milestones.length > 0 && (
+          <PaginationControls
+            page={page} totalPages={totalPages} pageSize={pageSize} total={total}
+            onPageChange={setPage} onPageSizeChange={setPageSize}
+          />
         )}
       </div>
     </div>

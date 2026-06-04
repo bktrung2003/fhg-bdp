@@ -8,6 +8,7 @@ import { AddProject } from "@/components/Projects/AddProject"
 import { EditProject } from "@/components/Projects/EditProject"
 import { Button } from "@/components/ui/button"
 import { Pencil } from "lucide-react"
+import { usePagination, PaginationControls } from "@/components/Common/Pagination"
 import { Input } from "@/components/ui/input"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -48,6 +49,7 @@ function ProjectsPage() {
   })
 
   const projects = data?.data ?? []
+  const { page, setPage, pageSize, setPageSize, totalPages, paginated, total } = usePagination(projects, 10)
   const total = data?.count ?? 0
 
   const delMut = useMutation({
@@ -107,7 +109,7 @@ function ProjectsPage() {
               </tr>
             </thead>
             <tbody>
-              {projects.map((p: ProjectPublic) => (
+              {paginated.map((p: ProjectPublic) => (
                 <tr
                   key={p.id}
                   className="border-b last:border-0 hover:bg-muted/20 cursor-pointer transition-colors"
@@ -153,6 +155,10 @@ function ProjectsPage() {
               ))}
             </tbody>
           </table>
+          <PaginationControls
+            page={page} totalPages={totalPages} pageSize={pageSize} total={total}
+            onPageChange={setPage} onPageSizeChange={setPageSize}
+          />
         </div>
       )}
     </div>
