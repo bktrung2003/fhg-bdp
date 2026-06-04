@@ -28,6 +28,7 @@ export function EditOwner({ owner }: Props) {
   const TYPES = useMasterData(MD.OWNER_TYPE)
   const RELATIONSHIPS = useMasterData(MD.OWNER_RELATIONSHIP)
   const CATCHUPS = useMasterData(MD.CATCHUP_STATUS)
+  const COUNTRIES = useMasterData(MD.COUNTRY)
 
   const { register, handleSubmit, reset, setValue, formState: { isSubmitting } } =
     useForm<OwnerUpdate>()
@@ -70,7 +71,10 @@ export function EditOwner({ owner }: Props) {
             </div>
             <div className="space-y-1.5">
               <Label>Country</Label>
-              <Input {...register("country")} />
+              <Select defaultValue={owner.country ?? ""} onValueChange={v => setValue("country", v)}>
+                <SelectTrigger><SelectValue placeholder="Select country..." /></SelectTrigger>
+                <SelectContent>{COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <Label>Owner Type</Label>

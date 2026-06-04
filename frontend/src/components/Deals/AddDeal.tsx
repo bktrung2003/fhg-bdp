@@ -42,6 +42,7 @@ export function AddDeal() {
   const RISKS = useMasterData(MD.DEAL_RISK)
   const PROJECT_TYPES = useMasterData(MD.PROJECT_TYPE)
   const REGIONS = useMasterData(MD.REGION)
+  const COUNTRIES = useMasterData(MD.COUNTRY)
   const OPENING_TARGETS = useMasterData(MD.OPENING_TARGET)
   const BRANDS = useMasterData(MD.BRAND)
 
@@ -130,10 +131,13 @@ export function AddDeal() {
 
             <div className="space-y-1.5">
               <Label>Country *</Label>
-              <Input
-                {...register("country", { required: "Required" })}
-                placeholder="e.g. Vietnam, Thailand, Indonesia"
-              />
+              <Select onValueChange={(v) => setValue("country", v, { shouldValidate: true })}>
+                <SelectTrigger><SelectValue placeholder="Select country..." /></SelectTrigger>
+                <SelectContent>
+                  {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <input type="hidden" {...register("country", { required: "Required" })} />
               {errors.country && <p className="text-xs text-red-500">{errors.country.message}</p>}
             </div>
 

@@ -19,6 +19,7 @@ export function useMasterData(category: string): string[] {
  * Master data category keys — typed for autocomplete.
  */
 export const MD = {
+  COUNTRY: "country",
   DEAL_STAGE: "deal_stage",
   DEAL_RISK: "deal_risk",
   FEASIBILITY_STATUS: "feasibility_status",

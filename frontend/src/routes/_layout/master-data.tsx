@@ -18,6 +18,7 @@ export const Route = createFileRoute("/_layout/master-data")({
 })
 
 const CATEGORY_LABELS: Record<string, string> = {
+  country: "Countries",
   deal_stage: "Deal Stages",
   deal_risk: "Deal Risk Levels",
   feasibility_status: "Feasibility Status",

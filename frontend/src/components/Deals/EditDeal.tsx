@@ -26,6 +26,7 @@ export function EditDeal({ deal }: Props) {
   const RISKS = useMasterData(MD.DEAL_RISK)
   const PROJECT_TYPES = useMasterData(MD.PROJECT_TYPE)
   const REGIONS = useMasterData(MD.REGION)
+  const COUNTRIES = useMasterData(MD.COUNTRY)
   const OPENING_TARGETS = useMasterData(MD.OPENING_TARGET)
   const BRANDS = useMasterData(MD.BRAND)
   const FEASIBILITY = useMasterData(MD.FEASIBILITY_STATUS)
@@ -100,7 +101,12 @@ export function EditDeal({ deal }: Props) {
             </div>
             <div className="space-y-1.5">
               <Label>Country</Label>
-              <Input {...register("country")} placeholder="e.g. Vietnam" />
+              <Select defaultValue={deal.country ?? ""} onValueChange={(v) => setValue("country", v)}>
+                <SelectTrigger><SelectValue placeholder="Select country..." /></SelectTrigger>
+                <SelectContent>
+                  {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <Label>City</Label>

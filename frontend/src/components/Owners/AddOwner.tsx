@@ -26,6 +26,7 @@ export function AddOwner() {
   const TYPES = useMasterData(MD.OWNER_TYPE)
   const RELATIONSHIPS = useMasterData(MD.OWNER_RELATIONSHIP)
   const CATCHUPS = useMasterData(MD.CATCHUP_STATUS)
+  const COUNTRIES = useMasterData(MD.COUNTRY)
 
   const { register, handleSubmit, reset, setValue, formState: { isSubmitting } } =
     useForm<OwnerCreate & { owner_type_s: string; priority_s: string; relationship_s: string; catchup_s: string; fh_s: string }>({
@@ -69,7 +70,11 @@ export function AddOwner() {
             </div>
             <div className="space-y-1.5">
               <Label>Country *</Label>
-              <Input {...register("country", { required: true })} placeholder="e.g. Vietnam" />
+              <Select onValueChange={v => setValue("country", v, { shouldValidate: true })}>
+                <SelectTrigger><SelectValue placeholder="Select country..." /></SelectTrigger>
+                <SelectContent>{COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+              </Select>
+              <input type="hidden" {...register("country", { required: true })} />
             </div>
             <div className="space-y-1.5">
               <Label>Owner Type</Label>
