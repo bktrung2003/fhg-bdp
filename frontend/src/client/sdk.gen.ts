@@ -110,7 +110,7 @@ export class DealsService {
     
     /**
      * Create Deal
-     * Create a new deal.
+     * Create a new deal. If linked to a Project, denormalize project fields.
      * @param data The data for the request.
      * @param data.requestBody
      * @returns DealPublic Successful Response

@@ -115,6 +115,8 @@ export type DealPublic = {
     stage_changed_at?: (string | null);
     created_at?: (string | null);
     updated_at?: (string | null);
+    project_name?: (string | null);
+    project_number?: (number | null);
 };
 
 export type DealRisk = 'Green' | 'Amber' | 'Red';

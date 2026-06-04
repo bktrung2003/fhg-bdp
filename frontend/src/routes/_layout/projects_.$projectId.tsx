@@ -5,7 +5,7 @@ import { ArrowLeft, Building2, MapPin, Bed } from "lucide-react"
 import { ProjectsService, type DealPublic } from "@/client"
 import { AddDeal } from "@/components/Deals/AddDeal"
 import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
+import { Plus, ExternalLink } from "lucide-react"
 
 export const Route = createFileRoute("/_layout/projects_/$projectId")({
   component: ProjectWorkspace,
@@ -109,6 +109,83 @@ function ProjectWorkspace() {
           </div>
         ))}
       </div>
+
+      {/* Location card */}
+      {(project.location_detail || project.google_maps_url || project.region) && (
+        <div className="rounded-lg border bg-card p-4">
+          <h3 className="font-semibold text-sm mb-3">Location</h3>
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            {project.region && (
+              <div>
+                <p className="text-xs text-muted-foreground">Region</p>
+                <p className="font-medium">{project.region}</p>
+              </div>
+            )}
+            {project.location_detail && (
+              <div className="col-span-2">
+                <p className="text-xs text-muted-foreground">Address</p>
+                <p>{project.location_detail}</p>
+              </div>
+            )}
+            {project.google_maps_url && (
+              <div className="col-span-2">
+                <a href={project.google_maps_url} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-primary hover:underline text-sm">
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  View on Google Maps
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Property details */}
+      {(project.segment || project.room_mix || project.facilities) && (
+        <div className="rounded-lg border bg-card p-4">
+          <h3 className="font-semibold text-sm mb-3">Property Details</h3>
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            {project.segment && (
+              <div>
+                <p className="text-xs text-muted-foreground">Segment</p>
+                <p className="font-medium">{project.segment}</p>
+              </div>
+            )}
+            {project.room_mix && (
+              <div className="col-span-2">
+                <p className="text-xs text-muted-foreground">Room Mix</p>
+                <p>{project.room_mix}</p>
+              </div>
+            )}
+            {project.facilities && (
+              <div className="col-span-2">
+                <p className="text-xs text-muted-foreground">Facilities</p>
+                <p>{project.facilities}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Status pillars */}
+      {(project.construction_status || project.design_status || project.legal_status || project.funding_status) && (
+        <div className="rounded-lg border bg-card p-4">
+          <h3 className="font-semibold text-sm mb-3">Development Status</h3>
+          <div className="grid grid-cols-4 gap-3">
+            {[
+              { label: "Construction", value: project.construction_status },
+              { label: "Design", value: project.design_status },
+              { label: "Legal", value: project.legal_status },
+              { label: "Funding", value: project.funding_status },
+            ].map(s => (
+              <div key={s.label} className="rounded-md bg-muted/40 border p-3">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{s.label}</p>
+                <p className="text-sm font-semibold mt-1">{s.value ?? "—"}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Description */}
       {project.description && (

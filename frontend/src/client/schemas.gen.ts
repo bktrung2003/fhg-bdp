@@ -781,6 +781,28 @@ export const DealPublicSchema = {
                 }
             ],
             title: 'Updated At'
+        },
+        project_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Project Name'
+        },
+        project_number: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Project Number'
         }
     },
     type: 'object',

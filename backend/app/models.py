@@ -879,14 +879,28 @@ class ProjectStatus(str, Enum):
 class ProjectBase(_EnumAsStr):
     name: str = Field(min_length=1, max_length=255)
     owner_id: uuid.UUID | None = Field(default=None, foreign_key="owner.id", ondelete="SET NULL")
+    # Location
     country: str = Field(max_length=100)
     region: APACRegion | None = Field(default=None, sa_type=String(50))
     city: str | None = Field(default=None, max_length=100)
+    location_detail: str | None = Field(default=None, max_length=500)  # Free text address
+    google_maps_url: str | None = Field(default=None, max_length=500)
+    # Physical
     project_type: ProjectType | None = Field(default=None, sa_type=String(80))
+    segment: str | None = Field(default=None, max_length=50)            # Luxury, Upscale, Midscale...
     keys: int | None = Field(default=None, ge=0)
-    opening_target: str | None = Field(default=None, max_length=20)
+    room_mix: str | None = Field(default=None, max_length=500)          # e.g. "180 rooms + 40 suites"
+    facilities: str | None = Field(default=None, max_length=1000)       # F&B, spa, ballroom...
+    # Status pillars
     status: ProjectStatus = Field(default=ProjectStatus.PROSPECT, sa_type=String(20))
-    description: str | None = Field(default=None, max_length=1000)
+    construction_status: str | None = Field(default=None, max_length=50)
+    design_status: str | None = Field(default=None, max_length=50)
+    legal_status: str | None = Field(default=None, max_length=50)
+    funding_status: str | None = Field(default=None, max_length=50)
+    # Timing
+    opening_target: str | None = Field(default=None, max_length=20)
+    # Notes
+    description: str | None = Field(default=None, max_length=2000)
 
 
 class ProjectCreate(ProjectBase):
@@ -899,11 +913,20 @@ class ProjectUpdate(SQLModel):
     country: str | None = Field(default=None, max_length=100)
     region: APACRegion | None = None
     city: str | None = Field(default=None, max_length=100)
+    location_detail: str | None = Field(default=None, max_length=500)
+    google_maps_url: str | None = Field(default=None, max_length=500)
     project_type: ProjectType | None = None
+    segment: str | None = Field(default=None, max_length=50)
     keys: int | None = Field(default=None, ge=0)
-    opening_target: str | None = Field(default=None, max_length=20)
+    room_mix: str | None = Field(default=None, max_length=500)
+    facilities: str | None = Field(default=None, max_length=1000)
     status: ProjectStatus | None = None
-    description: str | None = Field(default=None, max_length=1000)
+    construction_status: str | None = Field(default=None, max_length=50)
+    design_status: str | None = Field(default=None, max_length=50)
+    legal_status: str | None = Field(default=None, max_length=50)
+    funding_status: str | None = Field(default=None, max_length=50)
+    opening_target: str | None = Field(default=None, max_length=20)
+    description: str | None = Field(default=None, max_length=2000)
 
 
 class Project(ProjectBase, table=True):

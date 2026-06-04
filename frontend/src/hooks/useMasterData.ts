@@ -20,6 +20,12 @@ export function useMasterData(category: string): string[] {
  */
 export const MD = {
   COUNTRY: "country",
+  SEGMENT: "segment",
+  CONSTRUCTION_STATUS: "construction_status",
+  DESIGN_STATUS: "design_status",
+  LEGAL_STATUS: "legal_status",
+  FUNDING_STATUS: "funding_status",
+  PROJECT_STATUS: "project_status",
   DEAL_STAGE: "deal_stage",
   DEAL_RISK: "deal_risk",
   FEASIBILITY_STATUS: "feasibility_status",
