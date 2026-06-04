@@ -196,8 +196,8 @@ function PreopeningPage() {
   })
 
   const milestones = data?.data ?? []
-  const { page, setPage, pageSize, setPageSize, totalPages, paginated, total } = usePagination(milestones, 10)
   const total = data?.count ?? 0
+  const { page, setPage, pageSize, setPageSize, totalPages, paginated } = usePagination(milestones, 10)
   const redCount = milestones.filter(m => m.status === "Red").length
   const amberCount = milestones.filter(m => m.status === "Amber").length
   const greenCount = milestones.filter(m => m.status === "Green").length

@@ -49,8 +49,8 @@ function ProjectsPage() {
   })
 
   const projects = data?.data ?? []
-  const { page, setPage, pageSize, setPageSize, totalPages, paginated, total } = usePagination(projects, 10)
   const total = data?.count ?? 0
+  const { page, setPage, pageSize, setPageSize, totalPages, paginated } = usePagination(projects, 10)
 
   const delMut = useMutation({
     mutationFn: (id: string) => ProjectsService.deleteProject({ id }),

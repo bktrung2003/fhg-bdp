@@ -362,8 +362,8 @@ function DocumentsPage() {
   })
 
   const docs = data?.data ?? []
-  const { page, setPage, pageSize, setPageSize, totalPages, paginated, total } = usePagination(docs, 10)
   const total = data?.count ?? 0
+  const { page, setPage, pageSize, setPageSize, totalPages, paginated } = usePagination(docs, 10)
   const hasFilters = search || typeFilter || permFilter
 
   return (
