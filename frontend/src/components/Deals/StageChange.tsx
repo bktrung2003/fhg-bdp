@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 import { ArrowRight } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 import { DealsService, type DealPublic, type StageChangeRequest } from "@/client"
 import { Button } from "@/components/ui/button"
@@ -29,34 +29,60 @@ const STAGE_COLOR: Record<string, string> = {
   "Lost":           "bg-red-100 text-red-600",
 }
 
-interface FormData { new_stage: string; note: string; next_action: string }
+interface FormFields { note: string; next_action: string }
 interface Props { deal: DealPublic }
 
 export function StageChange({ deal }: Props) {
   const [open, setOpen] = useState(false)
   const queryClient = useQueryClient()
-  const { showSuccessToast } = useCustomToast()
+  const { showSuccessToast, showErrorToast } = useCustomToast()
   const STAGES = useMasterData(MD.DEAL_STAGE)
 
-  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } =
-    useForm<FormData>({ defaultValues: { new_stage: deal.stage ?? "Lead" } })
+  // Track new_stage as local state — cleaner than form integration
+  const [newStage, setNewStage] = useState<string>(deal.stage ?? "Lead")
 
-  const selectedStage = watch("new_stage")
+  // Reset when dialog opens
+  useEffect(() => {
+    if (open) {
+      // pick first non-current stage as default
+      const firstOther = STAGES.find(s => s !== deal.stage) ?? STAGES[0] ?? "Lead"
+      setNewStage(firstOther)
+    }
+  }, [open, deal.stage, STAGES])
+
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormFields>()
 
   const mutation = useMutation({
     mutationFn: (data: StageChangeRequest) =>
       DealsService.changeStage({ id: deal.id, requestBody: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["deals"] })
-      showSuccessToast(`Stage moved to "${selectedStage}".`)
+      queryClient.invalidateQueries({ queryKey: ["deal", deal.id] })
+      queryClient.invalidateQueries({ queryKey: ["deal-audit", deal.id] })
+      showSuccessToast(`Stage moved to "${newStage}".`)
       reset()
       setOpen(false)
     },
+    onError: (err: any) => {
+      const detail =
+        err?.body?.detail ??
+        err?.message ??
+        "Failed to change stage."
+      showErrorToast(typeof detail === "string" ? detail : "Failed to change stage.")
+    },
   })
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = (data: FormFields) => {
+    if (!newStage) {
+      showErrorToast("Please select a new stage.")
+      return
+    }
+    if (newStage === deal.stage) {
+      showErrorToast("Deal is already in this stage.")
+      return
+    }
     mutation.mutate({
-      new_stage: data.new_stage as StageChangeRequest["new_stage"],
+      new_stage: newStage as StageChangeRequest["new_stage"],
       note: data.note,
       next_action: data.next_action || undefined,
     })
@@ -65,7 +91,7 @@ export function StageChange({ deal }: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Change stage">
           <ArrowRight className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>
@@ -80,18 +106,15 @@ export function StageChange({ deal }: Props) {
             {deal.stage}
           </span>
           <ArrowRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STAGE_COLOR[selectedStage] ?? "bg-gray-100 text-gray-600"}`}>
-            {selectedStage}
+          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STAGE_COLOR[newStage] ?? "bg-gray-100 text-gray-600"}`}>
+            {newStage}
           </span>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1.5">
             <Label>New Stage</Label>
-            <Select
-              defaultValue={deal.stage ?? "Lead"}
-              onValueChange={(v) => setValue("new_stage", v)}
-            >
+            <Select value={newStage} onValueChange={setNewStage}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {STAGES.filter(s => s !== deal.stage).map(s => (
@@ -102,24 +125,18 @@ export function StageChange({ deal }: Props) {
           </div>
 
           <div className="space-y-1.5">
-            <Label>
-              Reason / Note <span className="text-red-500">*</span>
-            </Label>
+            <Label>Reason / Note <span className="text-red-500">*</span></Label>
             <Input
               {...register("note", { required: "A note is required for stage changes." })}
               placeholder="Why is this deal moving stage?"
+              autoFocus
             />
-            {errors.note && (
-              <p className="text-xs text-red-500">{errors.note.message}</p>
-            )}
+            {errors.note && <p className="text-xs text-red-500">{errors.note.message}</p>}
           </div>
 
           <div className="space-y-1.5">
             <Label>Next Action</Label>
-            <Input
-              {...register("next_action")}
-              placeholder="What happens next?"
-            />
+            <Input {...register("next_action")} placeholder="What happens next?" />
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
