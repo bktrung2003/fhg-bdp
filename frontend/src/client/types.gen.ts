@@ -864,6 +864,8 @@ export type TasksDeleteTaskData = {
 
 export type TasksDeleteTaskResponse = (Message);
 
+export type UsersListTeamResponse = (UsersPublic);
+
 export type UsersReadUsersData = {
     limit?: number;
     skip?: number;

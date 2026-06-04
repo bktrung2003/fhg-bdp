@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { Building2, Search, X } from "lucide-react"
+import { Building2, Kanban, Search, Table as TableIcon, X } from "lucide-react"
 import { useState } from "react"
 
 import { DealsService, type DealPublic, type DealRisk, type DealStage } from "@/client"
 import { AddDeal } from "@/components/Deals/AddDeal"
 import { dealColumns } from "@/components/Deals/columns"
+import { DealKanban } from "@/components/Deals/DealKanban"
 import { DataTable } from "@/components/Common/DataTable"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -35,6 +36,12 @@ function DealsPage() {
   const [search, setSearch] = useState("")
   const [stage, setStage] = useState<string>("")
   const [risk, setRisk] = useState<string>("")
+  const [view, setView] = useState<"table" | "kanban">(() =>
+    (localStorage.getItem("deals-view") as "table" | "kanban") ?? "table"
+  )
+  const switchView = (v: "table" | "kanban") => {
+    setView(v); localStorage.setItem("deals-view", v)
+  }
 
   const { data, isLoading } = useQuery({
     queryKey: ["deals", { search, stage, risk }],
@@ -68,7 +75,28 @@ function DealsPage() {
             {isLoading ? "Loading..." : `${total} deal${total !== 1 ? "s" : ""} found`}
           </p>
         </div>
-        <AddDeal />
+        <div className="flex items-center gap-2">
+          {/* View toggle */}
+          <div className="inline-flex rounded-md border bg-card p-0.5">
+            <Button
+              variant={view === "table" ? "default" : "ghost"}
+              size="sm"
+              className="h-7 px-2.5"
+              onClick={() => switchView("table")}
+            >
+              <TableIcon className="h-3.5 w-3.5 mr-1" />Table
+            </Button>
+            <Button
+              variant={view === "kanban" ? "default" : "ghost"}
+              size="sm"
+              className="h-7 px-2.5"
+              onClick={() => switchView("kanban")}
+            >
+              <Kanban className="h-3.5 w-3.5 mr-1" />Kanban
+            </Button>
+          </div>
+          <AddDeal />
+        </div>
       </div>
 
       {/* Filters */}
@@ -113,7 +141,7 @@ function DealsPage() {
         )}
       </div>
 
-      {/* Table */}
+      {/* Content */}
       {isLoading ? (
         <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">
           Loading deals...
@@ -130,6 +158,8 @@ function DealsPage() {
             </p>
           </div>
         </div>
+      ) : view === "kanban" ? (
+        <DealKanban deals={deals} stages={STAGES} />
       ) : (
         <div className="rounded-lg border bg-card overflow-x-auto w-full">
           <DataTable columns={dealColumns} data={deals} />
