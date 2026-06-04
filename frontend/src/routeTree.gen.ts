@@ -19,11 +19,9 @@ import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
 import { Route as LayoutProjectsRouteImport } from './routes/_layout/projects'
 import { Route as LayoutPreopeningRouteImport } from './routes/_layout/preopening'
 import { Route as LayoutOwnersRouteImport } from './routes/_layout/owners'
-import { Route as LayoutMasterDataRouteImport } from './routes/_layout/master-data'
 import { Route as LayoutFeasibilityRouteImport } from './routes/_layout/feasibility'
 import { Route as LayoutDocumentsRouteImport } from './routes/_layout/documents'
 import { Route as LayoutDealsRouteImport } from './routes/_layout/deals'
-import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
 import { Route as LayoutActivitiesRouteImport } from './routes/_layout/activities'
 import { Route as LayoutProjectsProjectIdRouteImport } from './routes/_layout/projects_.$projectId'
 import { Route as LayoutOwnersOwnerIdRouteImport } from './routes/_layout/owners_.$ownerId'
@@ -78,11 +76,6 @@ const LayoutOwnersRoute = LayoutOwnersRouteImport.update({
   path: '/owners',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutMasterDataRoute = LayoutMasterDataRouteImport.update({
-  id: '/master-data',
-  path: '/master-data',
-  getParentRoute: () => LayoutRoute,
-} as any)
 const LayoutFeasibilityRoute = LayoutFeasibilityRouteImport.update({
   id: '/feasibility',
   path: '/feasibility',
@@ -96,11 +89,6 @@ const LayoutDocumentsRoute = LayoutDocumentsRouteImport.update({
 const LayoutDealsRoute = LayoutDealsRouteImport.update({
   id: '/deals',
   path: '/deals',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutAdminRoute = LayoutAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutActivitiesRoute = LayoutActivitiesRouteImport.update({
@@ -131,11 +119,9 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/activities': typeof LayoutActivitiesRoute
-  '/admin': typeof LayoutAdminRoute
   '/deals': typeof LayoutDealsRoute
   '/documents': typeof LayoutDocumentsRoute
   '/feasibility': typeof LayoutFeasibilityRoute
-  '/master-data': typeof LayoutMasterDataRoute
   '/owners': typeof LayoutOwnersRoute
   '/preopening': typeof LayoutPreopeningRoute
   '/projects': typeof LayoutProjectsRoute
@@ -150,11 +136,9 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/activities': typeof LayoutActivitiesRoute
-  '/admin': typeof LayoutAdminRoute
   '/deals': typeof LayoutDealsRoute
   '/documents': typeof LayoutDocumentsRoute
   '/feasibility': typeof LayoutFeasibilityRoute
-  '/master-data': typeof LayoutMasterDataRoute
   '/owners': typeof LayoutOwnersRoute
   '/preopening': typeof LayoutPreopeningRoute
   '/projects': typeof LayoutProjectsRoute
@@ -172,11 +156,9 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/_layout/activities': typeof LayoutActivitiesRoute
-  '/_layout/admin': typeof LayoutAdminRoute
   '/_layout/deals': typeof LayoutDealsRoute
   '/_layout/documents': typeof LayoutDocumentsRoute
   '/_layout/feasibility': typeof LayoutFeasibilityRoute
-  '/_layout/master-data': typeof LayoutMasterDataRoute
   '/_layout/owners': typeof LayoutOwnersRoute
   '/_layout/preopening': typeof LayoutPreopeningRoute
   '/_layout/projects': typeof LayoutProjectsRoute
@@ -195,11 +177,9 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/activities'
-    | '/admin'
     | '/deals'
     | '/documents'
     | '/feasibility'
-    | '/master-data'
     | '/owners'
     | '/preopening'
     | '/projects'
@@ -214,11 +194,9 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/activities'
-    | '/admin'
     | '/deals'
     | '/documents'
     | '/feasibility'
-    | '/master-data'
     | '/owners'
     | '/preopening'
     | '/projects'
@@ -235,11 +213,9 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/_layout/activities'
-    | '/_layout/admin'
     | '/_layout/deals'
     | '/_layout/documents'
     | '/_layout/feasibility'
-    | '/_layout/master-data'
     | '/_layout/owners'
     | '/_layout/preopening'
     | '/_layout/projects'
@@ -330,13 +306,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutOwnersRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/master-data': {
-      id: '/_layout/master-data'
-      path: '/master-data'
-      fullPath: '/master-data'
-      preLoaderRoute: typeof LayoutMasterDataRouteImport
-      parentRoute: typeof LayoutRoute
-    }
     '/_layout/feasibility': {
       id: '/_layout/feasibility'
       path: '/feasibility'
@@ -356,13 +325,6 @@ declare module '@tanstack/react-router' {
       path: '/deals'
       fullPath: '/deals'
       preLoaderRoute: typeof LayoutDealsRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/admin': {
-      id: '/_layout/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof LayoutAdminRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/activities': {
@@ -398,11 +360,9 @@ declare module '@tanstack/react-router' {
 
 interface LayoutRouteChildren {
   LayoutActivitiesRoute: typeof LayoutActivitiesRoute
-  LayoutAdminRoute: typeof LayoutAdminRoute
   LayoutDealsRoute: typeof LayoutDealsRoute
   LayoutDocumentsRoute: typeof LayoutDocumentsRoute
   LayoutFeasibilityRoute: typeof LayoutFeasibilityRoute
-  LayoutMasterDataRoute: typeof LayoutMasterDataRoute
   LayoutOwnersRoute: typeof LayoutOwnersRoute
   LayoutPreopeningRoute: typeof LayoutPreopeningRoute
   LayoutProjectsRoute: typeof LayoutProjectsRoute
@@ -415,11 +375,9 @@ interface LayoutRouteChildren {
 
 const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutActivitiesRoute: LayoutActivitiesRoute,
-  LayoutAdminRoute: LayoutAdminRoute,
   LayoutDealsRoute: LayoutDealsRoute,
   LayoutDocumentsRoute: LayoutDocumentsRoute,
   LayoutFeasibilityRoute: LayoutFeasibilityRoute,
-  LayoutMasterDataRoute: LayoutMasterDataRoute,
   LayoutOwnersRoute: LayoutOwnersRoute,
   LayoutPreopeningRoute: LayoutPreopeningRoute,
   LayoutProjectsRoute: LayoutProjectsRoute,
