@@ -19,6 +19,7 @@ def list_milestones(
     session: SessionDep, current_user: CurrentUser,
     skip: int = 0, limit: int = Query(default=200, le=500),
     search: str | None = None,
+    project_id: uuid.UUID | None = None,
     deal_id: uuid.UUID | None = None,
     department: MilestoneDept | None = None,
     status: MilestoneGate | None = None,
@@ -26,6 +27,8 @@ def list_milestones(
     stmt = select(Milestone)
     if search:
         stmt = stmt.where(col(Milestone.name).ilike(f"%{search}%"))
+    if project_id:
+        stmt = stmt.where(Milestone.project_id == project_id)
     if deal_id:
         stmt = stmt.where(Milestone.deal_id == deal_id)
     if department:

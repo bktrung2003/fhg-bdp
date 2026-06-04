@@ -7,7 +7,7 @@ from sqlmodel import col, func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import (
-    Deal, Message, Owner, Project, ProjectCreate, ProjectPublic,
+    Deal, Message, Milestone, Owner, Project, ProjectCreate, ProjectPublic,
     ProjectsPublic, ProjectStatus, ProjectUpdate,
 )
 
@@ -157,3 +157,20 @@ def list_project_deals(
         select(Deal).where(Deal.project_id == id).order_by(col(Deal.updated_at).desc())
     ).all()
     return deals
+
+
+# ── GET /projects/{id}/milestones ─────────────────────────────────────────────
+
+@router.get("/{id}/milestones")
+def list_project_milestones(
+    session: SessionDep, current_user: CurrentUser, id: uuid.UUID
+) -> Any:
+    """Pre-opening milestones for this project (asset-level governance)."""
+    if not session.get(Project, id):
+        raise HTTPException(status_code=404, detail="Project not found")
+    milestones = session.exec(
+        select(Milestone)
+        .where(Milestone.project_id == id)
+        .order_by(col(Milestone.due_date).asc().nullslast())
+    ).all()
+    return milestones

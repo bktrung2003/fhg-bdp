@@ -767,7 +767,9 @@ class MilestoneDept(str, Enum):
 
 class MilestoneBase(_EnumAsStr):
     name: str = Field(min_length=1, max_length=255)
-    deal_id: uuid.UUID | None = Field(default=None)
+    project_id: uuid.UUID | None = Field(default=None)        # PRIMARY link
+    project_name: str | None = Field(default=None, max_length=255)
+    deal_id: uuid.UUID | None = Field(default=None)            # legacy/optional
     deal_name: str | None = Field(default=None, max_length=255)
     department: MilestoneDept = Field(default=MilestoneDept.OPS, sa_type=String(30))
     milestone_owner: str | None = Field(default=None, max_length=100)
@@ -782,6 +784,8 @@ class MilestoneCreate(MilestoneBase):
 
 class MilestoneUpdate(SQLModel):
     name: str | None = Field(default=None, min_length=1, max_length=255)
+    project_id: uuid.UUID | None = None
+    project_name: str | None = Field(default=None, max_length=255)
     deal_id: uuid.UUID | None = None
     deal_name: str | None = Field(default=None, max_length=255)
     department: MilestoneDept | None = None

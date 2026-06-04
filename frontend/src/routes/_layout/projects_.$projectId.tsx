@@ -2,11 +2,12 @@ import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { ArrowLeft, Building2, MapPin, Bed } from "lucide-react"
 
-import { ProjectsService, type DealPublic } from "@/client"
+import { ProjectsService, type DealPublic, type MilestonePublic } from "@/client"
 import { AddDeal } from "@/components/Deals/AddDeal"
 import { EditProject } from "@/components/Projects/EditProject"
+import { AddMilestone } from "@/routes/_layout/preopening"
 import { Button } from "@/components/ui/button"
-import { Plus, ExternalLink } from "lucide-react"
+import { Plus, ExternalLink, Rocket, AlertCircle } from "lucide-react"
 
 export const Route = createFileRoute("/_layout/projects_/$projectId")({
   component: ProjectWorkspace,
@@ -45,7 +46,16 @@ function ProjectWorkspace() {
     enabled: !!project,
   })
 
+  const { data: milestonesData } = useQuery({
+    queryKey: ["project-milestones", projectId],
+    queryFn: () => ProjectsService.listProjectMilestones({ id: projectId }),
+    enabled: !!project,
+  })
+
   const deals = (dealsData ?? []) as DealPublic[]
+  const milestones = (milestonesData ?? []) as MilestonePublic[]
+  const redCount = milestones.filter(m => m.status === "Red").length
+  const amberCount = milestones.filter(m => m.status === "Amber").length
 
   if (isLoading) return <p className="text-muted-foreground">Loading...</p>
   if (!project) return (
@@ -197,6 +207,84 @@ function ProjectWorkspace() {
           <span className="font-semibold">Notes: </span>{project.description}
         </div>
       )}
+
+      {/* Pre-opening Gates (asset-level governance) */}
+      <div className="rounded-lg border bg-card">
+        <div className="p-4 border-b flex items-center justify-between">
+          <div>
+            <h2 className="font-semibold text-sm flex items-center gap-2">
+              <Rocket className="h-4 w-4 text-muted-foreground" />
+              Pre-opening Gates
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Asset-level execution milestones across departments (COO governance)
+            </p>
+          </div>
+          <AddMilestone
+            defaultProjectId={project.id}
+            trigger={<Button size="sm"><Plus className="h-4 w-4 mr-1" />Add Milestone</Button>}
+          />
+        </div>
+
+        {/* Red alert */}
+        {redCount > 0 && (
+          <div className="px-4 py-2 bg-red-50 border-b border-red-200 flex items-center gap-2 text-sm text-red-700">
+            <AlertCircle className="h-4 w-4" />
+            <span><span className="font-semibold">{redCount} milestone{redCount > 1 ? "s" : ""}</span> at Red gate — escalation required</span>
+          </div>
+        )}
+
+        {milestones.length === 0 ? (
+          <p className="text-sm text-muted-foreground p-6 text-center">No pre-opening milestones yet.</p>
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b bg-muted/30">
+                {["Milestone","Department","Owner","Due Date","Gate","Blocker"].map(h => (
+                  <th key={h} className="text-left text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground py-2.5 pr-3 pl-3 first:pl-3">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {milestones.map(m => (
+                <tr key={m.id} className={`border-b last:border-0 hover:bg-muted/20 ${
+                  m.status === "Red" ? "bg-red-50/40" : m.status === "Amber" ? "bg-amber-50/30" : ""
+                }`}>
+                  <td className="py-2.5 pr-3 pl-3 text-sm font-medium">{m.name}</td>
+                  <td className="py-2.5 pr-3 text-xs text-muted-foreground">{m.department}</td>
+                  <td className="py-2.5 pr-3 text-xs text-muted-foreground">{m.milestone_owner ?? "—"}</td>
+                  <td className="py-2.5 pr-3 text-xs text-muted-foreground whitespace-nowrap">{m.due_date ?? "—"}</td>
+                  <td className="py-2.5 pr-3">
+                    <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${
+                      m.status === "Red" ? "bg-red-100 text-red-600" :
+                      m.status === "Amber" ? "bg-amber-100 text-amber-700" :
+                      "bg-green-100 text-green-700"
+                    }`}>
+                      <span className={`h-2 w-2 rounded-full ${
+                        m.status === "Red" ? "bg-red-500" :
+                        m.status === "Amber" ? "bg-amber-400" :
+                        "bg-green-500"
+                      }`} />
+                      {m.status}
+                    </span>
+                  </td>
+                  <td className="py-2.5 pr-3 text-xs text-muted-foreground max-w-[300px] truncate">{m.blocker ?? "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        {/* Summary footer */}
+        {milestones.length > 0 && (
+          <div className="px-4 py-2 border-t bg-muted/20 text-xs text-muted-foreground flex items-center gap-4">
+            <span>Total: {milestones.length}</span>
+            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-green-500" />{milestones.length - redCount - amberCount} on track</span>
+            {amberCount > 0 && <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-amber-400" />{amberCount} attention</span>}
+            {redCount > 0 && <span className="flex items-center gap-1 text-red-600 font-semibold"><span className="h-1.5 w-1.5 rounded-full bg-red-500" />{redCount} escalate</span>}
+          </div>
+        )}
+      </div>
 
       {/* Deals under this project */}
       <div className="rounded-lg border bg-card">

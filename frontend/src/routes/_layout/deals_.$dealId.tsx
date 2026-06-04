@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import {
-  ArrowLeft, FileText, CheckSquare, BarChart3, Rocket, Clock, Shield,
+  ArrowLeft, FileText, CheckSquare, BarChart3, Clock, Shield,
 } from "lucide-react"
 
 import {
-  DealsService, TasksService, DocumentsService, MilestonesService,
+  DealsService, TasksService, DocumentsService,
   ActivitiesService,
   type DealPublic, type TaskPublic, type DocumentPublic,
-  type MilestonePublic, type ActivityPublic, type DealAuditLogPublic,
+  type ActivityPublic, type DealAuditLogPublic,
 } from "@/client"
 import { Button } from "@/components/ui/button"
 import { EditDeal } from "@/components/Deals/EditDeal"
@@ -32,7 +32,6 @@ const STAGE_COLOR: Record<string, string> = {
   "Opened":"bg-green-100 text-green-700","Lost":"bg-red-100 text-red-600",
 }
 const RISK_COLOR: Record<string, string> = { Green:"bg-green-100 text-green-700", Amber:"bg-amber-100 text-amber-700", Red:"bg-red-100 text-red-600" }
-const GATE_COLOR: Record<string, string> = { Green:"bg-green-100 text-green-700", Amber:"bg-amber-100 text-amber-700", Red:"bg-red-100 text-red-600" }
 const STATUS_COLOR: Record<string, string> = { Open:"bg-blue-100 text-blue-700","In Progress":"bg-amber-100 text-amber-700",Blocked:"bg-red-100 text-red-600",Done:"bg-green-100 text-green-700" }
 
 function Badge({ label, map }: { label?: string | null; map: Record<string, string> }) {
@@ -78,12 +77,6 @@ function DealWorkspace() {
     enabled: !!deal,
   })
 
-  const { data: milestonesData } = useQuery({
-    queryKey: ["deal-milestones", dealId],
-    queryFn: () => MilestonesService.listMilestones({ dealId: dealId, limit: 50 }),
-    enabled: !!deal,
-  })
-
   const { data: activitiesData } = useQuery({
     queryKey: ["deal-activities", dealId],
     queryFn: () => ActivitiesService.listActivities({ dealId: dealId, limit: 30 }),
@@ -105,7 +98,6 @@ function DealWorkspace() {
 
   const tasks: TaskPublic[] = tasksData?.data ?? []
   const docs: DocumentPublic[] = docsData?.data ?? []
-  const milestones: MilestonePublic[] = milestonesData?.data ?? []
   const activities: ActivityPublic[] = activitiesData?.data ?? []
   const auditLogs: DealAuditLogPublic[] = audit ?? []
 
@@ -165,8 +157,8 @@ function DealWorkspace() {
         </div>
       )}
 
-      {/* 3-column: Tasks, Documents, Pre-opening */}
-      <div className="grid grid-cols-3 gap-4">
+      {/* 2-column: Tasks, Documents (Pre-opening moved to Project Workspace) */}
+      <div className="grid grid-cols-2 gap-4">
         {/* Tasks */}
         <div className="rounded-lg border bg-card p-4">
           <div className="flex items-center gap-2 mb-3">
@@ -221,34 +213,6 @@ function DealWorkspace() {
           )}
         </div>
 
-        {/* Pre-opening Gates */}
-        <div className="rounded-lg border bg-card p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Rocket className="h-4 w-4 text-muted-foreground" />
-            <h3 className="font-semibold text-sm">Pre-opening Gates</h3>
-            <span className="text-xs text-muted-foreground ml-auto">{milestones.length}</span>
-          </div>
-          {milestones.length === 0 ? (
-            <p className="text-xs text-muted-foreground">No milestones yet.</p>
-          ) : (
-            <div className="flex flex-col gap-2">
-              {milestones.map(m => (
-                <div key={m.id} className="rounded-md bg-muted/40 p-2.5">
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="text-xs font-medium">{m.name}</p>
-                    <Badge label={m.status} map={GATE_COLOR} />
-                  </div>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">
-                    {m.department} · {m.milestone_owner ?? "—"} · due {m.due_date ?? "—"}
-                  </p>
-                  {m.blocker && (
-                    <p className="text-[10px] text-red-500 mt-0.5">Blocker: {m.blocker}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
       </div>
 
       {/* 2-column: Activity Timeline + Audit Log */}

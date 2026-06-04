@@ -5,7 +5,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 
 import {
-  MilestonesService, DealsService,
+  MilestonesService, ProjectsService,
   type MilestonePublic, type MilestoneCreate, type MilestoneUpdate,
 } from "@/client"
 import { Button } from "@/components/ui/button"
@@ -38,7 +38,9 @@ const GATE_DOT: Record<string, string> = {
 
 // ── Add Milestone Dialog ──────────────────────────────────────────────────────
 
-function AddMilestone() {
+interface AddMilestoneProps { defaultProjectId?: string; trigger?: React.ReactNode }
+
+export function AddMilestone({ defaultProjectId, trigger }: AddMilestoneProps = {}) {
   const [open, setOpen] = useState(false)
   const qc = useQueryClient()
   const { showSuccessToast } = useCustomToast()
@@ -48,28 +50,29 @@ function AddMilestone() {
     defaultValues: { dept_s: "Ops", status_s: "Green" },
   })
 
-  const { data: dealsData } = useQuery({
-    queryKey: ["deals-picker"],
-    queryFn: () => DealsService.listDeals({ limit: 500 }),
+  const { data: projectsData } = useQuery({
+    queryKey: ["projects-picker"],
+    queryFn: () => ProjectsService.listProjects({ limit: 500 }),
     enabled: open,
   })
-  const deals = dealsData?.data ?? []
-  const [dealId, setDealId] = useState("")
-  const [dealName, setDealName] = useState("")
+  const projects = projectsData?.data ?? []
+  const [projectId, setProjectId] = useState(defaultProjectId ?? "")
+  const [projectName, setProjectName] = useState("")
 
   const mut = useMutation({
     mutationFn: (d: MilestoneCreate) => MilestonesService.createMilestone({ requestBody: d }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["milestones"] })
+      qc.invalidateQueries({ queryKey: ["project-milestones"] })
       showSuccessToast("Milestone added.")
-      reset(); setDealId(""); setDealName(""); setOpen(false)
+      reset(); setProjectId(defaultProjectId ?? ""); setProjectName(""); setOpen(false)
     },
   })
 
   const onSubmit = (d: any) => mut.mutate({
     name: d.name,
-    deal_id: dealId || undefined,
-    deal_name: dealName || undefined,
+    project_id: projectId || undefined,
+    project_name: projectName || undefined,
     department: d.dept_s,
     milestone_owner: d.milestone_owner || undefined,
     due_date: d.due_date || undefined,
@@ -77,16 +80,16 @@ function AddMilestone() {
     blocker: d.blocker || undefined,
   })
 
-  const handleDeal = (v: string) => {
-    if (v === "__none__") { setDealId(""); setDealName(""); return }
-    const d = deals.find(x => x.id === v)
-    if (d) { setDealId(d.id); setDealName(d.name) }
+  const handleProject = (v: string) => {
+    if (v === "__none__") { setProjectId(""); setProjectName(""); return }
+    const p = projects.find(x => x.id === v)
+    if (p) { setProjectId(p.id); setProjectName(p.name) }
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm"><Plus className="h-4 w-4 mr-1" />Add Milestone</Button>
+        {trigger ?? <Button size="sm"><Plus className="h-4 w-4 mr-1" />Add Milestone</Button>}
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader><DialogTitle>New Pre-opening Milestone</DialogTitle></DialogHeader>
@@ -96,14 +99,15 @@ function AddMilestone() {
             <Input {...register("name", { required: true })} placeholder="e.g. PMS Implementation" />
           </div>
           <div className="space-y-1.5">
-            <Label>Project / Deal</Label>
-            <Select value={dealId || "__none__"} onValueChange={handleDeal}>
-              <SelectTrigger><SelectValue placeholder="Select deal..." /></SelectTrigger>
+            <Label>Project (Hotel Asset)</Label>
+            <Select value={projectId || "__none__"} onValueChange={handleProject}>
+              <SelectTrigger><SelectValue placeholder="Select project..." /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__">— No deal —</SelectItem>
-                {deals.map(d => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}
+                <SelectItem value="__none__">— No project —</SelectItem>
+                {projects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
               </SelectContent>
             </Select>
+            <p className="text-[10px] text-muted-foreground">Pre-opening milestones belong to the hotel asset, not specific deals.</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
@@ -293,7 +297,7 @@ function PreopeningPage() {
               <tbody>
                 {milestones.map(m => (
                   <tr key={m.id} className={`border-b last:border-0 hover:bg-muted/20 transition-colors ${m.status === "Red" ? "bg-red-50/30" : m.status === "Amber" ? "bg-amber-50/20" : ""}`}>
-                    <td className="py-2.5 pr-3 pl-3 text-xs text-muted-foreground">{m.deal_name || "—"}</td>
+                    <td className="py-2.5 pr-3 pl-3 text-xs text-muted-foreground">{(m as any).project_name || m.deal_name || "—"}</td>
                     <td className="py-2.5 pr-3 font-medium">{m.name}</td>
                     <td className="py-2.5 pr-3">
                       <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-700">{m.department}</span>
