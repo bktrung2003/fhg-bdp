@@ -29,6 +29,17 @@ from app.utils import generate_new_account_email, send_email
 router = APIRouter(prefix="/users", tags=["users"])
 
 
+@router.get("/team", response_model=UsersPublic)
+def list_team(session: SessionDep, current_user: CurrentUser) -> Any:
+    """List active users — for dropdowns (BD Owner picker, etc.). Any authenticated user."""
+    statement = select(User).where(User.is_active == True).order_by(col(User.full_name))
+    users = session.exec(statement).all()
+    return UsersPublic(
+        data=[UserPublic.model_validate(u) for u in users],
+        count=len(users),
+    )
+
+
 @router.get(
     "/",
     dependencies=[Depends(get_current_active_superuser)],

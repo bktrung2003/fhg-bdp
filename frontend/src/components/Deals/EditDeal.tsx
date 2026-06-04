@@ -1,9 +1,9 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { type SubmitHandler, useForm } from "react-hook-form"
 import { Pencil } from "lucide-react"
 import { useEffect, useState } from "react"
 
-import { DealsService, type DealPublic, type DealUpdate } from "@/client"
+import { DealsService, OwnersService, UsersService, type DealPublic, type DealUpdate } from "@/client"
 import { Button } from "@/components/ui/button"
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
@@ -31,6 +31,21 @@ export function EditDeal({ deal }: Props) {
   const FEASIBILITY = useMasterData(MD.FEASIBILITY_STATUS)
   const { showSuccessToast } = useCustomToast()
 
+  // Owners + Users for dropdowns
+  const { data: ownersData } = useQuery({
+    queryKey: ["owners-picker"],
+    queryFn: () => OwnersService.listOwners({ limit: 500 }),
+    enabled: open,
+  })
+  const owners = ownersData?.data ?? []
+  const { data: usersData } = useQuery({
+    queryKey: ["users-team"],
+    queryFn: () => UsersService.listTeam(),
+    enabled: open,
+  })
+  const users = usersData?.data ?? []
+  const [bdOwnerId, setBdOwnerId] = useState(deal.bd_owner_id ?? "")
+
   const { register, handleSubmit, reset, setValue, formState: { isSubmitting } } =
     useForm<DealUpdate>()
 
@@ -48,6 +63,7 @@ export function EditDeal({ deal }: Props) {
         fee_forecast: deal.fee_forecast ?? undefined,
         next_action: deal.next_action ?? undefined,
       })
+      setBdOwnerId(deal.bd_owner_id ?? "")
     }
   }, [open, deal, reset])
 
@@ -61,7 +77,8 @@ export function EditDeal({ deal }: Props) {
     },
   })
 
-  const onSubmit: SubmitHandler<DealUpdate> = (data) => mutation.mutate(data)
+  const onSubmit: SubmitHandler<DealUpdate> = (data) =>
+    mutation.mutate({ ...data, bd_owner_id: bdOwnerId || undefined })
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -83,15 +100,31 @@ export function EditDeal({ deal }: Props) {
             </div>
             <div className="space-y-1.5">
               <Label>Country</Label>
-              <Input {...register("country")} />
+              <Select defaultValue={deal.country ?? ""} onValueChange={(v) => setValue("country", v)}>
+                <SelectTrigger><SelectValue placeholder="Select country / region..." /></SelectTrigger>
+                <SelectContent>
+                  {REGIONS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <Label>City</Label>
               <Input {...register("city")} />
             </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-1.5">
               <Label>Developer / Owner</Label>
-              <Input {...register("owner_name")} />
+              <Select defaultValue={deal.owner_name ?? ""} onValueChange={(v) => setValue("owner_name", v === "__none__" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Select owner..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">— None —</SelectItem>
+                  {owners.map(o => (
+                    <SelectItem key={o.id} value={o.company}>{o.company}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <Label>Brand</Label>
@@ -100,6 +133,21 @@ export function EditDeal({ deal }: Props) {
                 <SelectContent>
                   <SelectItem value="__none__">— None —</SelectItem>
                   {BRANDS.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Development Lead</Label>
+              <Select value={bdOwnerId || "__none__"} onValueChange={(v) => setBdOwnerId(v === "__none__" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Assign BD lead..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">— Unassigned —</SelectItem>
+                  {users.map(u => (
+                    <SelectItem key={u.id} value={u.id}>
+                      {u.full_name || u.email}
+                      <span className="text-muted-foreground text-xs ml-1">· {u.role}</span>
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

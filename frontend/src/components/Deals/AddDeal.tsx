@@ -1,9 +1,9 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { type SubmitHandler, useForm } from "react-hook-form"
 import { Plus } from "lucide-react"
 import { useState } from "react"
 
-import { DealsService, type DealCreate } from "@/client"
+import { DealsService, OwnersService, UsersService, type DealCreate } from "@/client"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -45,6 +45,23 @@ export function AddDeal() {
   const OPENING_TARGETS = useMasterData(MD.OPENING_TARGET)
   const BRANDS = useMasterData(MD.BRAND)
 
+  // Owners + Users for dropdowns
+  const { data: ownersData } = useQuery({
+    queryKey: ["owners-picker"],
+    queryFn: () => OwnersService.listOwners({ limit: 500 }),
+    enabled: open,
+  })
+  const owners = ownersData?.data ?? []
+
+  const { data: usersData } = useQuery({
+    queryKey: ["users-team"],
+    queryFn: () => UsersService.listTeam(),
+    enabled: open,
+  })
+  const users = usersData?.data ?? []
+
+  const [bdOwnerId, setBdOwnerId] = useState("")
+
   const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } =
     useForm<FormData>({
       defaultValues: {
@@ -81,6 +98,7 @@ export function AddDeal() {
       region: (data.region_str as DealCreate["region"]) || undefined,
       project_type: (data.project_type_str as DealCreate["project_type"]) || undefined,
       opening_target: data.opening_target_str || undefined,
+      bd_owner_id: bdOwnerId || undefined,
     }
     mutation.mutate(payload)
   }
@@ -112,10 +130,13 @@ export function AddDeal() {
 
             <div className="space-y-1.5">
               <Label>Country *</Label>
-              <Input
-                {...register("country", { required: "Required" })}
-                placeholder="e.g. Vietnam"
-              />
+              <Select onValueChange={(v) => setValue("country", v, { shouldValidate: true })}>
+                <SelectTrigger><SelectValue placeholder="Select country / region..." /></SelectTrigger>
+                <SelectContent>
+                  {REGIONS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <input type="hidden" {...register("country", { required: "Required" })} />
               {errors.country && <p className="text-xs text-red-500">{errors.country.message}</p>}
             </div>
 
@@ -126,10 +147,23 @@ export function AddDeal() {
           </div>
 
           {/* Row 2 */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-1.5">
               <Label>Developer / Owner</Label>
-              <Input {...register("owner_name")} placeholder="e.g. Sun Group" />
+              <Select onValueChange={(v) => setValue("owner_name", v === "__none__" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Select owner..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">— None —</SelectItem>
+                  {owners.map(o => (
+                    <SelectItem key={o.id} value={o.company}>
+                      {o.company} <span className="text-muted-foreground text-xs">· {o.country}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {owners.length === 0 && (
+                <p className="text-[10px] text-muted-foreground">No owners yet. Add one in Owner CRM 360.</p>
+              )}
             </div>
             <div className="space-y-1.5">
               <Label>Brand</Label>
@@ -140,6 +174,22 @@ export function AddDeal() {
                   {BRANDS.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Development Lead</Label>
+              <Select value={bdOwnerId || "__none__"} onValueChange={(v) => setBdOwnerId(v === "__none__" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Assign BD lead..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">— Unassigned —</SelectItem>
+                  {users.map(u => (
+                    <SelectItem key={u.id} value={u.id}>
+                      {u.full_name || u.email}
+                      <span className="text-muted-foreground text-xs ml-1">· {u.role}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-[10px] text-muted-foreground">Users managed in Admin module</p>
             </div>
           </div>
 
