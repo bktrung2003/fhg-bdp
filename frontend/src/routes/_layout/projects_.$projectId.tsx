@@ -4,6 +4,7 @@ import { ArrowLeft, Building2, MapPin, Bed } from "lucide-react"
 
 import { ProjectsService, type DealPublic } from "@/client"
 import { AddDeal } from "@/components/Deals/AddDeal"
+import { EditProject } from "@/components/Projects/EditProject"
 import { Button } from "@/components/ui/button"
 import { Plus, ExternalLink } from "lucide-react"
 
@@ -74,6 +75,9 @@ function ProjectWorkspace() {
             {project.keys != null && <span className="inline-flex items-center gap-1"><Bed className="h-3.5 w-3.5" />{project.keys} keys</span>}
             {project.project_type && <span>· {project.project_type}</span>}
           </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <EditProject project={project} />
         </div>
       </div>
 

@@ -5,7 +5,9 @@ import { useState } from "react"
 
 import { ProjectsService, type ProjectPublic } from "@/client"
 import { AddProject } from "@/components/Projects/AddProject"
+import { EditProject } from "@/components/Projects/EditProject"
 import { Button } from "@/components/ui/button"
+import { Pencil } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -131,13 +133,21 @@ function ProjectsPage() {
                   <td className="py-3 pr-3 text-sm font-semibold tabular-nums">{p.deal_count}</td>
                   <td className="py-3 pr-3 text-sm tabular-nums text-primary font-medium">{fmtM(p.active_pipeline_value)}</td>
                   <td className="py-3 pr-2" onClick={e => e.stopPropagation()}>
-                    <Button
-                      variant="ghost" size="sm"
-                      className="h-7 w-7 p-0 text-red-400 hover:text-red-600"
-                      onClick={() => { if (confirm(`Delete project "${p.name}"?`)) delMut.mutate(p.id) }}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                    <div className="flex gap-0.5">
+                      <EditProject project={p} trigger={
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Edit">
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                      } />
+                      <Button
+                        variant="ghost" size="sm"
+                        className="h-7 w-7 p-0 text-red-400 hover:text-red-600"
+                        title="Delete"
+                        onClick={() => { if (confirm(`Delete project "${p.name}"?`)) delMut.mutate(p.id) }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}

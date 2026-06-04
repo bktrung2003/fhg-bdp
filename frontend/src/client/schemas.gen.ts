@@ -2616,6 +2616,30 @@ export const ProjectCreateSchema = {
             ],
             title: 'City'
         },
+        location_detail: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Location Detail'
+        },
+        google_maps_url: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Google Maps Url'
+        },
         project_type: {
             anyOf: [
                 {
@@ -2625,6 +2649,18 @@ export const ProjectCreateSchema = {
                     type: 'null'
                 }
             ]
+        },
+        segment: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Segment'
         },
         keys: {
             anyOf: [
@@ -2638,6 +2674,82 @@ export const ProjectCreateSchema = {
             ],
             title: 'Keys'
         },
+        room_mix: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Room Mix'
+        },
+        facilities: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Facilities'
+        },
+        status: {
+            '$ref': '#/components/schemas/ProjectStatus',
+            default: 'Prospect'
+        },
+        construction_status: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Construction Status'
+        },
+        design_status: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Design Status'
+        },
+        legal_status: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Legal Status'
+        },
+        funding_status: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Funding Status'
+        },
         opening_target: {
             anyOf: [
                 {
@@ -2650,15 +2762,11 @@ export const ProjectCreateSchema = {
             ],
             title: 'Opening Target'
         },
-        status: {
-            '$ref': '#/components/schemas/ProjectStatus',
-            default: 'Prospect'
-        },
         description: {
             anyOf: [
                 {
                     type: 'string',
-                    maxLength: 1000
+                    maxLength: 2000
                 },
                 {
                     type: 'null'
@@ -2719,6 +2827,30 @@ export const ProjectPublicSchema = {
             ],
             title: 'City'
         },
+        location_detail: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Location Detail'
+        },
+        google_maps_url: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Google Maps Url'
+        },
         project_type: {
             anyOf: [
                 {
@@ -2728,6 +2860,18 @@ export const ProjectPublicSchema = {
                     type: 'null'
                 }
             ]
+        },
+        segment: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Segment'
         },
         keys: {
             anyOf: [
@@ -2741,6 +2885,82 @@ export const ProjectPublicSchema = {
             ],
             title: 'Keys'
         },
+        room_mix: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Room Mix'
+        },
+        facilities: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Facilities'
+        },
+        status: {
+            '$ref': '#/components/schemas/ProjectStatus',
+            default: 'Prospect'
+        },
+        construction_status: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Construction Status'
+        },
+        design_status: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Design Status'
+        },
+        legal_status: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Legal Status'
+        },
+        funding_status: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Funding Status'
+        },
         opening_target: {
             anyOf: [
                 {
@@ -2753,15 +2973,11 @@ export const ProjectPublicSchema = {
             ],
             title: 'Opening Target'
         },
-        status: {
-            '$ref': '#/components/schemas/ProjectStatus',
-            default: 'Prospect'
-        },
         description: {
             anyOf: [
                 {
                     type: 'string',
-                    maxLength: 1000
+                    maxLength: 2000
                 },
                 {
                     type: 'null'
@@ -2909,6 +3125,30 @@ export const ProjectUpdateSchema = {
             ],
             title: 'City'
         },
+        location_detail: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Location Detail'
+        },
+        google_maps_url: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Google Maps Url'
+        },
         project_type: {
             anyOf: [
                 {
@@ -2918,6 +3158,18 @@ export const ProjectUpdateSchema = {
                     type: 'null'
                 }
             ]
+        },
+        segment: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Segment'
         },
         keys: {
             anyOf: [
@@ -2931,6 +3183,88 @@ export const ProjectUpdateSchema = {
             ],
             title: 'Keys'
         },
+        room_mix: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Room Mix'
+        },
+        facilities: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Facilities'
+        },
+        status: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/ProjectStatus'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        construction_status: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Construction Status'
+        },
+        design_status: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Design Status'
+        },
+        legal_status: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Legal Status'
+        },
+        funding_status: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Funding Status'
+        },
         opening_target: {
             anyOf: [
                 {
@@ -2943,21 +3277,11 @@ export const ProjectUpdateSchema = {
             ],
             title: 'Opening Target'
         },
-        status: {
-            anyOf: [
-                {
-                    '$ref': '#/components/schemas/ProjectStatus'
-                },
-                {
-                    type: 'null'
-                }
-            ]
-        },
         description: {
             anyOf: [
                 {
                     type: 'string',
-                    maxLength: 1000
+                    maxLength: 2000
                 },
                 {
                     type: 'null'
