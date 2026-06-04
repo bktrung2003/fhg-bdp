@@ -207,6 +207,8 @@ class APACRegion(str, Enum):
 
 class DealBase(_EnumAsStr):
     name: str = Field(min_length=1, max_length=255)
+    project_id: uuid.UUID | None = Field(default=None)  # Link to Project (nullable for backward compat)
+    deal_type: DealType = Field(default=DealType.HMA, sa_type=String(20))
     country: str = Field(max_length=100)
     region: APACRegion | None = Field(default=None, sa_type=String(50))
     city: str | None = Field(default=None, max_length=100)
@@ -426,8 +428,9 @@ class OwnerPublic(OwnerBase):
     id: uuid.UUID
     created_at: datetime | None = None
     updated_at: datetime | None = None
-    deal_count: int = 0          # computed
-    last_interaction: str | None = None   # latest interaction date
+    deal_count: int = 0
+    project_count: int = 0
+    last_interaction: str | None = None
 
 
 class OwnersPublic(SQLModel):
@@ -442,9 +445,13 @@ class OwnersPublic(SQLModel):
 class OwnerContactBase(_EnumAsStr):
     fusion_role: str = Field(max_length=100)   # "CEO", "BD Director VN"
     owner_contact: str = Field(max_length=100)  # "Owner Chairman"
+    contact_title: str | None = Field(default=None, max_length=100)  # "Chairman", "CFO"
+    email: str | None = Field(default=None, max_length=255)
+    phone: str | None = Field(default=None, max_length=50)
+    seniority: str | None = Field(default=None, max_length=20)  # "C-Suite", "Senior", "Mid"
     strength: ContactStrength = Field(default=ContactStrength.NEW, sa_type=String(20))
-    last_met: str | None = Field(default=None, max_length=20)  # "2026-05-10"
-    senior_flag: bool = Field(default=False)    # C-Suite involved
+    last_met: str | None = Field(default=None, max_length=20)
+    senior_flag: bool = Field(default=False)
     note: str | None = Field(default=None, max_length=500)
 
 
@@ -841,3 +848,87 @@ class MasterDataPublic(SQLModel):
     value: str
     sort_order: int
     is_active: bool
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PROJECT — Hotel asset / development opportunity
+# (Sits between Owner and Deals: 1 Owner → N Projects → N Deals)
+# ─────────────────────────────────────────────────────────────────────────────
+
+class ProjectStatus(str, Enum):
+    PROSPECT = "Prospect"
+    ACTIVE = "Active"
+    ON_HOLD = "On Hold"
+    OPERATING = "Operating"
+    LOST = "Lost"
+    CLOSED = "Closed"
+
+
+class ProjectBase(_EnumAsStr):
+    name: str = Field(min_length=1, max_length=255)
+    owner_id: uuid.UUID | None = Field(default=None, foreign_key="owner.id", ondelete="SET NULL")
+    country: str = Field(max_length=100)
+    region: APACRegion | None = Field(default=None, sa_type=String(50))
+    city: str | None = Field(default=None, max_length=100)
+    project_type: ProjectType | None = Field(default=None, sa_type=String(80))
+    keys: int | None = Field(default=None, ge=0)
+    opening_target: str | None = Field(default=None, max_length=20)
+    status: ProjectStatus = Field(default=ProjectStatus.PROSPECT, sa_type=String(20))
+    description: str | None = Field(default=None, max_length=1000)
+
+
+class ProjectCreate(ProjectBase):
+    pass
+
+
+class ProjectUpdate(SQLModel):
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    owner_id: uuid.UUID | None = None
+    country: str | None = Field(default=None, max_length=100)
+    region: APACRegion | None = None
+    city: str | None = Field(default=None, max_length=100)
+    project_type: ProjectType | None = None
+    keys: int | None = Field(default=None, ge=0)
+    opening_target: str | None = Field(default=None, max_length=20)
+    status: ProjectStatus | None = None
+    description: str | None = Field(default=None, max_length=1000)
+
+
+class Project(ProjectBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    project_number: int | None = Field(default=None, index=True)  # FUS-P-00001
+    created_by_id: uuid.UUID = Field(foreign_key="user.id", ondelete="CASCADE")
+    created_at: datetime | None = Field(
+        default_factory=get_datetime_utc, sa_type=DateTime(timezone=True)
+    )
+    updated_at: datetime | None = Field(
+        default_factory=get_datetime_utc, sa_type=DateTime(timezone=True)
+    )
+
+    owner: Optional["Owner"] = Relationship(
+        sa_relationship_kwargs={"lazy": "select"}
+    )
+
+
+class ProjectPublic(ProjectBase):
+    id: uuid.UUID
+    project_number: int | None
+    owner_name: str | None = None
+    deal_count: int = 0
+    active_pipeline_value: int = 0
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+class ProjectsPublic(SQLModel):
+    data: list[ProjectPublic]
+    count: int
+
+
+class DealType(str, Enum):
+    HMA = "HMA"
+    TSA = "TSA"
+    FRANCHISE = "Franchise"
+    CONSULTING = "Consulting"
+    PRE_OPENING = "Pre-opening"
+    OTHER = "Other"

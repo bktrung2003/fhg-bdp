@@ -10,16 +10,30 @@ from app.models import (
     CatchupStatus, Deal, Message, Owner, OwnerContact, OwnerContactCreate,
     OwnerContactPublic, OwnerCreate, OwnerInteraction, OwnerInteractionCreate,
     OwnerInteractionPublic, OwnerPublic, OwnersPublic, OwnerRelationship,
-    OwnerType, OwnerUpdate,
+    OwnerType, OwnerUpdate, Project,
 )
 
 router = APIRouter(prefix="/owners", tags=["owners"])
 
 
 def _to_public(owner: Owner, session: SessionDep) -> OwnerPublic:
-    deal_count = session.exec(
-        select(func.count()).select_from(Deal).where(Deal.owner_name == owner.company)
+    # Projects under this owner
+    project_count = session.exec(
+        select(func.count()).select_from(Project).where(Project.owner_id == owner.id)
     ).one()
+
+    # Deals: prefer linked via project, fallback to owner_name match
+    deal_count_by_project = session.exec(
+        select(func.count()).select_from(Deal)
+        .join(Project, Deal.project_id == Project.id)
+        .where(Project.owner_id == owner.id)
+    ).one()
+    deal_count_legacy = session.exec(
+        select(func.count()).select_from(Deal)
+        .where(Deal.owner_name == owner.company)
+        .where(Deal.project_id.is_(None))
+    ).one()
+    deal_count = (deal_count_by_project or 0) + (deal_count_legacy or 0)
 
     last_int = session.exec(
         select(OwnerInteraction)
@@ -31,6 +45,7 @@ def _to_public(owner: Owner, session: SessionDep) -> OwnerPublic:
     return OwnerPublic(
         **owner.model_dump(),
         deal_count=deal_count,
+        project_count=project_count,
         last_interaction=last_int.date if last_int else None,
     )
 
@@ -102,6 +117,44 @@ def list_interactions(session: SessionDep, current_user: CurrentUser, id: uuid.U
         .where(OwnerInteraction.owner_id == id)
         .order_by(col(OwnerInteraction.date).desc())
     ).all()
+
+
+# ── GET /owners/{id}/projects ─────────────────────────────────────────────────
+
+@router.get("/{id}/projects")
+def list_owner_projects(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> Any:
+    """List all projects linked to this owner."""
+    if not session.get(Owner, id):
+        raise HTTPException(status_code=404, detail="Owner not found")
+    projects = session.exec(
+        select(Project)
+        .where(Project.owner_id == id)
+        .order_by(col(Project.updated_at).desc())
+    ).all()
+    return projects
+
+
+# ── GET /owners/{id}/deals ────────────────────────────────────────────────────
+
+@router.get("/{id}/deals")
+def list_owner_deals(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> Any:
+    """List all deals across all projects of this owner + legacy unlinked deals."""
+    owner = session.get(Owner, id)
+    if not owner:
+        raise HTTPException(status_code=404, detail="Owner not found")
+    # Deals via projects
+    by_project = session.exec(
+        select(Deal)
+        .join(Project, Deal.project_id == Project.id)
+        .where(Project.owner_id == id)
+    ).all()
+    # Legacy deals (no project link, matched by owner_name)
+    legacy = session.exec(
+        select(Deal)
+        .where(Deal.owner_name == owner.company)
+        .where(Deal.project_id.is_(None))
+    ).all()
+    return list(by_project) + list(legacy)
 
 
 # ── POST /owners ──────────────────────────────────────────────────────────────
