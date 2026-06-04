@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { useForm } from "react-hook-form"
 import { useState } from "react"
-import { ArrowRight, GripVertical } from "lucide-react"
+import { ArrowRight, EyeOff, Eye } from "lucide-react"
 
 import { DealsService, type DealPublic, type StageChangeRequest } from "@/client"
 import { Button } from "@/components/ui/button"
@@ -21,16 +21,16 @@ interface Props {
 // ── Color helpers ─────────────────────────────────────────────────────────────
 
 const STAGE_BG: Record<string, string> = {
-  "Lead": "bg-gray-50 border-gray-200",
-  "NDA / Qualified": "bg-blue-50 border-blue-200",
-  "Feasibility": "bg-sky-50 border-sky-200",
-  "Proposal": "bg-violet-50 border-violet-200",
-  "Negotiation": "bg-orange-50 border-orange-200",
-  "LOI Signed": "bg-yellow-50 border-yellow-200",
-  "HMA Signed": "bg-emerald-50 border-emerald-200",
-  "Pre-opening": "bg-teal-50 border-teal-200",
-  "Opened": "bg-green-50 border-green-200",
-  "Lost": "bg-red-50 border-red-200",
+  "Lead": "bg-gray-50/70 border-gray-200",
+  "NDA / Qualified": "bg-blue-50/70 border-blue-200",
+  "Feasibility": "bg-sky-50/70 border-sky-200",
+  "Proposal": "bg-violet-50/70 border-violet-200",
+  "Negotiation": "bg-orange-50/70 border-orange-200",
+  "LOI Signed": "bg-yellow-50/70 border-yellow-200",
+  "HMA Signed": "bg-emerald-50/70 border-emerald-200",
+  "Pre-opening": "bg-teal-50/70 border-teal-200",
+  "Opened": "bg-green-50/70 border-green-200",
+  "Lost": "bg-red-50/70 border-red-200",
 }
 
 const STAGE_HEADER: Record<string, string> = {
@@ -50,19 +50,14 @@ const RISK_DOT: Record<string, string> = {
   Green: "bg-green-500", Amber: "bg-amber-400", Red: "bg-red-500",
 }
 
+const TERMINAL_STAGES = ["Lost", "Opened"]
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const fmtM = (n?: number | null) => n != null ? `$${(n / 1_000_000).toFixed(1)}M` : "—"
 const dealNum = (n?: number | null) => n != null ? `FUS-${String(n).padStart(5, "0")}` : ""
 
-function getAgeBadge(days?: number | null) {
-  if (!days) return null
-  if (days > 60) return { label: `${days}d`, class: "bg-red-100 text-red-600 font-bold" }
-  if (days > 30) return { label: `${days}d`, class: "bg-amber-100 text-amber-700 font-semibold" }
-  return { label: `${days}d`, class: "bg-muted text-muted-foreground" }
-}
-
-// ── Stage Change Dialog (with mandatory note) ────────────────────────────────
+// ── Stage Change Dialog ──────────────────────────────────────────────────────
 
 interface ChangeDialogProps {
   deal: DealPublic | null
@@ -139,11 +134,12 @@ function StageChangeDialog({ deal, newStage, onClose }: ChangeDialogProps) {
   )
 }
 
-// ── Deal Card ─────────────────────────────────────────────────────────────────
+// ── Compact Deal Card ─────────────────────────────────────────────────────────
 
 function DealCard({ deal, onDragStart }: { deal: DealPublic; onDragStart: (deal: DealPublic) => void }) {
   const navigate = useNavigate()
-  const ageBadge = getAgeBadge(deal.days_in_stage)
+  const days = deal.days_in_stage ?? 0
+  const stuck = days > 60 ? "border-l-red-500 border-l-4" : days > 30 ? "border-l-amber-400 border-l-4" : ""
 
   return (
     <div
@@ -154,49 +150,30 @@ function DealCard({ deal, onDragStart }: { deal: DealPublic; onDragStart: (deal:
         onDragStart(deal)
       }}
       onClick={() => navigate({ to: "/deals/$dealId" as any, params: { dealId: deal.id } })}
-      className={`group bg-card border rounded-lg p-3 cursor-pointer hover:shadow-md transition-all relative ${
-        (deal.days_in_stage ?? 0) > 60 ? "border-red-300" :
-        (deal.days_in_stage ?? 0) > 30 ? "border-amber-300" : ""
-      }`}
+      className={`group bg-card border rounded-md p-2 cursor-pointer hover:shadow-sm transition-all ${stuck}`}
     >
-      <div className="flex items-start justify-between gap-2 mb-1.5">
-        <p className="font-mono text-[10px] text-muted-foreground">{dealNum(deal.deal_number)}</p>
-        {ageBadge && (
-          <span className={`text-[10px] rounded-full px-1.5 py-0.5 ${ageBadge.class}`}>
-            {ageBadge.label}
-          </span>
-        )}
+      <div className="flex items-start gap-1.5 mb-1">
+        <span className={`h-1.5 w-1.5 rounded-full mt-1.5 flex-shrink-0 ${RISK_DOT[deal.risk ?? "Green"]}`} />
+        <p className="font-semibold text-xs leading-tight line-clamp-2 flex-1">{deal.name}</p>
       </div>
 
-      <p className="font-semibold text-sm leading-tight mb-1">{deal.name}</p>
-
-      <div className="text-xs text-muted-foreground mb-2 truncate">
-        {deal.city ?? deal.country} · {deal.owner_name ?? "—"}
+      <div className="flex items-center justify-between text-[10px] text-muted-foreground gap-1">
+        <span className="font-mono truncate">{dealNum(deal.deal_number)}</span>
+        <span className="font-semibold text-foreground tabular-nums">{fmtM(deal.pipeline_value)}</span>
       </div>
 
-      <div className="flex items-center justify-between text-xs">
-        <div className="flex items-center gap-1.5">
-          <span className={`h-2 w-2 rounded-full ${RISK_DOT[deal.risk ?? "Green"]}`} />
-          <span className="text-muted-foreground">{deal.keys ?? 0} keys</span>
-        </div>
-        <span className="font-semibold tabular-nums">{fmtM(deal.pipeline_value)}</span>
-      </div>
-
-      {deal.probability != null && (
-        <div className="mt-1.5 flex items-center gap-1">
-          <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
-            <div
-              className="h-full bg-primary rounded-full"
-              style={{ width: `${deal.probability}%` }}
-            />
-          </div>
-          <span className="text-[10px] text-muted-foreground tabular-nums w-7 text-right">
-            {deal.probability}%
-          </span>
+      {(deal.probability != null || days > 0) && (
+        <div className="flex items-center justify-between text-[10px] text-muted-foreground mt-0.5">
+          {deal.probability != null && (
+            <span className="tabular-nums">{deal.probability}%</span>
+          )}
+          {days > 0 && (
+            <span className={`tabular-nums ${days > 60 ? "text-red-600 font-semibold" : days > 30 ? "text-amber-600 font-semibold" : ""}`}>
+              {days}d
+            </span>
+          )}
         </div>
       )}
-
-      <GripVertical className="absolute top-1.5 right-1.5 h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
     </div>
   )
 }
@@ -208,7 +185,20 @@ export function DealKanban({ deals, stages }: Props) {
   const [dragOverStage, setDragOverStage] = useState<string | null>(null)
   const [pendingMove, setPendingMove] = useState<{ deal: DealPublic; newStage: string } | null>(null)
 
-  // Group deals by stage
+  // Show terminal stages (Lost/Opened) toggle — persisted
+  const [showTerminal, setShowTerminal] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("kanban:show-terminal") === "true"
+    }
+    return false
+  })
+  const toggleTerminal = () => {
+    const next = !showTerminal
+    setShowTerminal(next)
+    localStorage.setItem("kanban:show-terminal", String(next))
+  }
+
+  // Group by stage
   const dealsByStage: Record<string, DealPublic[]> = {}
   stages.forEach(s => { dealsByStage[s] = [] })
   deals.forEach(d => {
@@ -217,17 +207,42 @@ export function DealKanban({ deals, stages }: Props) {
     dealsByStage[s].push(d)
   })
 
-  // Stats per column
+  // Filter stages — hide terminal if no deals AND not toggled on
+  const visibleStages = stages.filter(s => {
+    if (!TERMINAL_STAGES.includes(s)) return true
+    if (showTerminal) return true
+    return (dealsByStage[s] ?? []).length > 0
+  })
+
+  const hiddenTerminalCount = TERMINAL_STAGES.filter(
+    s => !visibleStages.includes(s)
+  ).length
+
   const colStats = (stageDeals: DealPublic[]) => {
     const count = stageDeals.length
-    const value = stageDeals.reduce((s, d) => s + (d.pipeline_value ?? 0), 0)
+    const value = stageDeals.reduce((sum, d) => sum + (d.pipeline_value ?? 0), 0)
     return { count, value }
   }
 
   return (
     <>
-      <div className="flex gap-3 overflow-x-auto pb-3">
-        {stages.map((stage) => {
+      {/* Toolbar */}
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs text-muted-foreground">
+          Drag cards between columns · {visibleStages.length} stages shown
+        </p>
+        {hiddenTerminalCount > 0 && (
+          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={toggleTerminal}>
+            {showTerminal
+              ? <><EyeOff className="h-3 w-3 mr-1" />Hide terminal stages</>
+              : <><Eye className="h-3 w-3 mr-1" />Show {hiddenTerminalCount} terminal stage{hiddenTerminalCount > 1 ? "s" : ""}</>}
+          </Button>
+        )}
+      </div>
+
+      {/* Kanban columns */}
+      <div className="flex gap-2 overflow-x-auto pb-3" style={{ scrollbarWidth: "thin" }}>
+        {visibleStages.map((stage) => {
           const stageDeals = dealsByStage[stage] ?? []
           const { count, value } = colStats(stageDeals)
           const isOver = dragOverStage === stage
@@ -249,27 +264,28 @@ export function DealKanban({ deals, stages }: Props) {
                 }
                 setDraggedDeal(null)
               }}
-              className={`flex-shrink-0 w-[260px] rounded-xl border-2 ${STAGE_BG[stage] ?? "bg-gray-50 border-gray-200"} p-3 transition-all ${
-                isOver ? "ring-2 ring-primary ring-offset-2" : ""
+              className={`flex-shrink-0 w-[230px] rounded-lg border ${STAGE_BG[stage] ?? "bg-gray-50/70 border-gray-200"} transition-all flex flex-col ${
+                isOver ? "ring-2 ring-primary ring-offset-1" : ""
               }`}
+              style={{ maxHeight: "calc(100vh - 280px)" }}
             >
-              {/* Column header */}
-              <div className="flex items-center justify-between mb-3 px-1">
-                <div>
-                  <h3 className={`font-semibold text-xs uppercase tracking-wider ${STAGE_HEADER[stage] ?? "text-gray-700"}`}>
+              {/* Sticky column header */}
+              <div className="sticky top-0 flex items-center justify-between px-2.5 py-2 border-b border-current/10 backdrop-blur bg-inherit rounded-t-lg z-10">
+                <div className="min-w-0 flex-1">
+                  <h3 className={`font-semibold text-[11px] uppercase tracking-wider truncate ${STAGE_HEADER[stage] ?? "text-gray-700"}`}>
                     {stage}
                   </h3>
-                  <p className="text-[10px] text-muted-foreground mt-0.5 tabular-nums">
+                  <p className="text-[10px] text-muted-foreground tabular-nums mt-0.5">
                     {fmtM(value)}
                   </p>
                 </div>
-                <span className="rounded-full bg-white px-2 py-0.5 text-xs font-bold border tabular-nums">
+                <span className="rounded-full bg-white px-1.5 py-0.5 text-[10px] font-bold border tabular-nums flex-shrink-0 ml-1">
                   {count}
                 </span>
               </div>
 
-              {/* Cards */}
-              <div className="flex flex-col gap-2 min-h-[60px]">
+              {/* Cards — own scroll */}
+              <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-1.5 min-h-[80px]" style={{ scrollbarWidth: "thin" }}>
                 {stageDeals.length === 0 ? (
                   <p className="text-[10px] text-muted-foreground text-center py-4 italic">
                     Drop deals here
@@ -289,7 +305,6 @@ export function DealKanban({ deals, stages }: Props) {
         })}
       </div>
 
-      {/* Stage change confirmation */}
       {pendingMove && (
         <StageChangeDialog
           deal={pendingMove.deal}
