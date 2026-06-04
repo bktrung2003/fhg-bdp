@@ -792,3 +792,52 @@ class MilestonePublic(MilestoneBase):
 class MilestonesPublic(SQLModel):
     data: list[MilestonePublic]
     count: int
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# MASTER DATA / SETTINGS — configurable lookup values
+# ─────────────────────────────────────────────────────────────────────────────
+
+class MasterDataCategory(str, Enum):
+    DEAL_STAGE = "deal_stage"
+    DEAL_RISK = "deal_risk"
+    FEASIBILITY_STATUS = "feasibility_status"
+    PROJECT_TYPE = "project_type"
+    REGION = "region"
+    BRAND = "brand"
+    OWNER_TYPE = "owner_type"
+    OWNER_RELATIONSHIP = "owner_relationship"
+    CATCHUP_STATUS = "catchup_status"
+    CONTACT_STRENGTH = "contact_strength"
+    INTERACTION_TYPE = "interaction_type"
+    TASK_STATUS = "task_status"
+    TASK_PRIORITY = "task_priority"
+    ACTIVITY_TYPE = "activity_type"
+    DOC_TYPE = "doc_type"
+    DOC_PERMISSION = "doc_permission"
+    MILESTONE_DEPT = "milestone_dept"
+    MILESTONE_GATE = "milestone_gate"
+    OPENING_TARGET = "opening_target"
+
+
+class MasterData(SQLModel, table=True):
+    __tablename__ = "master_data"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    category: str = Field(max_length=50, index=True)  # e.g. "brand", "deal_stage"
+    value: str = Field(max_length=255)                 # e.g. "Fusion Resort"
+    sort_order: int = Field(default=0)
+    is_active: bool = Field(default=True)
+
+
+class MasterDataCreate(SQLModel):
+    category: str
+    value: str
+    sort_order: int = 0
+
+
+class MasterDataPublic(SQLModel):
+    id: uuid.UUID
+    category: str
+    value: str
+    sort_order: int
+    is_active: bool
