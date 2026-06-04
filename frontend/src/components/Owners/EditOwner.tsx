@@ -19,9 +19,9 @@ import { MD, useMasterData } from "@/hooks/useMasterData"
 const PRIORITIES = ["Strategic","High","Medium","Low"]
 const HEALTH = ["Strong","Moderate","Unknown"]
 
-interface Props { owner: OwnerPublic }
+interface Props { owner: OwnerPublic; trigger?: React.ReactNode }
 
-export function EditOwner({ owner }: Props) {
+export function EditOwner({ owner, trigger }: Props) {
   const [open, setOpen] = useState(false)
   const qc = useQueryClient()
   const { showSuccessToast } = useCustomToast()
@@ -57,9 +57,11 @@ export function EditOwner({ owner }: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-          <Pencil className="h-3.5 w-3.5" />
-        </Button>
+        {trigger ?? (
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+            <Pencil className="h-3.5 w-3.5" />
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>Edit — {owner.company}</DialogTitle></DialogHeader>

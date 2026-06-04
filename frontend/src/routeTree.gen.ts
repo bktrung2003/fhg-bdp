@@ -26,6 +26,7 @@ import { Route as LayoutDealsRouteImport } from './routes/_layout/deals'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
 import { Route as LayoutActivitiesRouteImport } from './routes/_layout/activities'
 import { Route as LayoutProjectsProjectIdRouteImport } from './routes/_layout/projects_.$projectId'
+import { Route as LayoutOwnersOwnerIdRouteImport } from './routes/_layout/owners_.$ownerId'
 import { Route as LayoutDealsDealIdRouteImport } from './routes/_layout/deals_.$dealId'
 
 const SignupRoute = SignupRouteImport.update({
@@ -112,6 +113,11 @@ const LayoutProjectsProjectIdRoute = LayoutProjectsProjectIdRouteImport.update({
   path: '/projects/$projectId',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutOwnersOwnerIdRoute = LayoutOwnersOwnerIdRouteImport.update({
+  id: '/owners_/$ownerId',
+  path: '/owners/$ownerId',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutDealsDealIdRoute = LayoutDealsDealIdRouteImport.update({
   id: '/deals_/$dealId',
   path: '/deals/$dealId',
@@ -135,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/projects': typeof LayoutProjectsRoute
   '/settings': typeof LayoutSettingsRoute
   '/deals/$dealId': typeof LayoutDealsDealIdRoute
+  '/owners/$ownerId': typeof LayoutOwnersOwnerIdRoute
   '/projects/$projectId': typeof LayoutProjectsProjectIdRoute
 }
 export interface FileRoutesByTo {
@@ -154,6 +161,7 @@ export interface FileRoutesByTo {
   '/settings': typeof LayoutSettingsRoute
   '/': typeof LayoutIndexRoute
   '/deals/$dealId': typeof LayoutDealsDealIdRoute
+  '/owners/$ownerId': typeof LayoutOwnersOwnerIdRoute
   '/projects/$projectId': typeof LayoutProjectsProjectIdRoute
 }
 export interface FileRoutesById {
@@ -175,6 +183,7 @@ export interface FileRoutesById {
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/': typeof LayoutIndexRoute
   '/_layout/deals_/$dealId': typeof LayoutDealsDealIdRoute
+  '/_layout/owners_/$ownerId': typeof LayoutOwnersOwnerIdRoute
   '/_layout/projects_/$projectId': typeof LayoutProjectsProjectIdRoute
 }
 export interface FileRouteTypes {
@@ -196,6 +205,7 @@ export interface FileRouteTypes {
     | '/projects'
     | '/settings'
     | '/deals/$dealId'
+    | '/owners/$ownerId'
     | '/projects/$projectId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -215,6 +225,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/'
     | '/deals/$dealId'
+    | '/owners/$ownerId'
     | '/projects/$projectId'
   id:
     | '__root__'
@@ -235,6 +246,7 @@ export interface FileRouteTypes {
     | '/_layout/settings'
     | '/_layout/'
     | '/_layout/deals_/$dealId'
+    | '/_layout/owners_/$ownerId'
     | '/_layout/projects_/$projectId'
   fileRoutesById: FileRoutesById
 }
@@ -367,6 +379,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutProjectsProjectIdRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/owners_/$ownerId': {
+      id: '/_layout/owners_/$ownerId'
+      path: '/owners/$ownerId'
+      fullPath: '/owners/$ownerId'
+      preLoaderRoute: typeof LayoutOwnersOwnerIdRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/deals_/$dealId': {
       id: '/_layout/deals_/$dealId'
       path: '/deals/$dealId'
@@ -390,6 +409,7 @@ interface LayoutRouteChildren {
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
   LayoutDealsDealIdRoute: typeof LayoutDealsDealIdRoute
+  LayoutOwnersOwnerIdRoute: typeof LayoutOwnersOwnerIdRoute
   LayoutProjectsProjectIdRoute: typeof LayoutProjectsProjectIdRoute
 }
 
@@ -406,6 +426,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutIndexRoute: LayoutIndexRoute,
   LayoutDealsDealIdRoute: LayoutDealsDealIdRoute,
+  LayoutOwnersOwnerIdRoute: LayoutOwnersOwnerIdRoute,
   LayoutProjectsProjectIdRoute: LayoutProjectsProjectIdRoute,
 }
 
