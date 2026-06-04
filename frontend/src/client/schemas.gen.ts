@@ -803,6 +803,18 @@ export const DealPublicSchema = {
                 }
             ],
             title: 'Project Number'
+        },
+        owner_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Owner Id'
         }
     },
     type: 'object',

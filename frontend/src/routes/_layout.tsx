@@ -24,13 +24,15 @@ function Layout() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className="min-w-0 overflow-hidden">
         {/* Thin top bar — only sidebar trigger, much smaller than before */}
         <header className="sticky top-0 z-10 flex h-10 shrink-0 items-center gap-2 border-b bg-background px-3">
           <SidebarTrigger className="h-7 w-7 text-muted-foreground" />
         </header>
         <main className="flex-1 p-4 md:p-6 min-w-0 overflow-hidden">
-          <Outlet />
+          <div className="min-w-0 max-w-full">
+            <Outlet />
+          </div>
         </main>
         <Footer />
       </SidebarInset>

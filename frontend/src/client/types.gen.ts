@@ -117,6 +117,7 @@ export type DealPublic = {
     updated_at?: (string | null);
     project_name?: (string | null);
     project_number?: (number | null);
+    owner_id?: (string | null);
 };
 
 export type DealRisk = 'Green' | 'Amber' | 'Red';
