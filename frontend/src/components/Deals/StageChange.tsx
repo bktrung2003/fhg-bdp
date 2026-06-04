@@ -39,16 +39,17 @@ export function StageChange({ deal }: Props) {
   const STAGES = useMasterData(MD.DEAL_STAGE)
 
   // Track new_stage as local state — cleaner than form integration
-  const [newStage, setNewStage] = useState<string>(deal.stage ?? "Lead")
+  const [newStage, setNewStage] = useState<string>("")
 
-  // Reset when dialog opens
+  // Reset ONLY when dialog opens (not on every STAGES array re-creation)
   useEffect(() => {
     if (open) {
-      // pick first non-current stage as default
+      // pick first non-current stage as default — read STAGES at time of open
       const firstOther = STAGES.find(s => s !== deal.stage) ?? STAGES[0] ?? "Lead"
       setNewStage(firstOther)
     }
-  }, [open, deal.stage, STAGES])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, deal.stage])
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormFields>()
 
