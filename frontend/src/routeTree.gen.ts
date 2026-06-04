@@ -16,6 +16,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
+import { Route as LayoutProjectsRouteImport } from './routes/_layout/projects'
 import { Route as LayoutPreopeningRouteImport } from './routes/_layout/preopening'
 import { Route as LayoutOwnersRouteImport } from './routes/_layout/owners'
 import { Route as LayoutMasterDataRouteImport } from './routes/_layout/master-data'
@@ -24,6 +25,7 @@ import { Route as LayoutDocumentsRouteImport } from './routes/_layout/documents'
 import { Route as LayoutDealsRouteImport } from './routes/_layout/deals'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
 import { Route as LayoutActivitiesRouteImport } from './routes/_layout/activities'
+import { Route as LayoutProjectsProjectIdRouteImport } from './routes/_layout/projects_.$projectId'
 import { Route as LayoutDealsDealIdRouteImport } from './routes/_layout/deals_.$dealId'
 
 const SignupRoute = SignupRouteImport.update({
@@ -58,6 +60,11 @@ const LayoutIndexRoute = LayoutIndexRouteImport.update({
 const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutProjectsRoute = LayoutProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutPreopeningRoute = LayoutPreopeningRouteImport.update({
@@ -100,6 +107,11 @@ const LayoutActivitiesRoute = LayoutActivitiesRouteImport.update({
   path: '/activities',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutProjectsProjectIdRoute = LayoutProjectsProjectIdRouteImport.update({
+  id: '/projects_/$projectId',
+  path: '/projects/$projectId',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutDealsDealIdRoute = LayoutDealsDealIdRouteImport.update({
   id: '/deals_/$dealId',
   path: '/deals/$dealId',
@@ -120,8 +132,10 @@ export interface FileRoutesByFullPath {
   '/master-data': typeof LayoutMasterDataRoute
   '/owners': typeof LayoutOwnersRoute
   '/preopening': typeof LayoutPreopeningRoute
+  '/projects': typeof LayoutProjectsRoute
   '/settings': typeof LayoutSettingsRoute
   '/deals/$dealId': typeof LayoutDealsDealIdRoute
+  '/projects/$projectId': typeof LayoutProjectsProjectIdRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -136,9 +150,11 @@ export interface FileRoutesByTo {
   '/master-data': typeof LayoutMasterDataRoute
   '/owners': typeof LayoutOwnersRoute
   '/preopening': typeof LayoutPreopeningRoute
+  '/projects': typeof LayoutProjectsRoute
   '/settings': typeof LayoutSettingsRoute
   '/': typeof LayoutIndexRoute
   '/deals/$dealId': typeof LayoutDealsDealIdRoute
+  '/projects/$projectId': typeof LayoutProjectsProjectIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -155,9 +171,11 @@ export interface FileRoutesById {
   '/_layout/master-data': typeof LayoutMasterDataRoute
   '/_layout/owners': typeof LayoutOwnersRoute
   '/_layout/preopening': typeof LayoutPreopeningRoute
+  '/_layout/projects': typeof LayoutProjectsRoute
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/': typeof LayoutIndexRoute
   '/_layout/deals_/$dealId': typeof LayoutDealsDealIdRoute
+  '/_layout/projects_/$projectId': typeof LayoutProjectsProjectIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -175,8 +193,10 @@ export interface FileRouteTypes {
     | '/master-data'
     | '/owners'
     | '/preopening'
+    | '/projects'
     | '/settings'
     | '/deals/$dealId'
+    | '/projects/$projectId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -191,9 +211,11 @@ export interface FileRouteTypes {
     | '/master-data'
     | '/owners'
     | '/preopening'
+    | '/projects'
     | '/settings'
     | '/'
     | '/deals/$dealId'
+    | '/projects/$projectId'
   id:
     | '__root__'
     | '/_layout'
@@ -209,9 +231,11 @@ export interface FileRouteTypes {
     | '/_layout/master-data'
     | '/_layout/owners'
     | '/_layout/preopening'
+    | '/_layout/projects'
     | '/_layout/settings'
     | '/_layout/'
     | '/_layout/deals_/$dealId'
+    | '/_layout/projects_/$projectId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -273,6 +297,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutSettingsRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/projects': {
+      id: '/_layout/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof LayoutProjectsRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/preopening': {
       id: '/_layout/preopening'
       path: '/preopening'
@@ -329,6 +360,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutActivitiesRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/projects_/$projectId': {
+      id: '/_layout/projects_/$projectId'
+      path: '/projects/$projectId'
+      fullPath: '/projects/$projectId'
+      preLoaderRoute: typeof LayoutProjectsProjectIdRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/deals_/$dealId': {
       id: '/_layout/deals_/$dealId'
       path: '/deals/$dealId'
@@ -348,9 +386,11 @@ interface LayoutRouteChildren {
   LayoutMasterDataRoute: typeof LayoutMasterDataRoute
   LayoutOwnersRoute: typeof LayoutOwnersRoute
   LayoutPreopeningRoute: typeof LayoutPreopeningRoute
+  LayoutProjectsRoute: typeof LayoutProjectsRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
   LayoutDealsDealIdRoute: typeof LayoutDealsDealIdRoute
+  LayoutProjectsProjectIdRoute: typeof LayoutProjectsProjectIdRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
@@ -362,9 +402,11 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutMasterDataRoute: LayoutMasterDataRoute,
   LayoutOwnersRoute: LayoutOwnersRoute,
   LayoutPreopeningRoute: LayoutPreopeningRoute,
+  LayoutProjectsRoute: LayoutProjectsRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutIndexRoute: LayoutIndexRoute,
   LayoutDealsDealIdRoute: LayoutDealsDealIdRoute,
+  LayoutProjectsProjectIdRoute: LayoutProjectsProjectIdRoute,
 }
 
 const LayoutRouteWithChildren =

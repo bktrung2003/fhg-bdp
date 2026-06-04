@@ -1,4 +1,4 @@
-import { BarChart3, Building2, CheckSquare, FileText, Home, Rocket, Settings, UserCheck, Users } from "lucide-react"
+import { BarChart3, Briefcase, Building2, CheckSquare, FileText, Home, Rocket, Settings, UserCheck, Users } from "lucide-react"
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
 import { Logo } from "@/components/Common/Logo"
@@ -14,8 +14,9 @@ import { User } from "./User"
 
 const baseItems: Item[] = [
   { icon: Home, title: "Dashboard", path: "/" },
-  { icon: Building2, title: "Deal Pipeline", path: "/deals" },
   { icon: UserCheck, title: "Owner CRM 360", path: "/owners" },
+  { icon: Briefcase, title: "Projects", path: "/projects" },
+  { icon: Building2, title: "Deal Pipeline", path: "/deals" },
   { icon: CheckSquare, title: "Activities & Tasks", path: "/activities" },
   { icon: FileText, title: "Documents", path: "/documents" },
   { icon: BarChart3, title: "Feasibility", path: "/feasibility" },

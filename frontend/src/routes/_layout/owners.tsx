@@ -8,7 +8,11 @@ import {
   type OwnerPublic,
   type OwnerContactPublic,
   type OwnerInteractionPublic,
+  type ProjectPublic,
 } from "@/client"
+import { useNavigate } from "@tanstack/react-router"
+import { AddProject } from "@/components/Projects/AddProject"
+import { Building2 } from "lucide-react"
 import { AddOwner } from "@/components/Owners/AddOwner"
 import { AddContact } from "@/components/Owners/AddContact"
 import { EditOwner } from "@/components/Owners/EditOwner"
@@ -88,6 +92,8 @@ function DeleteContactBtn({ contactId, ownerId }: { contactId: string; ownerId: 
 // ── Owner Detail Panel ────────────────────────────────────────────────────────
 
 function OwnerDetail({ owner }: { owner: OwnerPublic }) {
+  const navigate = useNavigate()
+
   const { data: contacts } = useQuery({
     queryKey: ["owner-contacts", owner.id],
     queryFn: () => OwnersService.listContacts({ id: owner.id }),
@@ -97,6 +103,19 @@ function OwnerDetail({ owner }: { owner: OwnerPublic }) {
     queryKey: ["owner-interactions", owner.id],
     queryFn: () => OwnersService.listInteractions({ id: owner.id }),
   })
+
+  const { data: projects } = useQuery({
+    queryKey: ["owner-projects", owner.id],
+    queryFn: () => OwnersService.listOwnerProjects({ id: owner.id }),
+  })
+
+  const { data: ownerDeals } = useQuery({
+    queryKey: ["owner-deals", owner.id],
+    queryFn: () => OwnersService.listOwnerDeals({ id: owner.id }),
+  })
+
+  const projectsList = (projects ?? []) as ProjectPublic[]
+  const dealsList = (ownerDeals ?? []) as any[]
 
   return (
     <div className="flex flex-col gap-4 overflow-y-auto pr-1">
@@ -118,12 +137,13 @@ function OwnerDetail({ owner }: { owner: OwnerPublic }) {
         </div>
 
         {/* Mini stats */}
-        <div className="grid grid-cols-4 gap-2 mb-3">
+        <div className="grid grid-cols-5 gap-2 mb-3">
           {[
             { label: "Catch-up", value: owner.catchup_status, sub: owner.next_catchup ? `Next: ${owner.next_catchup}` : "" },
             { label: "Last Met", value: owner.last_interaction ?? "—", sub: "Latest interaction" },
+            { label: "Projects", value: String((owner as any).project_count ?? 0), sub: "Assets" },
+            { label: "Deals", value: String(owner.deal_count), sub: "Active + closed" },
             { label: "Portfolio", value: owner.assets ?? "—", sub: "" },
-            { label: "Linked Deals", value: String(owner.deal_count), sub: "" },
           ].map(s => (
             <div key={s.label} className="rounded-md bg-muted/50 p-2.5">
               <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{s.label}</p>
@@ -136,6 +156,73 @@ function OwnerDetail({ owner }: { owner: OwnerPublic }) {
         {owner.strategic_value && (
           <div className="rounded-md bg-muted/30 border px-3 py-2 text-sm">
             <span className="font-semibold">Strategic value: </span>{owner.strategic_value}
+          </div>
+        )}
+      </div>
+
+      {/* Projects on this Owner */}
+      <div className="rounded-lg border bg-card p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-sm flex items-center gap-2">
+            <Building2 className="h-4 w-4 text-muted-foreground" />
+            Projects ({projectsList.length})
+          </h3>
+          <AddProject
+            defaultOwnerId={owner.id}
+            trigger={<Button size="sm" variant="outline"><Building2 className="h-3.5 w-3.5 mr-1" />Add Project</Button>}
+          />
+        </div>
+        {projectsList.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No projects yet. Add the first hotel asset for this owner.</p>
+        ) : (
+          <div className="grid grid-cols-1 gap-2">
+            {projectsList.map(p => (
+              <div key={p.id}
+                className="rounded-md border bg-muted/20 hover:bg-muted/40 p-2.5 cursor-pointer transition-colors"
+                onClick={() => navigate({ to: "/projects/$projectId" as any, params: { projectId: p.id } })}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">{p.name}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {p.city ?? p.country} · {p.keys ?? "—"} keys · {p.project_type ?? "—"}
+                    </p>
+                  </div>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">{p.status}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Deals across this Owner's projects */}
+      <div className="rounded-lg border bg-card p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-sm">All Deals ({dealsList.length})</h3>
+        </div>
+        {dealsList.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No deals across this owner's projects yet.</p>
+        ) : (
+          <div className="grid grid-cols-1 gap-2 max-h-[280px] overflow-y-auto">
+            {dealsList.map(d => (
+              <div key={d.id}
+                className="rounded-md border bg-muted/20 hover:bg-muted/40 p-2.5 cursor-pointer transition-colors"
+                onClick={() => navigate({ to: "/deals/$dealId" as any, params: { dealId: d.id } })}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">{d.name}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {d.deal_type ?? "HMA"} · {d.stage} · {d.probability ?? 0}%
+                    </p>
+                  </div>
+                  <span className="text-xs font-semibold tabular-nums">
+                    {d.pipeline_value ? `$${(d.pipeline_value / 1_000_000).toFixed(1)}M` : "—"}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
