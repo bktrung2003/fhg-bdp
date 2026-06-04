@@ -26,8 +26,10 @@ if settings.all_cors_origins:
         CORSMiddleware,
         allow_origins=settings.all_cors_origins,
         allow_credentials=True,
-        allow_methods=["*"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"],
         allow_headers=["*"],
+        expose_headers=["*"],
+        max_age=600,
     )
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
