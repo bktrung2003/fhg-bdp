@@ -676,11 +676,14 @@ class DocumentBase(_EnumAsStr):
     name: str = Field(min_length=1, max_length=255)
     doc_type: DocType = Field(default=DocType.OTHER, sa_type=String(30))
     permission: DocPermission = Field(default=DocPermission.INTERNAL, sa_type=String(30))
+    # Polymorphic context — link to Deal OR Project (not both required)
     deal_id: uuid.UUID | None = Field(default=None)
     deal_name: str | None = Field(default=None, max_length=255)
+    project_id: uuid.UUID | None = Field(default=None)
+    project_name: str | None = Field(default=None, max_length=255)
     version: str | None = Field(default="v1.0", max_length=20)
     note: str | None = Field(default=None, max_length=500)
-    is_confidential: bool = Field(default=False)  # Only uploader + BDD/COO/CEO can view
+    is_confidential: bool = Field(default=False)
 
 
 class Document(DocumentBase, table=True):

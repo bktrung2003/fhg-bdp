@@ -2,12 +2,13 @@ import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { ArrowLeft, Building2, MapPin, Bed } from "lucide-react"
 
-import { ProjectsService, type DealPublic, type MilestonePublic } from "@/client"
+import { ProjectsService, type DealPublic, type MilestonePublic, type DocumentPublic } from "@/client"
 import { AddDeal } from "@/components/Deals/AddDeal"
 import { EditProject } from "@/components/Projects/EditProject"
 import { AddMilestone } from "@/routes/_layout/preopening"
+import { UploadDocument } from "@/routes/_layout/documents"
 import { Button } from "@/components/ui/button"
-import { Plus, ExternalLink, Rocket, AlertCircle } from "lucide-react"
+import { Plus, ExternalLink, Rocket, AlertCircle, FileText, Lock } from "lucide-react"
 
 export const Route = createFileRoute("/_layout/projects_/$projectId")({
   component: ProjectWorkspace,
@@ -52,8 +53,15 @@ function ProjectWorkspace() {
     enabled: !!project,
   })
 
+  const { data: documentsData } = useQuery({
+    queryKey: ["project-documents", projectId],
+    queryFn: () => ProjectsService.listProjectDocuments({ id: projectId }),
+    enabled: !!project,
+  })
+
   const deals = (dealsData ?? []) as DealPublic[]
   const milestones = (milestonesData ?? []) as MilestonePublic[]
+  const documents = (documentsData ?? []) as DocumentPublic[]
   const redCount = milestones.filter(m => m.status === "Red").length
   const amberCount = milestones.filter(m => m.status === "Amber").length
 
@@ -342,6 +350,74 @@ function ProjectWorkspace() {
                   </td>
                   <td className="py-2.5 pr-3 text-xs text-muted-foreground">
                     → View
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* Documents linked to project + its deals */}
+      <div className="rounded-lg border bg-card">
+        <div className="p-4 border-b flex items-center justify-between">
+          <div>
+            <h2 className="font-semibold text-sm flex items-center gap-2">
+              <FileText className="h-4 w-4 text-muted-foreground" />
+              Documents ({documents.length})
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Asset-level docs (Feasibility, Drawings) + Deal-specific docs (NDA, Proposal, HMA)
+            </p>
+          </div>
+          <UploadDocument
+            defaultProjectId={project.id}
+            trigger={<Button size="sm"><Plus className="h-4 w-4 mr-1" />Upload Document</Button>}
+          />
+        </div>
+        {documents.length === 0 ? (
+          <p className="text-sm text-muted-foreground p-6 text-center">
+            No documents yet. Upload Feasibility Reports, Technical Drawings or any deal-specific docs.
+          </p>
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b bg-muted/30">
+                {["Document","Type","Linked To","Version","Permission","Size",""].map(h => (
+                  <th key={h} className="text-left text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground py-2.5 pr-3 pl-3 first:pl-3">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {documents.map(doc => (
+                <tr key={doc.id} className="border-b last:border-0 hover:bg-muted/20">
+                  <td className="py-2.5 pr-3 pl-3">
+                    <div className="flex items-center gap-2">
+                      {doc.is_confidential
+                        ? <Lock className="h-3.5 w-3.5 text-amber-500" />
+                        : <FileText className="h-3.5 w-3.5 text-muted-foreground" />}
+                      <div>
+                        <p className="text-sm font-medium">{doc.name}</p>
+                        <p className="text-[10px] text-muted-foreground">{doc.original_filename}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-2.5 pr-3 text-xs">{doc.doc_type}</td>
+                  <td className="py-2.5 pr-3 text-xs text-muted-foreground">
+                    {doc.deal_name ? <span>📋 {doc.deal_name}</span> : <span>📁 Project-level</span>}
+                  </td>
+                  <td className="py-2.5 pr-3 text-xs font-mono text-muted-foreground">{doc.version}</td>
+                  <td className="py-2.5 pr-3 text-xs">{doc.permission}</td>
+                  <td className="py-2.5 pr-3 text-[10px] text-muted-foreground">
+                    {doc.file_size >= 1_000_000 ? `${(doc.file_size / 1_000_000).toFixed(1)} MB` : `${(doc.file_size / 1_000).toFixed(0)} KB`}
+                  </td>
+                  <td className="py-2.5 pr-3">
+                    {doc.can_view && doc.download_url && (
+                      <Button variant="ghost" size="sm" className="h-7 text-xs"
+                        onClick={() => window.open(doc.download_url!, "_blank")}>
+                        Open
+                      </Button>
+                    )}
                   </td>
                 </tr>
               ))}

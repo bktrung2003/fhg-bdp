@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import { FileText, Trash2, Upload, Eye, EyeOff, Lock, Search, X } from "lucide-react"
 import { useMemo, useRef, useState } from "react"
 
-import { DocumentsService, DealsService, type DocumentPublic } from "@/client"
+import { DocumentsService, DealsService, ProjectsService, type DocumentPublic } from "@/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -65,7 +65,15 @@ const TYPE_COLOR: Record<string, string> = {
 
 // ── Upload Dialog ─────────────────────────────────────────────────────────────
 
-function UploadDocument() {
+type ContextType = "deal" | "project" | "standalone"
+
+interface UploadDocumentProps {
+  defaultDealId?: string
+  defaultProjectId?: string
+  trigger?: React.ReactNode
+}
+
+export function UploadDocument({ defaultDealId, defaultProjectId, trigger }: UploadDocumentProps = {}) {
   const [open, setOpen] = useState(false)
   const [file, setFile] = useState<File | null>(null)
   const [docType, setDocType] = useState("Other")
@@ -73,8 +81,13 @@ function UploadDocument() {
   const DOC_TYPES = useMasterData(MD.DOC_TYPE)
   const PERMISSIONS = useMasterData(MD.DOC_PERMISSION)
   const [name, setName] = useState("")
-  const [selectedDealId, setSelectedDealId] = useState("")
+  const [contextType, setContextType] = useState<ContextType>(
+    defaultProjectId ? "project" : defaultDealId ? "deal" : "deal"
+  )
+  const [selectedDealId, setSelectedDealId] = useState(defaultDealId ?? "")
   const [selectedDealName, setSelectedDealName] = useState("")
+  const [selectedProjectId, setSelectedProjectId] = useState(defaultProjectId ?? "")
+  const [selectedProjectName, setSelectedProjectName] = useState("")
   const [version, setVersion] = useState("v1.0")
   const [isConfidential, setIsConfidential] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -82,13 +95,20 @@ function UploadDocument() {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [uploading, setUploading] = useState(false)
 
-  // Fetch all active deals for dropdown
+  // Fetch all active deals + projects for dropdowns
   const { data: dealsData } = useQuery({
     queryKey: ["deals-picker"],
     queryFn: () => DealsService.listDeals({ limit: 500 }),
-    enabled: open,
+    enabled: open && contextType === "deal",
   })
   const deals = dealsData?.data ?? []
+
+  const { data: projectsData } = useQuery({
+    queryKey: ["projects-picker"],
+    queryFn: () => ProjectsService.listProjects({ limit: 500 }),
+    enabled: open && contextType === "project",
+  })
+  const projects = projectsData?.data ?? []
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]
@@ -108,6 +128,19 @@ function UploadDocument() {
     }
   }
 
+  const handleProjectSelect = (value: string) => {
+    if (value === "__none__") {
+      setSelectedProjectId("")
+      setSelectedProjectName("")
+      return
+    }
+    const project = projects.find(p => p.id === value)
+    if (project) {
+      setSelectedProjectId(project.id)
+      setSelectedProjectName(project.name)
+    }
+  }
+
   const handleUpload = async () => {
     if (!file || !name) return
     setUploading(true)
@@ -117,8 +150,14 @@ function UploadDocument() {
       fd.append("name", name)
       fd.append("doc_type", docType)
       fd.append("permission", permission)
-      fd.append("deal_id", selectedDealId)
-      fd.append("deal_name", selectedDealName)
+      // Context based on type
+      if (contextType === "deal") {
+        fd.append("deal_id", selectedDealId)
+        fd.append("deal_name", selectedDealName)
+      } else if (contextType === "project") {
+        fd.append("project_id", selectedProjectId)
+        fd.append("project_name", selectedProjectName)
+      }
       fd.append("version", version)
       fd.append("is_confidential", String(isConfidential))
 
@@ -132,9 +171,13 @@ function UploadDocument() {
       if (!res.ok) throw new Error(await res.text())
 
       qc.invalidateQueries({ queryKey: ["documents"] })
+      qc.invalidateQueries({ queryKey: ["project-documents"] })
+      qc.invalidateQueries({ queryKey: ["deal-docs"] })
       showSuccessToast("Document uploaded.")
       setOpen(false)
-      setFile(null); setName(""); setSelectedDealId(""); setSelectedDealName("")
+      setFile(null); setName("")
+      setSelectedDealId(""); setSelectedDealName("")
+      setSelectedProjectId(""); setSelectedProjectName("")
       setVersion("v1.0"); setDocType("Other"); setPermission("Internal Only"); setIsConfidential(false)
     } catch {
       showErrorToast("Upload failed.")
@@ -145,35 +188,97 @@ function UploadDocument() {
 
   return (
     <>
-      <Button size="sm" onClick={() => setOpen(true)}>
-        <Upload className="h-4 w-4 mr-1" />Upload Document
-      </Button>
+      {trigger ? (
+        <span onClick={() => setOpen(true)}>{trigger}</span>
+      ) : (
+        <Button size="sm" onClick={() => setOpen(true)}>
+          <Upload className="h-4 w-4 mr-1" />Upload Document
+        </Button>
+      )}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>Upload Document</DialogTitle></DialogHeader>
           <div className="space-y-4">
-            {/* Step 1 — Related Deal */}
-            <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
+            {/* Step 1 — Choose context */}
+            <div className="rounded-lg border bg-muted/30 p-3 space-y-3">
               <div className="flex items-center gap-2">
                 <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold">1</span>
-                <Label className="text-xs uppercase tracking-wider">Related Deal (optional)</Label>
+                <Label className="text-xs uppercase tracking-wider">What is this document about?</Label>
               </div>
-              <Select value={selectedDealId || "__none__"} onValueChange={handleDealSelect}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a deal..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">— Standalone document —</SelectItem>
-                  {deals.map(d => (
-                    <SelectItem key={d.id} value={d.id}>
-                      <span className="font-medium">{d.name}</span>
-                      <span className="text-muted-foreground ml-2 text-xs">{d.country} · {d.stage}</span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+
+              {/* Context type chips */}
+              <div className="grid grid-cols-3 gap-2">
+                <Button
+                  type="button"
+                  variant={contextType === "deal" ? "default" : "outline"}
+                  size="sm"
+                  className="h-auto py-2 flex flex-col gap-0.5"
+                  onClick={() => setContextType("deal")}
+                >
+                  <span className="font-semibold text-xs">Deal</span>
+                  <span className="text-[9px] opacity-75 font-normal">NDA, Proposal, HMA</span>
+                </Button>
+                <Button
+                  type="button"
+                  variant={contextType === "project" ? "default" : "outline"}
+                  size="sm"
+                  className="h-auto py-2 flex flex-col gap-0.5"
+                  onClick={() => setContextType("project")}
+                >
+                  <span className="font-semibold text-xs">Project</span>
+                  <span className="text-[9px] opacity-75 font-normal">Feasibility, Drawings</span>
+                </Button>
+                <Button
+                  type="button"
+                  variant={contextType === "standalone" ? "default" : "outline"}
+                  size="sm"
+                  className="h-auto py-2 flex flex-col gap-0.5"
+                  onClick={() => setContextType("standalone")}
+                >
+                  <span className="font-semibold text-xs">Standalone</span>
+                  <span className="text-[9px] opacity-75 font-normal">Internal ops</span>
+                </Button>
+              </div>
+
+              {/* Entity dropdown based on context */}
+              {contextType === "deal" && (
+                <Select value={selectedDealId || "__none__"} onValueChange={handleDealSelect}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a deal..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— Pick later —</SelectItem>
+                    {deals.map(d => (
+                      <SelectItem key={d.id} value={d.id}>
+                        <span className="font-medium">{d.name}</span>
+                        <span className="text-muted-foreground ml-2 text-xs">{d.country} · {d.stage}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+
+              {contextType === "project" && (
+                <Select value={selectedProjectId || "__none__"} onValueChange={handleProjectSelect}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a project..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— Pick later —</SelectItem>
+                    {projects.map(p => (
+                      <SelectItem key={p.id} value={p.id}>
+                        <span className="font-medium">{p.name}</span>
+                        <span className="text-muted-foreground ml-2 text-xs">{p.city ?? p.country}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+
               <p className="text-[10px] text-muted-foreground">
-                Linking to a Deal keeps NDAs, proposals and HMA drafts organized by deal lifecycle.
+                {contextType === "deal" && "Deal-specific docs: NDA, Proposal, HMA Draft, Contract."}
+                {contextType === "project" && "Asset-level docs: Feasibility Report, Technical Drawings, Permits — apply across multiple deals."}
+                {contextType === "standalone" && "Internal docs not tied to a specific deal or project."}
               </p>
             </div>
 
@@ -302,7 +407,15 @@ function DocRow({ doc }: { doc: DocumentPublic }) {
           {doc.doc_type}
         </span>
       </td>
-      <td className="py-3 pr-3 text-sm text-muted-foreground">{doc.deal_name || "—"}</td>
+      <td className="py-3 pr-3 text-sm text-muted-foreground">
+        {doc.deal_name ? (
+          <span>📋 {doc.deal_name}</span>
+        ) : (doc as any).project_name ? (
+          <span>📁 {(doc as any).project_name}</span>
+        ) : (
+          <span>—</span>
+        )}
+      </td>
       <td className="py-3 pr-3 text-sm font-mono text-muted-foreground">{doc.version}</td>
       <td className="py-3 pr-3">
         <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${permColor}`}>
@@ -400,11 +513,15 @@ function DocumentsPage() {
     return `${bytes} B`
   }
 
-  // Group by deal for "grouped" view
-  const groupedByDeal = useMemo(() => {
+  // Group by context (deal or project) for "grouped" view
+  const groupedByContext = useMemo(() => {
     const groups: Record<string, DocumentPublic[]> = {}
     docs.forEach(d => {
-      const key = d.deal_name || "— Standalone (no deal) —"
+      const key = d.deal_name
+        ? `📋 ${d.deal_name}`
+        : (d as any).project_name
+          ? `📁 ${(d as any).project_name} (Project)`
+          : "— Standalone —"
       if (!groups[key]) groups[key] = []
       groups[key].push(d)
     })
@@ -504,7 +621,7 @@ function DocumentsPage() {
           </Button>
           <Button variant={viewMode === "grouped" ? "default" : "ghost"} size="sm" className="h-7 px-2.5"
             onClick={() => setViewMode("grouped")}>
-            By Deal
+            By Context
           </Button>
         </div>
       </div>
@@ -529,7 +646,7 @@ function DocumentsPage() {
           <table className="w-full min-w-[900px] text-sm">
             <thead>
               <tr className="border-b bg-muted/30">
-                {["Document","Type","Related Deal","Version","Permission","Size","Uploaded",""].map(h => (
+                {["Document","Type","Linked To","Version","Permission","Size","Uploaded",""].map(h => (
                   <th key={h} className="text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground py-2.5 pr-3 pl-3 first:pl-3">
                     {h}
                   </th>
@@ -547,13 +664,10 @@ function DocumentsPage() {
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {groupedByDeal.map(([dealName, items]) => (
-            <div key={dealName} className="rounded-lg border bg-card overflow-hidden">
+          {groupedByContext.map(([groupName, items]) => (
+            <div key={groupName} className="rounded-lg border bg-card overflow-hidden">
               <div className="flex items-center justify-between px-4 py-2 bg-muted/40 border-b">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-semibold text-sm">{dealName}</span>
-                </div>
+                <span className="font-semibold text-sm">{groupName}</span>
                 <span className="text-xs text-muted-foreground">{items.length} document{items.length !== 1 ? "s" : ""}</span>
               </div>
               <table className="w-full min-w-[800px] text-sm">

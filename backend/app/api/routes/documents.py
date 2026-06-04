@@ -7,8 +7,8 @@ from sqlmodel import col, func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import (
-    Document, DocumentPublic, DocumentsPublic,
-    DocPermission, DocType, Message, UserRole,
+    Deal, Document, DocumentPublic, DocumentsPublic,
+    DocPermission, DocType, Message, Project, UserRole,
 )
 from app.storage import delete_file, get_download_url, upload_file, LOCAL_UPLOAD_DIR
 
@@ -46,6 +46,7 @@ def list_documents(
     skip: int = 0, limit: int = Query(default=100, le=500),
     search: str | None = None,
     deal_id: uuid.UUID | None = None,
+    project_id: uuid.UUID | None = None,
     doc_type: DocType | None = None,
     permission: DocPermission | None = None,
 ) -> Any:
@@ -54,6 +55,8 @@ def list_documents(
         stmt = stmt.where(col(Document.name).ilike(f"%{search}%"))
     if deal_id:
         stmt = stmt.where(Document.deal_id == deal_id)
+    if project_id:
+        stmt = stmt.where(Document.project_id == project_id)
     if doc_type:
         stmt = stmt.where(Document.doc_type == doc_type)
     if permission:
@@ -79,6 +82,8 @@ async def upload_document(
     permission: str = Form(default="Internal Only"),
     deal_id: str = Form(default=""),
     deal_name: str = Form(default=""),
+    project_id: str = Form(default=""),
+    project_name: str = Form(default=""),
     version: str = Form(default="v1.0"),
     note: str = Form(default=""),
     is_confidential: bool = Form(default=False),
@@ -89,13 +94,28 @@ async def upload_document(
 
     storage_path = upload_file(content, file.filename or "file", file.content_type or "application/octet-stream")
 
+    deal_uuid = uuid.UUID(deal_id) if deal_id else None
+    project_uuid = uuid.UUID(project_id) if project_id else None
+    final_project_name = project_name or None
+
+    # Auto-resolve project from deal if deal linked but project not specified
+    if deal_uuid and not project_uuid:
+        deal = session.get(Deal, deal_uuid)
+        if deal and deal.project_id:
+            project_uuid = deal.project_id
+            project = session.get(Project, deal.project_id)
+            if project:
+                final_project_name = project.name
+
     from datetime import datetime, timezone
     doc = Document(
         name=name,
         doc_type=doc_type,
         permission=permission,
-        deal_id=uuid.UUID(deal_id) if deal_id else None,
+        deal_id=deal_uuid,
         deal_name=deal_name or None,
+        project_id=project_uuid,
+        project_name=final_project_name,
         version=version or "v1.0",
         note=note or None,
         original_filename=file.filename or "file",

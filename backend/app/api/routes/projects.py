@@ -7,8 +7,8 @@ from sqlmodel import col, func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import (
-    Deal, Message, Milestone, Owner, Project, ProjectCreate, ProjectPublic,
-    ProjectsPublic, ProjectStatus, ProjectUpdate,
+    Deal, Document, Message, Milestone, Owner, Project, ProjectCreate,
+    ProjectPublic, ProjectsPublic, ProjectStatus, ProjectUpdate,
 )
 
 router = APIRouter(prefix="/projects", tags=["projects"])
@@ -157,6 +157,34 @@ def list_project_deals(
         select(Deal).where(Deal.project_id == id).order_by(col(Deal.updated_at).desc())
     ).all()
     return deals
+
+
+# ── GET /projects/{id}/documents ──────────────────────────────────────────────
+
+@router.get("/{id}/documents")
+def list_project_documents(
+    session: SessionDep, current_user: CurrentUser, id: uuid.UUID
+) -> Any:
+    """All docs for this project — both project-linked and deal-linked where deal belongs to project."""
+    if not session.get(Project, id):
+        raise HTTPException(status_code=404, detail="Project not found")
+    # Direct project_id match
+    direct = session.exec(
+        select(Document).where(Document.project_id == id)
+    ).all()
+    # Docs linked to deals of this project (but project_id not set explicitly)
+    deal_ids = session.exec(select(Deal.id).where(Deal.project_id == id)).all()
+    via_deals = []
+    if deal_ids:
+        via_deals = session.exec(
+            select(Document)
+            .where(col(Document.deal_id).in_(deal_ids))
+            .where(Document.project_id != id)  # avoid duplicates from direct match
+        ).all()
+    all_docs = list(direct) + list(via_deals)
+    # Sort by uploaded_at desc
+    all_docs.sort(key=lambda d: d.uploaded_at or "", reverse=True)
+    return all_docs
 
 
 # ── GET /projects/{id}/milestones ─────────────────────────────────────────────
