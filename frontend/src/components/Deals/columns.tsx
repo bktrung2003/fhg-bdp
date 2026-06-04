@@ -136,12 +136,16 @@ export const dealColumns: ColumnDef<DealPublic>[] = [
     id: "country",
     header: "Country",
     cell: ({ row }) => (
-      <div>
-        <p className="text-sm">{row.original.country}</p>
-        {row.original.region && (
-          <p className="text-xs text-muted-foreground">{row.original.region}</p>
-        )}
-      </div>
+      <span className="text-sm">{row.original.country}</span>
+    ),
+  },
+  {
+    id: "region",
+    header: "Region",
+    cell: ({ row }) => (
+      <span className="text-xs text-muted-foreground whitespace-nowrap">
+        {row.original.region ?? "—"}
+      </span>
     ),
   },
   {

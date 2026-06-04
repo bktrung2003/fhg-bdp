@@ -130,13 +130,10 @@ export function AddDeal() {
 
             <div className="space-y-1.5">
               <Label>Country *</Label>
-              <Select onValueChange={(v) => setValue("country", v, { shouldValidate: true })}>
-                <SelectTrigger><SelectValue placeholder="Select country / region..." /></SelectTrigger>
-                <SelectContent>
-                  {REGIONS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
-                </SelectContent>
-              </Select>
-              <input type="hidden" {...register("country", { required: "Required" })} />
+              <Input
+                {...register("country", { required: "Required" })}
+                placeholder="e.g. Vietnam, Thailand, Indonesia"
+              />
               {errors.country && <p className="text-xs text-red-500">{errors.country.message}</p>}
             </div>
 

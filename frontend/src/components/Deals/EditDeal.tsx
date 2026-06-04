@@ -100,12 +100,7 @@ export function EditDeal({ deal }: Props) {
             </div>
             <div className="space-y-1.5">
               <Label>Country</Label>
-              <Select defaultValue={deal.country ?? ""} onValueChange={(v) => setValue("country", v)}>
-                <SelectTrigger><SelectValue placeholder="Select country / region..." /></SelectTrigger>
-                <SelectContent>
-                  {REGIONS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <Input {...register("country")} placeholder="e.g. Vietnam" />
             </div>
             <div className="space-y-1.5">
               <Label>City</Label>
