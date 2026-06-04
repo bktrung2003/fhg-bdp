@@ -1,0 +1,265 @@
+{
+  "deals": [
+    {
+      "deal_number": 1, "name": "Fusion Resort Da Nang", "country": "Vietnam", "region": "Vietnam",
+      "city": "Da Nang", "owner_name": "Sun Group", "brand": "Fusion Resort",
+      "project_type": "Hotel New Build (Greenfield)", "stage": "Negotiation", "opening_target": "Q3 2026",
+      "keys": 220, "probability": 75, "pipeline_value": 45000000, "fee_forecast": 1650000,
+      "risk": "Amber", "feasibility": "Strong",
+      "next_action": "COO to review owner revised commercial terms before 10 June."
+    },
+    {
+      "deal_number": 2, "name": "Fusion Suites Saigon", "country": "Vietnam", "region": "Vietnam",
+      "city": "Ho Chi Minh City", "owner_name": "Vingroup", "brand": "Fusion Suites",
+      "project_type": "Hotel Conversion (Takeover)", "stage": "Proposal", "opening_target": "Q4 2026",
+      "keys": 180, "probability": 60, "pipeline_value": 38000000, "fee_forecast": 1180000,
+      "risk": "Green", "feasibility": "Strong",
+      "next_action": "BDM to follow up board review and confirm decision timeline."
+    },
+    {
+      "deal_number": 3, "name": "Fusion Retreat Phu Quoc", "country": "Vietnam", "region": "Vietnam",
+      "city": "Phu Quoc", "owner_name": "BIM Group", "brand": "Fusion Wellness",
+      "project_type": "Wellness / Spa Resort", "stage": "LOI Signed", "opening_target": "Q3 2026",
+      "keys": 150, "probability": 85, "pipeline_value": 32000000, "fee_forecast": 940000,
+      "risk": "Amber", "feasibility": "Medium",
+      "next_action": "Legal to circulate HMA draft v2."
+    },
+    {
+      "deal_number": 4, "name": "Fusion Heritage Hoi An", "country": "Vietnam", "region": "Vietnam",
+      "city": "Hoi An", "owner_name": "BRG Group", "brand": "Fusion Resort",
+      "project_type": "Hotel Adaptive Re-Use", "stage": "Feasibility", "opening_target": "Q1 2027",
+      "keys": 95, "probability": 45, "pipeline_value": 18000000, "fee_forecast": 420000,
+      "risk": "Red", "feasibility": "Weak",
+      "next_action": "Complete heritage licensing assessment."
+    },
+    {
+      "deal_number": 5, "name": "Fusion Bay Nha Trang", "country": "Vietnam", "region": "Vietnam",
+      "city": "Nha Trang", "owner_name": "KDI Holdings", "brand": "Fusion Resort",
+      "project_type": "Hotel New Build (Greenfield)", "stage": "NDA / Qualified", "opening_target": "Q2 2027",
+      "keys": 300, "probability": 35, "pipeline_value": 55000000, "fee_forecast": 1250000,
+      "risk": "Amber", "feasibility": "Medium",
+      "next_action": "Schedule site visit and clarify competitive operator shortlist."
+    },
+    {
+      "deal_number": 6, "name": "Fusion Grand Bangkok", "country": "Thailand", "region": "Thailand",
+      "city": "Bangkok", "owner_name": "Central Group", "brand": "Fusion Suites",
+      "project_type": "Hotel New Build (Greenfield)", "stage": "Proposal", "opening_target": "Q4 2026",
+      "keys": 260, "probability": 50, "pipeline_value": 62000000, "fee_forecast": 1480000,
+      "risk": "Green", "feasibility": "Strong",
+      "next_action": "Send revised proposal including technical services fee."
+    },
+    {
+      "deal_number": 7, "name": "Fusion Wellness Chiang Mai", "country": "Thailand", "region": "Thailand",
+      "city": "Chiang Mai", "owner_name": "Minor International", "brand": "Fusion Wellness",
+      "project_type": "Wellness / Spa Resort", "stage": "Feasibility", "opening_target": "Q1 2027",
+      "keys": 80, "probability": 40, "pipeline_value": 15000000, "fee_forecast": 310000,
+      "risk": "Amber", "feasibility": "Medium",
+      "next_action": "Market study on wellness demand and staffing risk."
+    },
+    {
+      "deal_number": 8, "name": "Fusion Resort Bali", "country": "Indonesia", "region": "Southeast Asia",
+      "city": "Bali", "owner_name": "Ciputra Group", "brand": "Fusion Resort",
+      "project_type": "Hotel New Build (Greenfield)", "stage": "Lead", "opening_target": "TBD",
+      "keys": 120, "probability": 15, "pipeline_value": 28000000, "fee_forecast": 460000,
+      "risk": "Green", "feasibility": "TBD",
+      "next_action": "Qualify owner intent and land status."
+    },
+    {
+      "deal_number": 9, "name": "Fusion City Hanoi", "country": "Vietnam", "region": "Vietnam",
+      "city": "Hanoi", "owner_name": "Sovico Group", "brand": "Fusion Suites",
+      "project_type": "Hotel New Build (Greenfield)", "stage": "Pre-opening", "opening_target": "Q3 2026",
+      "keys": 250, "probability": 100, "pipeline_value": 52000000, "fee_forecast": 1750000,
+      "risk": "Red", "feasibility": "Strong",
+      "next_action": "COO weekly pre-opening review."
+    },
+    {
+      "deal_number": 10, "name": "Fusion Phuket Wellness", "country": "Thailand", "region": "Thailand",
+      "city": "Phuket", "owner_name": "Central Group", "brand": "Fusion Wellness",
+      "project_type": "Wellness / Spa Resort", "stage": "NDA / Qualified", "opening_target": "Q1 2027",
+      "keys": 110, "probability": 30, "pipeline_value": 24000000, "fee_forecast": 520000,
+      "risk": "Amber", "feasibility": "TBD",
+      "next_action": "NDA countersignature pending."
+    },
+    {
+      "deal_number": 11, "name": "Fusion Kyoto Retreat", "country": "Japan", "region": "North Asia",
+      "city": "Kyoto", "owner_name": "Sakura REIT", "brand": "Fusion Wellness",
+      "project_type": "Hotel Conversion (Takeover)", "stage": "Lead", "opening_target": "TBD",
+      "keys": 90, "probability": 12, "pipeline_value": 72000000, "fee_forecast": 880000,
+      "risk": "Amber", "feasibility": "TBD",
+      "next_action": "Qualify REIT investment appetite and brand fit."
+    },
+    {
+      "deal_number": 12, "name": "Fusion Manila Bay", "country": "Philippines", "region": "Southeast Asia",
+      "city": "Manila", "owner_name": "Ayala Land", "brand": "Fusion Suites",
+      "project_type": "Hotel New Build (Greenfield)", "stage": "NDA / Qualified", "opening_target": "Q2 2027",
+      "keys": 210, "probability": 28, "pipeline_value": 47000000, "fee_forecast": 740000,
+      "risk": "Green", "feasibility": "TBD",
+      "next_action": "Confirm ownership structure and decision makers."
+    },
+    {
+      "deal_number": 13, "name": "Fusion Danang Residences", "country": "Vietnam", "region": "Vietnam",
+      "city": "Da Nang", "owner_name": "Sun Group", "brand": "Branded Residences",
+      "project_type": "Branded Residences", "stage": "Lead", "opening_target": "TBD",
+      "keys": 140, "probability": 20, "pipeline_value": 26000000, "fee_forecast": 390000,
+      "risk": "Green", "feasibility": "TBD",
+      "next_action": "Discuss branded residence fit with Sun Group."
+    }
+  ],
+
+  "owners": [
+    {
+      "company": "Sun Group", "owner_type": "Developer", "country": "Vietnam",
+      "priority": "Strategic", "relationship": "Strategic Partner",
+      "catchup_status": "On track", "next_catchup": "2026-06-12",
+      "financial_health": "Strong",
+      "assets": "6 assets: Da Nang, Phu Quoc, Ba Na, Hoi An",
+      "strategic_value": "Highest expansion potential. Currently linked to Da Nang resort and residences. Approach for Phuket / Bali if APAC mandate expands.",
+      "contacts": [
+        {"fusion_role": "CEO", "owner_contact": "Owner Chairman", "strength": "Strong", "last_met": "2026-05-10", "senior_flag": true, "note": "Quarterly strategic catch-up"},
+        {"fusion_role": "COO", "owner_contact": "Asset Director", "strength": "Warm", "last_met": "2026-04-25", "senior_flag": true, "note": "Pre-opening and operating model"},
+        {"fusion_role": "BD Director", "owner_contact": "Development VP", "strength": "Strong", "last_met": "2026-05-28", "senior_flag": false, "note": "Weekly deal progress"}
+      ],
+      "interactions": [
+        {"type": "Dinner", "date": "2026-05-10", "note": "Positive feedback on Da Nang commercial structure."},
+        {"type": "Site visit", "date": "2026-04-25", "note": "Owner requested wellness programming examples."},
+        {"type": "NDA signed", "date": "2026-03-20", "note": "NDA executed and stored in document register."}
+      ]
+    },
+    {
+      "company": "Vingroup", "owner_type": "Asset Owner", "country": "Vietnam",
+      "priority": "High", "relationship": "Strong",
+      "catchup_status": "Due this week", "next_catchup": "2026-06-06",
+      "financial_health": "Strong",
+      "assets": "12 hotels nationwide",
+      "strategic_value": "Large domestic portfolio. Potential conversion opportunities in HCMC and coastal assets.",
+      "contacts": [
+        {"fusion_role": "CEO", "owner_contact": "Group CEO", "strength": "Warm", "last_met": "2026-04-30", "senior_flag": true, "note": "Executive alignment"},
+        {"fusion_role": "BD Director", "owner_contact": "Hospitality Dev Director", "strength": "Strong", "last_met": "2026-05-05", "senior_flag": false, "note": "Proposal and commercial terms"}
+      ],
+      "interactions": [
+        {"type": "Proposal sent", "date": "2026-05-05", "note": "Proposal v3 submitted."},
+        {"type": "WhatsApp summary", "date": "2026-05-08", "note": "Board review expected late May."}
+      ]
+    },
+    {
+      "company": "BIM Group", "owner_type": "Developer", "country": "Vietnam",
+      "priority": "High", "relationship": "Warm",
+      "catchup_status": "On track", "next_catchup": "2026-06-10",
+      "financial_health": "Moderate",
+      "assets": "3 resorts in Phu Quoc, 1 mixed-use in Ha Long",
+      "strategic_value": "Potential for Phu Quoc and Ha Long wellness / resort expansion.",
+      "contacts": [
+        {"fusion_role": "COO", "owner_contact": "Asset Director", "strength": "Warm", "last_met": "2026-05-12", "senior_flag": true, "note": "HMA execution"},
+        {"fusion_role": "BD Director", "owner_contact": "Development VP", "strength": "Strong", "last_met": "2026-05-12", "senior_flag": false, "note": "LOI complete"}
+      ],
+      "interactions": [
+        {"type": "Meeting", "date": "2026-05-12", "note": "LOI signed. Move to HMA draft."}
+      ]
+    },
+    {
+      "company": "BRG Group", "owner_type": "Family Office", "country": "Vietnam",
+      "priority": "Medium", "relationship": "Warm",
+      "catchup_status": "Overdue", "next_catchup": "2026-05-25",
+      "financial_health": "Moderate",
+      "assets": "4 hotels, 2 golf resorts",
+      "strategic_value": "Relationship needs senior catch-up. Licensing and heritage positioning require COO/Legal involvement.",
+      "contacts": [
+        {"fusion_role": "BD Manager", "owner_contact": "Asset Manager", "strength": "Warm", "last_met": "2026-05-02", "senior_flag": false, "note": "Feasibility follow-up"}
+      ],
+      "interactions": [
+        {"type": "Meeting", "date": "2026-05-02", "note": "Concern on heritage conversion restrictions."}
+      ]
+    },
+    {
+      "company": "Central Group", "owner_type": "Institutional Investor", "country": "Thailand",
+      "priority": "Strategic", "relationship": "Warm",
+      "catchup_status": "Due this week", "next_catchup": "2026-06-07",
+      "financial_health": "Strong",
+      "assets": "8 hotels and mixed-use assets in Thailand",
+      "strategic_value": "Strategic Thailand owner. Potential Bangkok + Phuket multi-asset relationship.",
+      "contacts": [
+        {"fusion_role": "CEO", "owner_contact": "Owner Chairman", "strength": "New", "last_met": "", "senior_flag": true, "note": "Needs senior introduction"},
+        {"fusion_role": "COO", "owner_contact": "Asset Director", "strength": "Warm", "last_met": "2026-05-11", "senior_flag": true, "note": "Operating model"},
+        {"fusion_role": "BD Director", "owner_contact": "Development VP", "strength": "Warm", "last_met": "2026-05-11", "senior_flag": false, "note": "Bangkok and Phuket pipeline"}
+      ],
+      "interactions": [
+        {"type": "WhatsApp summary", "date": "2026-05-11", "note": "Owner asked for technical services proposal."}
+      ]
+    },
+    {
+      "company": "Ciputra Group", "owner_type": "Developer", "country": "Indonesia",
+      "priority": "Medium", "relationship": "New",
+      "catchup_status": "No cadence", "next_catchup": "2026-06-15",
+      "financial_health": "Unknown",
+      "assets": "Bali land bank and mixed-use portfolio",
+      "strategic_value": "Potential APAC entry owner. Need qualification of land status and capex readiness.",
+      "contacts": [
+        {"fusion_role": "BD Director", "owner_contact": "Development Director", "strength": "New", "last_met": "", "senior_flag": false, "note": "Intro call pending"}
+      ],
+      "interactions": [
+        {"type": "Other", "date": "2026-05-13", "note": "Inbound inquiry — Bali resort interest received."}
+      ]
+    },
+    {
+      "company": "Sakura REIT", "owner_type": "REIT", "country": "Japan",
+      "priority": "Medium", "relationship": "New",
+      "catchup_status": "No cadence", "next_catchup": "2026-06-20",
+      "financial_health": "Strong",
+      "assets": "Urban assets in Tokyo, Kyoto, Osaka",
+      "strategic_value": "Potential Japan entry, but fee model and local partner requirements need validation.",
+      "contacts": [
+        {"fusion_role": "BD Director", "owner_contact": "Investment Director", "strength": "New", "last_met": "", "senior_flag": false, "note": "Intro email sent"}
+      ],
+      "interactions": [
+        {"type": "Other", "date": "2026-05-16", "note": "Intro email sent. Awaiting response."}
+      ]
+    }
+  ],
+
+  "tasks": [
+    {"title": "Send revised proposal to Central Group", "deal_name": "Fusion Grand Bangkok", "task_owner": "BD Director TH", "due_date": "2026-06-08", "priority": "High", "status": "Open"},
+    {"title": "Legal review HMA draft v2", "deal_name": "Fusion Retreat Phu Quoc", "task_owner": "Legal", "due_date": "2026-06-12", "priority": "High", "status": "In Progress"},
+    {"title": "COO review Da Nang commercial terms", "deal_name": "Fusion Resort Da Nang", "task_owner": "COO", "due_date": "2026-06-10", "priority": "High", "status": "Open"},
+    {"title": "Follow up Vingroup board review", "deal_name": "Fusion Suites Saigon", "task_owner": "BD Manager VN", "due_date": "2026-06-05", "priority": "Medium", "status": "Open"},
+    {"title": "Escalate Hoi An licensing risk", "deal_name": "Fusion Heritage Hoi An", "task_owner": "Legal", "due_date": "2026-05-28", "priority": "High", "status": "Blocked", "note": "Waiting for local authority clarification"},
+    {"title": "Confirm NDA countersignature Phuket", "deal_name": "Fusion Phuket Wellness", "task_owner": "BD Director TH", "due_date": "2026-06-08", "priority": "Medium", "status": "Open"},
+    {"title": "Schedule site visit Nha Trang", "deal_name": "Fusion Bay Nha Trang", "task_owner": "BD Manager VN", "due_date": "2026-06-15", "priority": "Medium", "status": "Open"},
+    {"title": "Qualify Ciputra capex readiness", "deal_name": "Fusion Resort Bali", "task_owner": "BD Director APAC", "due_date": "2026-06-20", "priority": "Low", "status": "Open"},
+    {"title": "PMS vendor contract finalization", "deal_name": "Fusion City Hanoi", "task_owner": "IT Manager", "due_date": "2026-06-01", "priority": "High", "status": "Blocked", "note": "Vendor pricing not agreed"}
+  ],
+
+  "activities": [
+    {"type": "Pre-opening review", "date": "2026-05-30", "deal_name": "Fusion City Hanoi", "note": "Hanoi opening risk escalated: PMS and licensing delays. COO flagged Red."},
+    {"type": "Meeting", "date": "2026-05-28", "deal_name": "Fusion Resort Da Nang", "note": "Sun Group CEO dinner. Positive sentiment, owner asks for revised fee structure."},
+    {"type": "Meeting", "date": "2026-05-12", "deal_name": "Fusion Retreat Phu Quoc", "note": "LOI signed with BIM Group. Legal preparing HMA draft."},
+    {"type": "Proposal sent", "date": "2026-05-05", "deal_name": "Fusion Suites Saigon", "note": "Proposal v3 submitted to Vingroup."},
+    {"type": "WhatsApp summary", "date": "2026-05-08", "deal_name": "Fusion Suites Saigon", "note": "Vingroup board review expected late May."},
+    {"type": "Meeting", "date": "2026-05-02", "deal_name": "Fusion Heritage Hoi An", "note": "Heritage licensing and design approval are key blockers. BRG concerned."},
+    {"type": "Site visit", "date": "2026-04-25", "deal_name": "Fusion Resort Da Nang", "note": "Sun Group requested wellness programming examples for resort concept."},
+    {"type": "NDA signed", "date": "2026-05-20", "deal_name": "Fusion Manila Bay", "note": "NDA signed with Ayala Land. Qualification in progress."}
+  ],
+
+  "milestones": [
+    {"name": "PMS Implementation", "deal_name": "Fusion City Hanoi", "department": "IT", "milestone_owner": "IT Manager", "due_date": "2026-06-10", "status": "Red", "blocker": "Vendor contract not finalized."},
+    {"name": "Licensing Approval", "deal_name": "Fusion City Hanoi", "department": "Legal", "milestone_owner": "Legal Counsel", "due_date": "2026-06-05", "status": "Red", "blocker": "Local authority review delayed."},
+    {"name": "Recruitment Plan", "deal_name": "Fusion City Hanoi", "department": "HR", "milestone_owner": "HR Director", "due_date": "2026-06-20", "status": "Amber", "blocker": "Department heads pending."},
+    {"name": "Pre-opening Marketing", "deal_name": "Fusion City Hanoi", "department": "Marketing", "milestone_owner": "Commercial Director", "due_date": "2026-07-01", "status": "Green"},
+    {"name": "Technical Services Kickoff", "deal_name": "Fusion Retreat Phu Quoc", "department": "Design", "milestone_owner": "Technical Services", "due_date": "2026-06-15", "status": "Amber", "blocker": "Awaiting owner drawings."},
+    {"name": "Procurement Strategy", "deal_name": "Fusion Retreat Phu Quoc", "department": "Procurement", "milestone_owner": "Procurement Lead", "due_date": "2026-06-12", "status": "Green"},
+    {"name": "Design Approval Gate", "deal_name": "Fusion Resort Da Nang", "department": "Design", "milestone_owner": "Design Director", "due_date": "2026-06-18", "status": "Amber", "blocker": "Owner requested wellness concept changes."},
+    {"name": "IT Infrastructure Assessment", "deal_name": "Fusion Resort Da Nang", "department": "IT", "milestone_owner": "IT Director", "due_date": "2026-06-25", "status": "Green"}
+  ],
+
+  "feasibility_snapshots": [
+    {
+      "deal_name": "Fusion Resort Da Nang", "label": "Base Case",
+      "assumptions": {"rooms": 220, "adr": 185, "occupancy": 72, "otherRevPct": 38, "gopPct": 36, "ffePct": 4, "feePct": 3, "projectCost": 52000000},
+      "outputs": {"revpar": 133.2, "roomRevenue": 10704480, "totalRevenue": 14772182, "gop": 5317986, "ffeReserve": 590887, "ownerNOI": 4727099, "mgmtFee": 443166, "paybackYears": 11.0, "noiYield": 9.1}
+    },
+    {
+      "deal_name": "Fusion Grand Bangkok", "label": "Conservative",
+      "assumptions": {"rooms": 260, "adr": 165, "occupancy": 68, "otherRevPct": 35, "gopPct": 34, "ffePct": 4, "feePct": 3, "projectCost": 78000000},
+      "outputs": {"revpar": 112.2, "roomRevenue": 10645680, "totalRevenue": 14371668, "gop": 4886367, "ffeReserve": 574867, "ownerNOI": 4311500, "mgmtFee": 431150, "paybackYears": 18.1, "noiYield": 5.5}
+    }
+  ]
+}

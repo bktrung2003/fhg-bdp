@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.routes import deals, documents, feasibility, items, login, milestones, owners, private, tasks, users, utils
+from app.api.routes import deals, documents, feasibility, items, login, milestones, owners, private, seed, tasks, users, utils
 from app.core.config import settings
 
 api_router = APIRouter()
@@ -18,3 +18,4 @@ api_router.include_router(milestones.router)
 
 if settings.ENVIRONMENT == "local":
     api_router.include_router(private.router)
+    api_router.include_router(seed.router)
