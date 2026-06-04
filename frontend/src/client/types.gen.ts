@@ -246,6 +246,8 @@ export type Message = {
 
 export type MilestoneCreate = {
     name: string;
+    project_id?: (string | null);
+    project_name?: (string | null);
     deal_id?: (string | null);
     deal_name?: (string | null);
     department?: MilestoneDept;
@@ -261,6 +263,8 @@ export type MilestoneGate = 'Green' | 'Amber' | 'Red';
 
 export type MilestonePublic = {
     name: string;
+    project_id?: (string | null);
+    project_name?: (string | null);
     deal_id?: (string | null);
     deal_name?: (string | null);
     department?: MilestoneDept;
@@ -281,6 +285,8 @@ export type MilestonesPublic = {
 
 export type MilestoneUpdate = {
     name?: (string | null);
+    project_id?: (string | null);
+    project_name?: (string | null);
     deal_id?: (string | null);
     deal_name?: (string | null);
     department?: (MilestoneDept | null);
@@ -495,6 +501,7 @@ export type TaskCreate = {
     title: string;
     deal_id?: (string | null);
     deal_name?: (string | null);
+    task_owner_id?: (string | null);
     task_owner?: (string | null);
     due_date?: (string | null);
     priority?: TaskPriority;
@@ -508,6 +515,7 @@ export type TaskPublic = {
     title: string;
     deal_id?: (string | null);
     deal_name?: (string | null);
+    task_owner_id?: (string | null);
     task_owner?: (string | null);
     due_date?: (string | null);
     priority?: TaskPriority;
@@ -516,6 +524,8 @@ export type TaskPublic = {
     id: string;
     created_by_id: string;
     is_overdue?: boolean;
+    task_owner_name?: (string | null);
+    task_owner_role?: (string | null);
     created_at?: (string | null);
     updated_at?: (string | null);
 };
@@ -531,6 +541,7 @@ export type TaskUpdate = {
     title?: (string | null);
     deal_id?: (string | null);
     deal_name?: (string | null);
+    task_owner_id?: (string | null);
     task_owner?: (string | null);
     due_date?: (string | null);
     priority?: (TaskPriority | null);
@@ -822,6 +833,7 @@ export type MilestonesListMilestonesData = {
     dealId?: (string | null);
     department?: (MilestoneDept | null);
     limit?: number;
+    projectId?: (string | null);
     search?: (string | null);
     skip?: number;
     status?: (MilestoneGate | null);
@@ -975,6 +987,12 @@ export type ProjectsListProjectDealsData = {
 };
 
 export type ProjectsListProjectDealsResponse = (unknown);
+
+export type ProjectsListProjectMilestonesData = {
+    id: string;
+};
+
+export type ProjectsListProjectMilestonesResponse = (unknown);
 
 export type SeedLoadSeedDataData = {
     requestBody: {

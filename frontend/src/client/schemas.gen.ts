@@ -1546,6 +1546,30 @@ export const MilestoneCreateSchema = {
             minLength: 1,
             title: 'Name'
         },
+        project_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Project Id'
+        },
+        project_name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Project Name'
+        },
         deal_id: {
             anyOf: [
                 {
@@ -1639,6 +1663,30 @@ export const MilestonePublicSchema = {
             maxLength: 255,
             minLength: 1,
             title: 'Name'
+        },
+        project_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Project Id'
+        },
+        project_name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Project Name'
         },
         deal_id: {
             anyOf: [
@@ -1762,6 +1810,30 @@ export const MilestoneUpdateSchema = {
                 }
             ],
             title: 'Name'
+        },
+        project_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Project Id'
+        },
+        project_name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Project Name'
         },
         deal_id: {
             anyOf: [
@@ -3386,6 +3458,18 @@ export const TaskCreateSchema = {
             ],
             title: 'Deal Name'
         },
+        task_owner_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Task Owner Id'
+        },
         task_owner: {
             anyOf: [
                 {
@@ -3474,6 +3558,18 @@ export const TaskPublicSchema = {
             ],
             title: 'Deal Name'
         },
+        task_owner_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Task Owner Id'
+        },
         task_owner: {
             anyOf: [
                 {
@@ -3532,6 +3628,28 @@ export const TaskPublicSchema = {
             type: 'boolean',
             title: 'Is Overdue',
             default: false
+        },
+        task_owner_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Task Owner Name'
+        },
+        task_owner_role: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Task Owner Role'
         },
         created_at: {
             anyOf: [
@@ -3607,6 +3725,18 @@ export const TaskUpdateSchema = {
                 }
             ],
             title: 'Deal Name'
+        },
+        task_owner_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Task Owner Id'
         },
         task_owner: {
             anyOf: [

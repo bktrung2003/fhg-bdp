@@ -50,7 +50,11 @@ def list_tasks(
     search: str | None = None,
     status: TaskStatus | None = None,
     deal_id: uuid.UUID | None = None,
+    task_owner_id: uuid.UUID | None = None,
     overdue_only: bool = False,
+    due_from: str | None = None,
+    due_to: str | None = None,
+    hide_archived: bool = True,   # hide Done tasks older than 30 days
 ) -> Any:
     stmt = select(Task)
     if search:
@@ -59,14 +63,89 @@ def list_tasks(
         stmt = stmt.where(Task.status == status)
     if deal_id:
         stmt = stmt.where(Task.deal_id == deal_id)
+    if task_owner_id:
+        stmt = stmt.where(Task.task_owner_id == task_owner_id)
     if overdue_only:
         stmt = stmt.where(Task.status != TaskStatus.DONE).where(Task.due_date < TODAY)
+    if due_from:
+        stmt = stmt.where(Task.due_date >= due_from)
+    if due_to:
+        stmt = stmt.where(Task.due_date <= due_to)
+    if hide_archived:
+        # Hide Done tasks older than 30 days
+        from datetime import timedelta
+        threshold = (datetime.now(timezone.utc).date() - timedelta(days=30)).isoformat()
+        # Keep: not Done, or (Done AND due_date >= threshold)
+        stmt = stmt.where(
+            (Task.status != TaskStatus.DONE) |
+            (Task.due_date.is_(None)) |
+            (Task.due_date >= threshold)
+        )
 
     count = session.exec(select(func.count()).select_from(stmt.subquery())).one()
     tasks = session.exec(
         stmt.order_by(col(Task.due_date).asc().nullslast()).offset(skip).limit(limit)
     ).all()
     return TasksPublic(data=[_task_public(t, session) for t in tasks], count=count)
+
+
+# ── Bulk operations ──────────────────────────────────────────────────────────
+
+from pydantic import BaseModel
+
+class BulkTaskUpdate(BaseModel):
+    task_ids: list[uuid.UUID]
+    status: TaskStatus | None = None
+    task_owner_id: uuid.UUID | None = None
+
+
+@task_router.post("/bulk-update", response_model=Message)
+def bulk_update_tasks(
+    *, session: SessionDep, current_user: CurrentUser, body: BulkTaskUpdate,
+) -> Any:
+    """Update multiple tasks at once — status and/or task_owner_id."""
+    if not body.task_ids:
+        return Message(message="No tasks selected.")
+    updates: dict[str, Any] = {}
+    if body.status is not None:
+        updates["status"] = body.status
+    if body.task_owner_id is not None:
+        updates["task_owner_id"] = body.task_owner_id
+    if not updates:
+        return Message(message="No fields to update.")
+
+    count = 0
+    now = datetime.now(timezone.utc)
+    for tid in body.task_ids:
+        t = session.get(Task, tid)
+        if not t:
+            continue
+        for k, v in updates.items():
+            setattr(t, k, v)
+        t.updated_at = now
+        session.add(t)
+        count += 1
+    session.commit()
+    return Message(message=f"Updated {count} task(s).")
+
+
+class BulkTaskDelete(BaseModel):
+    task_ids: list[uuid.UUID]
+
+
+@task_router.post("/bulk-delete", response_model=Message)
+def bulk_delete_tasks(
+    *, session: SessionDep, current_user: CurrentUser, body: BulkTaskDelete,
+) -> Any:
+    """Delete multiple tasks at once."""
+    count = 0
+    for tid in body.task_ids:
+        t = session.get(Task, tid)
+        if t:
+            session.delete(t)
+            count += 1
+    session.commit()
+    return Message(message=f"Deleted {count} task(s).")
 
 
 @task_router.post("/", response_model=TaskPublic, status_code=201)
@@ -118,12 +197,24 @@ activity_router = APIRouter(prefix="/activities", tags=["activities"])
 @activity_router.get("/", response_model=ActivitiesPublic)
 def list_activities(
     session: SessionDep, current_user: CurrentUser,
-    skip: int = 0, limit: int = Query(default=50, le=200),
+    skip: int = 0, limit: int = Query(default=50, le=500),
     deal_id: uuid.UUID | None = None,
+    date_from: str | None = None,   # "2026-05-01"
+    date_to: str | None = None,     # "2026-06-04"
+    search: str | None = None,
 ) -> Any:
     stmt = select(Activity)
     if deal_id:
         stmt = stmt.where(Activity.deal_id == deal_id)
+    if date_from:
+        stmt = stmt.where(Activity.date >= date_from)
+    if date_to:
+        stmt = stmt.where(Activity.date <= date_to)
+    if search:
+        q = f"%{search.lower()}%"
+        stmt = stmt.where(
+            col(Activity.note).ilike(q) | col(Activity.deal_name).ilike(q)
+        )
     count = session.exec(select(func.count()).select_from(stmt.subquery())).one()
     acts = session.exec(stmt.order_by(col(Activity.date).desc()).offset(skip).limit(limit)).all()
     return ActivitiesPublic(data=list(acts), count=count)

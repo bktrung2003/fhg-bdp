@@ -3,10 +3,13 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import {
   CheckSquare, Plus, Trash2, AlertCircle, Pencil,
   Calendar, Clock, ListTodo, CheckCircle2, Search, X,
+  User as UserIcon, Users as UsersGroup, Archive,
 } from "lucide-react"
 import { useState, useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Checkbox } from "@/components/ui/checkbox"
+import useAuth from "@/hooks/useAuth"
 
 import {
   TasksService, ActivitiesService, DealsService, UsersService,
@@ -372,7 +375,7 @@ function LogActivity() {
 
 // ── Task Row ──────────────────────────────────────────────────────────────────
 
-function TaskRow({ task }: { task: TaskPublic }) {
+function TaskRow({ task, selected, onToggleSelect }: { task: TaskPublic; selected?: boolean; onToggleSelect?: () => void }) {
   const qc = useQueryClient()
   const { showSuccessToast } = useCustomToast()
 
@@ -387,7 +390,12 @@ function TaskRow({ task }: { task: TaskPublic }) {
   })
 
   return (
-    <tr className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+    <tr className={`border-b last:border-0 hover:bg-muted/30 transition-colors ${selected ? "bg-primary/5" : ""}`}>
+      {onToggleSelect !== undefined && (
+        <td className="py-2.5 pl-3 w-8">
+          <Checkbox checked={selected} onCheckedChange={onToggleSelect} aria-label={`Select task: ${task.title}`} />
+        </td>
+      )}
       <td className="py-2.5 pr-3 pl-2">
         <div className="flex items-start gap-2">
           {task.is_overdue && <AlertCircle className="h-3.5 w-3.5 text-red-500 mt-0.5 flex-shrink-0" />}
@@ -578,33 +586,74 @@ function TaskGroupHeader({ group, count, defaultOpen, onToggle }: {
   )
 }
 
+// ── Date range helpers ───────────────────────────────────────────────────────
+
+const daysAgo = (n: number) => {
+  const d = new Date(); d.setDate(d.getDate() - n)
+  return d.toISOString().split("T")[0]
+}
+
+type DateRangePreset = "all" | "7" | "30" | "90"
+
 function ActivitiesPage() {
   const STATUSES = useMasterData(MD.TASK_STATUS)
   const PRIORITIES = useMasterData(MD.TASK_PRIORITY)
   const ACT_TYPES_MD = useMasterData(MD.ACTIVITY_TYPE)
+  const { user: currentUser } = useAuth()
+  const qc = useQueryClient()
+  const { showSuccessToast, showErrorToast } = useCustomToast()
 
-  // Filters
+  // Task filters
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("")
   const [priorityFilter, setPriorityFilter] = useState("")
-  const [actTypeFilter, setActTypeFilter] = useState("")
-  const [showDone, setShowDone] = useState(false)
+  const [dueRange, setDueRange] = useState<"all" | "overdue" | "today" | "this_week" | "this_month">("all")
+  const [myTasksOnly, setMyTasksOnly] = useState(false)
+  const [showArchived, setShowArchived] = useState(false)  // include Done > 30 days
 
-  // Collapsible groups state
+  // Activity filters
+  const [actTypeFilter, setActTypeFilter] = useState("")
+  const [actDateRange, setActDateRange] = useState<DateRangePreset>("30")
+  const [actSearch, setActSearch] = useState("")
+
+  // Bulk selection
+  const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(new Set())
+  const [bulkOwnerId, setBulkOwnerId] = useState("")
+  const users = useUsersPicker(true)
+
+  // Collapsible groups
   const [collapsedGroups, setCollapsedGroups] = useState<Set<DateGroup>>(new Set(["Done"]))
+  const [showDone, setShowDone] = useState(false)
   const toggleGroup = (g: DateGroup) => {
     const next = new Set(collapsedGroups)
     if (next.has(g)) next.delete(g); else next.add(g)
     setCollapsedGroups(next)
   }
 
+  // Fetch tasks with server-side filters
   const { data: tasksData } = useQuery({
-    queryKey: ["tasks", { status: statusFilter }],
-    queryFn: () => TasksService.listTasks({ status: (statusFilter as any) || undefined, limit: 500 }),
+    queryKey: ["tasks", { statusFilter, myTasksOnly, showArchived, currentUserId: currentUser?.id }],
+    queryFn: () => TasksService.listTasks({
+      status: (statusFilter as any) || undefined,
+      taskOwnerId: (myTasksOnly && currentUser?.id) || undefined,
+      hideArchived: !showArchived,
+      limit: 500,
+    }),
   })
+
+  // Compute activity date_from based on preset
+  const actDateFrom = useMemo(() => {
+    if (actDateRange === "all") return undefined
+    return daysAgo(parseInt(actDateRange))
+  }, [actDateRange])
+
   const { data: actsData } = useQuery({
-    queryKey: ["activities"],
-    queryFn: () => ActivitiesService.listActivities({ limit: 200 }),
+    queryKey: ["activities", { actDateFrom, actSearch }],
+    queryFn: () => ActivitiesService.listActivities({
+      dateFrom: actDateFrom,
+      search: actSearch || undefined,
+      limit: 500,
+    }),
   })
 
   const allTasks = tasksData?.data ?? []
@@ -618,12 +667,27 @@ function ActivitiesPage() {
       result = result.filter(t =>
         t.title.toLowerCase().includes(q) ||
         (t.deal_name ?? "").toLowerCase().includes(q) ||
+        ((t as any).task_owner_name ?? "").toLowerCase().includes(q) ||
         (t.task_owner ?? "").toLowerCase().includes(q)
       )
     }
     if (priorityFilter) result = result.filter(t => t.priority === priorityFilter)
+    // Due date range
+    if (dueRange !== "all") {
+      const tod = today()
+      const tom = tomorrow()
+      const eow = endOfWeek()
+      const eom = (() => { const d = new Date(); d.setMonth(d.getMonth() + 1); d.setDate(0); return d.toISOString().split("T")[0] })()
+      result = result.filter(t => {
+        if (dueRange === "overdue") return t.status !== "Done" && t.due_date && t.due_date < tod
+        if (dueRange === "today") return t.due_date === tod
+        if (dueRange === "this_week") return t.due_date && t.due_date >= tod && t.due_date <= eow
+        if (dueRange === "this_month") return t.due_date && t.due_date >= tod && t.due_date <= eom
+        return true
+      })
+    }
     return result
-  }, [allTasks, search, priorityFilter])
+  }, [allTasks, search, priorityFilter, dueRange])
 
   // Group tasks by date
   const groupedTasks = useMemo(() => {
@@ -638,12 +702,82 @@ function ActivitiesPage() {
     return result
   }, [tasks])
 
-  // Filter activities
+  // Filter activities (client-side type filter; date_range + search applied server-side)
   const activities = useMemo(() => {
     let result = allActivities
     if (actTypeFilter) result = result.filter(a => a.activity_type === actTypeFilter)
     return result
   }, [allActivities, actTypeFilter])
+
+  // Bulk action mutations
+  const bulkUpdateMut = useMutation({
+    mutationFn: async ({ ids, status, ownerId }: { ids: string[]; status?: string; ownerId?: string }) => {
+      // Use fetch directly since bulk endpoint may not be in generated client yet
+      const { OpenAPI } = await import("@/client")
+      const token = typeof OpenAPI.TOKEN === "function" ? await OpenAPI.TOKEN() : OpenAPI.TOKEN
+      const res = await fetch(`${OpenAPI.BASE}/api/v1/tasks/bulk-update`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          task_ids: ids,
+          status: status,
+          task_owner_id: ownerId,
+        }),
+      })
+      if (!res.ok) throw new Error(await res.text())
+      return res.json()
+    },
+    onSuccess: (data: any) => {
+      qc.invalidateQueries({ queryKey: ["tasks"] })
+      showSuccessToast(data?.message ?? "Updated.")
+      setSelectedTaskIds(new Set())
+      setBulkOwnerId("")
+    },
+    onError: () => showErrorToast("Bulk update failed."),
+  })
+
+  const bulkDeleteMut = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { OpenAPI } = await import("@/client")
+      const token = typeof OpenAPI.TOKEN === "function" ? await OpenAPI.TOKEN() : OpenAPI.TOKEN
+      const res = await fetch(`${OpenAPI.BASE}/api/v1/tasks/bulk-delete`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ task_ids: ids }),
+      })
+      if (!res.ok) throw new Error(await res.text())
+      return res.json()
+    },
+    onSuccess: (data: any) => {
+      qc.invalidateQueries({ queryKey: ["tasks"] })
+      showSuccessToast(data?.message ?? "Deleted.")
+      setSelectedTaskIds(new Set())
+    },
+    onError: () => showErrorToast("Bulk delete failed."),
+  })
+
+  // Toggle individual / all in group
+  const toggleSelect = (taskId: string) => {
+    const next = new Set(selectedTaskIds)
+    if (next.has(taskId)) next.delete(taskId); else next.add(taskId)
+    setSelectedTaskIds(next)
+  }
+  const toggleSelectGroup = (groupTasks: TaskPublic[]) => {
+    const next = new Set(selectedTaskIds)
+    const allSelected = groupTasks.every(t => next.has(t.id))
+    if (allSelected) {
+      groupTasks.forEach(t => next.delete(t.id))
+    } else {
+      groupTasks.forEach(t => next.add(t.id))
+    }
+    setSelectedTaskIds(next)
+  }
 
   // Stats
   const totalOpen = allTasks.filter(t => t.status !== "Done").length
@@ -652,7 +786,8 @@ function ActivitiesPage() {
   const blockedCount = allTasks.filter(t => t.status === "Blocked").length
   const doneToday = allTasks.filter(t => t.status === "Done" && t.due_date === today()).length
 
-  const hasFilters = !!(search || statusFilter || priorityFilter)
+  const hasFilters = !!(search || statusFilter || priorityFilter || myTasksOnly || dueRange !== "all")
+  const selectedCount = selectedTaskIds.size
 
   return (
     <div className="flex flex-col gap-5 min-w-0 max-w-full">
@@ -688,32 +823,106 @@ function ActivitiesPage() {
 
         {/* ── Tasks Tab ── */}
         <TabsContent value="tasks" className="mt-4 flex flex-col gap-4">
-          {/* Filters */}
+          {/* Quick filters row 1 — main */}
           <div className="flex flex-wrap gap-2 items-center">
             <div className="relative flex-1 min-w-[200px] max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input className="pl-9 h-9" placeholder="Search task, deal, owner..." value={search} onChange={e => setSearch(e.target.value)} />
             </div>
+
+            {/* My Tasks toggle */}
+            <Button
+              variant={myTasksOnly ? "default" : "outline"}
+              size="sm"
+              className="h-9"
+              onClick={() => setMyTasksOnly(v => !v)}
+            >
+              <UserIcon className="h-3.5 w-3.5 mr-1.5" />
+              My Tasks
+            </Button>
+
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[140px]"><SelectValue placeholder="All status" /></SelectTrigger>
+              <SelectTrigger className="w-[130px]"><SelectValue placeholder="All status" /></SelectTrigger>
               <SelectContent>{STATUSES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
             </Select>
             <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-              <SelectTrigger className="w-[130px]"><SelectValue placeholder="All priority" /></SelectTrigger>
+              <SelectTrigger className="w-[120px]"><SelectValue placeholder="All priority" /></SelectTrigger>
               <SelectContent>{PRIORITIES.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
             </Select>
+
             {hasFilters && (
-              <Button variant="ghost" size="sm" onClick={() => { setSearch(""); setStatusFilter(""); setPriorityFilter("") }}>
+              <Button variant="ghost" size="sm" onClick={() => { setSearch(""); setStatusFilter(""); setPriorityFilter(""); setMyTasksOnly(false); setDueRange("all") }}>
                 <X className="h-4 w-4 mr-1" />Clear
               </Button>
             )}
-            <div className="ml-auto flex items-center gap-2">
+          </div>
+
+          {/* Quick filters row 2 — due range chips */}
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-xs text-muted-foreground">Due:</span>
+            {([
+              { v: "all", label: "All" },
+              { v: "overdue", label: "Overdue" },
+              { v: "today", label: "Today" },
+              { v: "this_week", label: "This Week" },
+              { v: "this_month", label: "This Month" },
+            ] as const).map(({ v, label }) => (
+              <Button
+                key={v}
+                size="sm"
+                variant={dueRange === v ? "default" : "outline"}
+                className="h-7 text-xs"
+                onClick={() => setDueRange(v)}
+              >
+                {label}
+              </Button>
+            ))}
+
+            <div className="ml-auto flex items-center gap-3">
               <label className="text-xs text-muted-foreground inline-flex items-center gap-1.5 cursor-pointer">
                 <input type="checkbox" checked={showDone} onChange={e => setShowDone(e.target.checked)} />
                 Show Done
               </label>
+              <label className="text-xs text-muted-foreground inline-flex items-center gap-1.5 cursor-pointer">
+                <input type="checkbox" checked={showArchived} onChange={e => setShowArchived(e.target.checked)} />
+                <Archive className="h-3 w-3" />
+                Include archived (Done &gt;30d)
+              </label>
             </div>
           </div>
+
+          {/* Bulk action bar */}
+          {selectedCount > 0 && (
+            <div className="flex items-center gap-3 rounded-lg border-2 border-primary bg-primary/5 px-4 py-2 sticky top-12 z-10">
+              <span className="text-sm font-semibold">{selectedCount} selected</span>
+              <Button size="sm" variant="outline" onClick={() => bulkUpdateMut.mutate({ ids: Array.from(selectedTaskIds), status: "Done" })}>
+                <CheckCircle2 className="h-3.5 w-3.5 mr-1" />Mark Done
+              </Button>
+              <div className="flex items-center gap-1.5">
+                <Select value={bulkOwnerId || "__none__"} onValueChange={v => setBulkOwnerId(v === "__none__" ? "" : v)}>
+                  <SelectTrigger className="h-8 w-[180px] text-xs"><SelectValue placeholder="Reassign to..." /></SelectTrigger>
+                  <SelectContent>
+                    {users.map(u => (
+                      <SelectItem key={u.id} value={u.id}>{u.full_name || u.email} · {u.role}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button size="sm" variant="outline" disabled={!bulkOwnerId}
+                  onClick={() => bulkUpdateMut.mutate({ ids: Array.from(selectedTaskIds), ownerId: bulkOwnerId })}>
+                  <UsersGroup className="h-3.5 w-3.5 mr-1" />Reassign
+                </Button>
+              </div>
+              <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50"
+                onClick={() => {
+                  if (confirm(`Delete ${selectedCount} task(s)?`)) bulkDeleteMut.mutate(Array.from(selectedTaskIds))
+                }}>
+                <Trash2 className="h-3.5 w-3.5 mr-1" />Delete
+              </Button>
+              <Button size="sm" variant="ghost" className="ml-auto" onClick={() => setSelectedTaskIds(new Set())}>
+                <X className="h-3.5 w-3.5 mr-1" />Cancel
+              </Button>
+            </div>
+          )}
 
           {/* Grouped tasks */}
           {tasks.length === 0 ? (
@@ -730,6 +939,7 @@ function ActivitiesPage() {
                 if (groupTasks.length === 0) return null
                 if (group === "Done" && !showDone) return null
                 const isCollapsed = collapsedGroups.has(group)
+                const allInGroupSelected = groupTasks.every(t => selectedTaskIds.has(t.id))
                 return (
                   <div key={group}>
                     <TaskGroupHeader group={group} count={groupTasks.length}
@@ -739,12 +949,27 @@ function ActivitiesPage() {
                         <table className="w-full text-sm">
                           <thead>
                             <tr className="border-b bg-muted/20">
+                              <th className="w-8 py-2 pl-3">
+                                <Checkbox
+                                  checked={allInGroupSelected}
+                                  onCheckedChange={() => toggleSelectGroup(groupTasks)}
+                                  aria-label="Select all in group"
+                                />
+                              </th>
                               {["Task","Owner","Due","Priority","Status",""].map(h => (
                                 <th key={h} className="text-left text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground py-2 pr-3 pl-2 first:pl-2">{h}</th>
                               ))}
                             </tr>
                           </thead>
-                          <tbody>{groupTasks.map(t => <TaskRow key={t.id} task={t} />)}</tbody>
+                          <tbody>
+                            {groupTasks.map(t => (
+                              <TaskRow
+                                key={t.id} task={t}
+                                selected={selectedTaskIds.has(t.id)}
+                                onToggleSelect={() => toggleSelect(t.id)}
+                              />
+                            ))}
+                          </tbody>
                         </table>
                       </div>
                     )}
@@ -757,17 +982,42 @@ function ActivitiesPage() {
 
         {/* ── Activity Log Tab ── */}
         <TabsContent value="activity" className="mt-4 flex flex-col gap-4">
-          {/* Activity filters */}
+          {/* Activity filters row 1 */}
           <div className="flex flex-wrap gap-2 items-center">
+            <div className="relative flex-1 min-w-[200px] max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input className="pl-9 h-9" placeholder="Search activity notes, deals..." value={actSearch} onChange={e => setActSearch(e.target.value)} />
+            </div>
             <Select value={actTypeFilter} onValueChange={setActTypeFilter}>
               <SelectTrigger className="w-[180px]"><SelectValue placeholder="All activity types" /></SelectTrigger>
               <SelectContent>{ACT_TYPES_MD.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
             </Select>
-            {actTypeFilter && (
-              <Button variant="ghost" size="sm" onClick={() => setActTypeFilter("")}>
+            {(actTypeFilter || actSearch) && (
+              <Button variant="ghost" size="sm" onClick={() => { setActTypeFilter(""); setActSearch("") }}>
                 <X className="h-4 w-4 mr-1" />Clear
               </Button>
             )}
+          </div>
+
+          {/* Activity filters row 2 — date range */}
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-xs text-muted-foreground">Range:</span>
+            {([
+              { v: "7", label: "Last 7 days" },
+              { v: "30", label: "Last 30 days" },
+              { v: "90", label: "Last 90 days" },
+              { v: "all", label: "All time" },
+            ] as const).map(({ v, label }) => (
+              <Button
+                key={v}
+                size="sm"
+                variant={actDateRange === v ? "default" : "outline"}
+                className="h-7 text-xs"
+                onClick={() => setActDateRange(v)}
+              >
+                {label}
+              </Button>
+            ))}
             <span className="text-xs text-muted-foreground ml-auto">{activities.length} activit{activities.length === 1 ? "y" : "ies"}</span>
           </div>
 
