@@ -72,14 +72,19 @@ function RiskDot({ risk }: { risk?: string }) {
 
 function DealNameCell({ deal }: { deal: DealPublic }) {
   const navigate = useNavigate()
-  const projectName = (deal as any).project_name
+  const projectName = (deal as any).project_name as string | undefined
+  // Only show the project line if deal name doesn't already contain it
+  const showProjectLine =
+    projectName &&
+    !deal.name.toLowerCase().includes(projectName.toLowerCase())
+
   return (
     <div
       className="min-w-[200px] cursor-pointer group"
       onClick={() => navigate({ to: "/deals/$dealId" as any, params: { dealId: deal.id } })}
     >
       <p className="font-semibold text-sm leading-tight text-primary group-hover:underline">{deal.name}</p>
-      {projectName && projectName !== deal.name && (
+      {showProjectLine && (
         <p className="text-[11px] text-muted-foreground mt-0.5 truncate">📁 {projectName}</p>
       )}
       {deal.project_type && (
