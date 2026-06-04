@@ -1404,6 +1404,56 @@ export const ItemsPublicSchema = {
     title: 'ItemsPublic'
 } as const;
 
+export const MasterDataCreateSchema = {
+    properties: {
+        category: {
+            type: 'string',
+            title: 'Category'
+        },
+        value: {
+            type: 'string',
+            title: 'Value'
+        },
+        sort_order: {
+            type: 'integer',
+            title: 'Sort Order',
+            default: 0
+        }
+    },
+    type: 'object',
+    required: ['category', 'value'],
+    title: 'MasterDataCreate'
+} as const;
+
+export const MasterDataPublicSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        category: {
+            type: 'string',
+            title: 'Category'
+        },
+        value: {
+            type: 'string',
+            title: 'Value'
+        },
+        sort_order: {
+            type: 'integer',
+            title: 'Sort Order'
+        },
+        is_active: {
+            type: 'boolean',
+            title: 'Is Active'
+        }
+    },
+    type: 'object',
+    required: ['id', 'category', 'value', 'sort_order', 'is_active'],
+    title: 'MasterDataPublic'
+} as const;
+
 export const MessageSchema = {
     properties: {
         message: {

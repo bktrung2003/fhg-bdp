@@ -14,17 +14,18 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import useCustomToast from "@/hooks/useCustomToast"
+import { MD, useMasterData } from "@/hooks/useMasterData"
 
-const TYPES = ["Developer","Family Office","REIT","Asset Owner","Institutional Investor"]
-const PRIORITIES = ["Strategic","High","Medium","Low"]
-const RELATIONSHIPS = ["New","Warm","Strong","Strategic Partner","Risk / Unstable"]
-const CATCHUPS = ["On track","Due this week","Overdue","No cadence"]
-const HEALTH = ["Strong","Moderate","Unknown"]
+const PRIORITIES = ["Strategic","High","Medium","Low"]   // not a configurable category
+const HEALTH = ["Strong","Moderate","Unknown"]            // not configurable
 
 export function AddOwner() {
   const [open, setOpen] = useState(false)
   const qc = useQueryClient()
   const { showSuccessToast } = useCustomToast()
+  const TYPES = useMasterData(MD.OWNER_TYPE)
+  const RELATIONSHIPS = useMasterData(MD.OWNER_RELATIONSHIP)
+  const CATCHUPS = useMasterData(MD.CATCHUP_STATUS)
 
   const { register, handleSubmit, reset, setValue, formState: { isSubmitting } } =
     useForm<OwnerCreate & { owner_type_s: string; priority_s: string; relationship_s: string; catchup_s: string; fh_s: string }>({

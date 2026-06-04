@@ -217,6 +217,20 @@ export type ItemUpdate = {
     description?: (string | null);
 };
 
+export type MasterDataCreate = {
+    category: string;
+    value: string;
+    sort_order?: number;
+};
+
+export type MasterDataPublic = {
+    id: string;
+    category: string;
+    value: string;
+    sort_order: number;
+    is_active: boolean;
+};
+
 export type Message = {
     message: string;
 };
@@ -676,6 +690,36 @@ export type LoginRecoverPasswordHtmlContentData = {
 
 export type LoginRecoverPasswordHtmlContentResponse = (string);
 
+export type MasterDataListAllResponse = (Array<MasterDataPublic>);
+
+export type MasterDataCreateEntryData = {
+    requestBody: MasterDataCreate;
+};
+
+export type MasterDataCreateEntryResponse = (MasterDataPublic);
+
+export type MasterDataListByCategoryData = {
+    activeOnly?: boolean;
+    category: string;
+};
+
+export type MasterDataListByCategoryResponse = (Array<MasterDataPublic>);
+
+export type MasterDataUpdateEntryData = {
+    id: string;
+    isActive?: (boolean | null);
+    sortOrder?: (number | null);
+    value?: (string | null);
+};
+
+export type MasterDataUpdateEntryResponse = (MasterDataPublic);
+
+export type MasterDataDeleteEntryData = {
+    id: string;
+};
+
+export type MasterDataDeleteEntryResponse = (Message);
+
 export type MilestonesListMilestonesData = {
     dealId?: (string | null);
     department?: (MilestoneDept | null);
@@ -779,6 +823,16 @@ export type PrivateCreateUserData = {
 };
 
 export type PrivateCreateUserResponse = (UserPublic);
+
+export type SeedLoadSeedDataData = {
+    requestBody: {
+        [key: string]: unknown;
+    };
+};
+
+export type SeedLoadSeedDataResponse = (Message);
+
+export type SeedClearAllDataResponse = (Message);
 
 export type TasksListTasksData = {
     dealId?: (string | null);

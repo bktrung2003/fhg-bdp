@@ -18,14 +18,12 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import useCustomToast from "@/hooks/useCustomToast"
+import { MD, useMasterData } from "@/hooks/useMasterData"
 
 export const Route = createFileRoute("/_layout/preopening")({
   component: PreopeningPage,
   head: () => ({ meta: [{ title: "Pre-opening Tracker — Fusion BD CORE OS" }] }),
 })
-
-const DEPTS = ["Ops","IT","Finance","Design","Legal","Procurement","HR","Marketing"]
-const GATES = ["Green","Amber","Red"]
 
 const GATE_COLOR: Record<string, string> = {
   Green: "bg-green-100 text-green-700",
@@ -44,6 +42,8 @@ function AddMilestone() {
   const [open, setOpen] = useState(false)
   const qc = useQueryClient()
   const { showSuccessToast } = useCustomToast()
+  const DEPTS = useMasterData(MD.MILESTONE_DEPT)
+  const GATES = useMasterData(MD.MILESTONE_GATE)
   const { register, handleSubmit, reset, setValue } = useForm<any>({
     defaultValues: { dept_s: "Ops", status_s: "Green" },
   })
@@ -177,6 +177,8 @@ function PreopeningPage() {
   const [search, setSearch] = useState("")
   const [deptFilter, setDeptFilter] = useState("")
   const [gateFilter, setGateFilter] = useState("")
+  const DEPTS = useMasterData(MD.MILESTONE_DEPT)
+  const GATES = useMasterData(MD.MILESTONE_GATE)
 
   const { data, isLoading } = useQuery({
     queryKey: ["milestones", { search, deptFilter, gateFilter }],

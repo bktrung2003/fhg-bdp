@@ -22,35 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import useCustomToast from "@/hooks/useCustomToast"
-
-const STAGES = [
-  "Lead", "NDA / Qualified", "Feasibility", "Proposal", "Negotiation",
-  "LOI Signed", "HMA Signed", "Pre-opening", "Opened", "Lost",
-]
-
-const RISKS = ["Green", "Amber", "Red"]
-
-const PROJECT_TYPES = [
-  "Hotel New Build (Greenfield)",
-  "Hotel Re-Brand",
-  "Hotel Conversion (Takeover)",
-  "Hotel Adaptive Re-Use",
-  "Serviced Apartment New Build",
-  "Wellness / Spa Resort",
-  "Branded Residences",
-]
-
-const REGIONS = [
-  "Vietnam", "Thailand", "Southeast Asia", "Greater China",
-  "North Asia", "South Asia", "Australia / Pacific",
-  "Europe", "Americas", "Middle East & Africa",
-]
-
-const OPENING_TARGETS = [
-  "Q1 2026", "Q2 2026", "Q3 2026", "Q4 2026",
-  "Q1 2027", "Q2 2027", "Q3 2027", "Q4 2027",
-  "Q1 2028", "TBD",
-]
+import { MD, useMasterData } from "@/hooks/useMasterData"
 
 type FormData = DealCreate & {
   stage_str: string
@@ -64,6 +36,14 @@ export function AddDeal() {
   const [open, setOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast } = useCustomToast()
+
+  // ── Master data from API ──
+  const STAGES = useMasterData(MD.DEAL_STAGE)
+  const RISKS = useMasterData(MD.DEAL_RISK)
+  const PROJECT_TYPES = useMasterData(MD.PROJECT_TYPE)
+  const REGIONS = useMasterData(MD.REGION)
+  const OPENING_TARGETS = useMasterData(MD.OPENING_TARGET)
+  const BRANDS = useMasterData(MD.BRAND)
 
   const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } =
     useForm<FormData>({
@@ -153,7 +133,13 @@ export function AddDeal() {
             </div>
             <div className="space-y-1.5">
               <Label>Brand</Label>
-              <Input {...register("brand")} placeholder="e.g. Fusion Resort" />
+              <Select onValueChange={(v) => setValue("brand", v === "__none__" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Select brand..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">— None —</SelectItem>
+                  {BRANDS.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

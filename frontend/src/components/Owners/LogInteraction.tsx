@@ -14,8 +14,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import useCustomToast from "@/hooks/useCustomToast"
-
-const TYPES = ["Meeting","Dinner","Site visit","Phone call","WhatsApp summary","Proposal sent","NDA signed","Other"]
+import { MD, useMasterData } from "@/hooks/useMasterData"
 
 interface Props { ownerId: string }
 
@@ -24,6 +23,7 @@ export function LogInteraction({ ownerId }: Props) {
   const qc = useQueryClient()
   const { showSuccessToast } = useCustomToast()
   const today = new Date().toISOString().split("T")[0]
+  const TYPES = useMasterData(MD.INTERACTION_TYPE)
 
   const { register, handleSubmit, reset, setValue } = useForm<{ type_s: string; date: string; note: string }>({
     defaultValues: { type_s: "Meeting", date: today },

@@ -15,6 +15,7 @@ import {
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import useCustomToast from "@/hooks/useCustomToast"
+import { MD, useMasterData } from "@/hooks/useMasterData"
 
 // ── Preview helper — fetch with auth then open blob ───────────────────────────
 async function previewDocument(url: string, filename: string) {
@@ -38,8 +39,6 @@ export const Route = createFileRoute("/_layout/documents")({
   head: () => ({ meta: [{ title: "Documents — Fusion BD CORE OS" }] }),
 })
 
-const DOC_TYPES = ["NDA","Proposal","Feasibility","HMA Draft","Contract","Technical Drawings","Legal Document","Presentation","Other"]
-const PERMISSIONS = ["Internal Only","Shared with Owner","Restricted"]
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -70,6 +69,8 @@ function UploadDocument() {
   const [file, setFile] = useState<File | null>(null)
   const [docType, setDocType] = useState("Other")
   const [permission, setPermission] = useState("Internal Only")
+  const DOC_TYPES = useMasterData(MD.DOC_TYPE)
+  const PERMISSIONS = useMasterData(MD.DOC_PERMISSION)
   const [name, setName] = useState("")
   const [selectedDealId, setSelectedDealId] = useState("")
   const [selectedDealName, setSelectedDealName] = useState("")
@@ -346,6 +347,8 @@ function DocumentsPage() {
   const [search, setSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState("")
   const [permFilter, setPermFilter] = useState("")
+  const DOC_TYPES = useMasterData(MD.DOC_TYPE)
+  const PERMISSIONS = useMasterData(MD.DOC_PERMISSION)
 
   const { data, isLoading } = useQuery({
     queryKey: ["documents", { search, typeFilter, permFilter }],

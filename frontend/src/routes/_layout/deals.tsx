@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { MD, useMasterData } from "@/hooks/useMasterData"
 
 // ── Route ─────────────────────────────────────────────────────────────────────
 
@@ -26,18 +27,11 @@ export const Route = createFileRoute("/_layout/deals")({
   }),
 })
 
-// ── Constants ─────────────────────────────────────────────────────────────────
-
-const STAGES: DealStage[] = [
-  "Lead", "NDA / Qualified", "Feasibility", "Proposal", "Negotiation",
-  "LOI Signed", "HMA Signed", "Pre-opening", "Opened", "Lost",
-]
-
-const RISKS: DealRisk[] = ["Green", "Amber", "Red"]
-
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 function DealsPage() {
+  const STAGES = useMasterData(MD.DEAL_STAGE)
+  const RISKS = useMasterData(MD.DEAL_RISK)
   const [search, setSearch] = useState("")
   const [stage, setStage] = useState<string>("")
   const [risk, setRisk] = useState<string>("")

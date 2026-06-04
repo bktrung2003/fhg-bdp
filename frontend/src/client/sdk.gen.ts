@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ActivitiesListActivitiesData, ActivitiesListActivitiesResponse, ActivitiesCreateActivityData, ActivitiesCreateActivityResponse, ActivitiesDeleteActivityData, ActivitiesDeleteActivityResponse, DealsListDealsData, DealsListDealsResponse, DealsCreateDealData, DealsCreateDealResponse, DealsGetDealData, DealsGetDealResponse, DealsUpdateDealData, DealsUpdateDealResponse, DealsDeleteDealData, DealsDeleteDealResponse, DealsChangeStageData, DealsChangeStageResponse, DealsGetDealAuditData, DealsGetDealAuditResponse, DocumentsListDocumentsData, DocumentsListDocumentsResponse, DocumentsUploadDocumentData, DocumentsUploadDocumentResponse, DocumentsServeLocalFileData, DocumentsServeLocalFileResponse, DocumentsToggleConfidentialData, DocumentsToggleConfidentialResponse, DocumentsDeleteDocumentData, DocumentsDeleteDocumentResponse, FeasibilityListSnapshotsData, FeasibilityListSnapshotsResponse, FeasibilitySaveSnapshotData, FeasibilitySaveSnapshotResponse, FeasibilityDeleteSnapshotData, FeasibilityDeleteSnapshotResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MilestonesListMilestonesData, MilestonesListMilestonesResponse, MilestonesCreateMilestoneData, MilestonesCreateMilestoneResponse, MilestonesUpdateMilestoneData, MilestonesUpdateMilestoneResponse, MilestonesDeleteMilestoneData, MilestonesDeleteMilestoneResponse, OwnersListOwnersData, OwnersListOwnersResponse, OwnersCreateOwnerData, OwnersCreateOwnerResponse, OwnersGetOwnerData, OwnersGetOwnerResponse, OwnersUpdateOwnerData, OwnersUpdateOwnerResponse, OwnersDeleteOwnerData, OwnersDeleteOwnerResponse, OwnersListContactsData, OwnersListContactsResponse, OwnersAddContactData, OwnersAddContactResponse, OwnersListInteractionsData, OwnersListInteractionsResponse, OwnersAddInteractionData, OwnersAddInteractionResponse, OwnersDeleteContactData, OwnersDeleteContactResponse, PrivateCreateUserData, PrivateCreateUserResponse, TasksListTasksData, TasksListTasksResponse, TasksCreateTaskData, TasksCreateTaskResponse, TasksUpdateTaskData, TasksUpdateTaskResponse, TasksDeleteTaskData, TasksDeleteTaskResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { ActivitiesListActivitiesData, ActivitiesListActivitiesResponse, ActivitiesCreateActivityData, ActivitiesCreateActivityResponse, ActivitiesDeleteActivityData, ActivitiesDeleteActivityResponse, DealsListDealsData, DealsListDealsResponse, DealsCreateDealData, DealsCreateDealResponse, DealsGetDealData, DealsGetDealResponse, DealsUpdateDealData, DealsUpdateDealResponse, DealsDeleteDealData, DealsDeleteDealResponse, DealsChangeStageData, DealsChangeStageResponse, DealsGetDealAuditData, DealsGetDealAuditResponse, DocumentsListDocumentsData, DocumentsListDocumentsResponse, DocumentsUploadDocumentData, DocumentsUploadDocumentResponse, DocumentsServeLocalFileData, DocumentsServeLocalFileResponse, DocumentsToggleConfidentialData, DocumentsToggleConfidentialResponse, DocumentsDeleteDocumentData, DocumentsDeleteDocumentResponse, FeasibilityListSnapshotsData, FeasibilityListSnapshotsResponse, FeasibilitySaveSnapshotData, FeasibilitySaveSnapshotResponse, FeasibilityDeleteSnapshotData, FeasibilityDeleteSnapshotResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MasterDataListAllResponse, MasterDataCreateEntryData, MasterDataCreateEntryResponse, MasterDataListByCategoryData, MasterDataListByCategoryResponse, MasterDataUpdateEntryData, MasterDataUpdateEntryResponse, MasterDataDeleteEntryData, MasterDataDeleteEntryResponse, MilestonesListMilestonesData, MilestonesListMilestonesResponse, MilestonesCreateMilestoneData, MilestonesCreateMilestoneResponse, MilestonesUpdateMilestoneData, MilestonesUpdateMilestoneResponse, MilestonesDeleteMilestoneData, MilestonesDeleteMilestoneResponse, OwnersListOwnersData, OwnersListOwnersResponse, OwnersCreateOwnerData, OwnersCreateOwnerResponse, OwnersGetOwnerData, OwnersGetOwnerResponse, OwnersUpdateOwnerData, OwnersUpdateOwnerResponse, OwnersDeleteOwnerData, OwnersDeleteOwnerResponse, OwnersListContactsData, OwnersListContactsResponse, OwnersAddContactData, OwnersAddContactResponse, OwnersListInteractionsData, OwnersListInteractionsResponse, OwnersAddInteractionData, OwnersAddInteractionResponse, OwnersDeleteContactData, OwnersDeleteContactResponse, PrivateCreateUserData, PrivateCreateUserResponse, SeedLoadSeedDataData, SeedLoadSeedDataResponse, SeedClearAllDataResponse, TasksListTasksData, TasksListTasksResponse, TasksCreateTaskData, TasksCreateTaskResponse, TasksUpdateTaskData, TasksUpdateTaskResponse, TasksDeleteTaskData, TasksDeleteTaskResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class ActivitiesService {
     /**
@@ -625,6 +625,116 @@ export class LoginService {
     }
 }
 
+export class MasterDataService {
+    /**
+     * List All
+     * Get all master data entries, sorted by category + sort_order.
+     * @returns MasterDataPublic Successful Response
+     * @throws ApiError
+     */
+    public static listAll(): CancelablePromise<MasterDataListAllResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/master-data/'
+        });
+    }
+    
+    /**
+     * Create Entry
+     * Add a new master data value.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns MasterDataPublic Successful Response
+     * @throws ApiError
+     */
+    public static createEntry(data: MasterDataCreateEntryData): CancelablePromise<MasterDataCreateEntryResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/master-data/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * List By Category
+     * Get master data for a specific category.
+     * @param data The data for the request.
+     * @param data.category
+     * @param data.activeOnly
+     * @returns MasterDataPublic Successful Response
+     * @throws ApiError
+     */
+    public static listByCategory(data: MasterDataListByCategoryData): CancelablePromise<MasterDataListByCategoryResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/master-data/{category}',
+            path: {
+                category: data.category
+            },
+            query: {
+                active_only: data.activeOnly
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Entry
+     * Update a master data entry (value, sort_order, or active status).
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.value
+     * @param data.sortOrder
+     * @param data.isActive
+     * @returns MasterDataPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateEntry(data: MasterDataUpdateEntryData): CancelablePromise<MasterDataUpdateEntryResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/master-data/{id}',
+            path: {
+                id: data.id
+            },
+            query: {
+                value: data.value,
+                sort_order: data.sortOrder,
+                is_active: data.isActive
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Entry
+     * Delete a master data entry.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteEntry(data: MasterDataDeleteEntryData): CancelablePromise<MasterDataDeleteEntryResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/master-data/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
 export class MilestonesService {
     /**
      * List Milestones
@@ -957,6 +1067,41 @@ export class PrivateService {
             errors: {
                 422: 'Validation Error'
             }
+        });
+    }
+}
+
+export class SeedService {
+    /**
+     * Load Seed Data
+     * Load seed data from JSON. Only works in local environment.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static loadSeedData(data: SeedLoadSeedDataData): CancelablePromise<SeedLoadSeedDataResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/seed/load',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Clear All Data
+     * Delete ALL business data. Keeps users. Only local environment.
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static clearAllData(): CancelablePromise<SeedClearAllDataResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/seed/clear'
         });
     }
 }

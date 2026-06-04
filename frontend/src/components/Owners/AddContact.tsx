@@ -15,9 +15,9 @@ import {
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import useCustomToast from "@/hooks/useCustomToast"
+import { MD, useMasterData } from "@/hooks/useMasterData"
 
 const FUSION_ROLES = ["CEO","COO","BD Director","BD Director VN","BD Director TH","BD Director APAC","BD Manager","Legal","Finance","IT Admin"]
-const STRENGTHS = ["New","Warm","Strong"]
 
 interface Props { ownerId: string }
 
@@ -26,6 +26,7 @@ export function AddContact({ ownerId }: Props) {
   const [senior, setSenior] = useState(false)
   const qc = useQueryClient()
   const { showSuccessToast } = useCustomToast()
+  const STRENGTHS = useMasterData(MD.CONTACT_STRENGTH)
 
   const { register, handleSubmit, reset, setValue } = useForm<any>({
     defaultValues: { strength_s: "New" },

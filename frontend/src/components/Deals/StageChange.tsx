@@ -14,11 +14,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import useCustomToast from "@/hooks/useCustomToast"
-
-const STAGES = [
-  "Lead","NDA / Qualified","Feasibility","Proposal","Negotiation",
-  "LOI Signed","HMA Signed","Pre-opening","Opened","Lost",
-]
+import { MD, useMasterData } from "@/hooks/useMasterData"
 
 const STAGE_COLOR: Record<string, string> = {
   "Lead":           "bg-gray-100 text-gray-700",
@@ -40,6 +36,7 @@ export function StageChange({ deal }: Props) {
   const [open, setOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast } = useCustomToast()
+  const STAGES = useMasterData(MD.DEAL_STAGE)
 
   const { register, handleSubmit, setValue, watch, reset, formState: { errors } } =
     useForm<FormData>({ defaultValues: { new_stage: deal.stage ?? "Lead" } })

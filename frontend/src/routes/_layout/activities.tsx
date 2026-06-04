@@ -19,18 +19,12 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import useCustomToast from "@/hooks/useCustomToast"
+import { MD, useMasterData } from "@/hooks/useMasterData"
 
 export const Route = createFileRoute("/_layout/activities")({
   component: ActivitiesPage,
   head: () => ({ meta: [{ title: "Activities & Tasks — Fusion BD CORE OS" }] }),
 })
-
-const STATUSES = ["Open","In Progress","Blocked","Done"]
-const PRIORITIES = ["High","Medium","Low"]
-const ACT_TYPES = [
-  "Meeting","Dinner","Site visit","Phone call","WhatsApp summary",
-  "Proposal sent","NDA signed","LOI signed","HMA signed","Pre-opening review","Other",
-]
 
 const STATUS_COLOR: Record<string, string> = {
   "Open": "bg-blue-100 text-blue-700", "In Progress": "bg-amber-100 text-amber-700",
@@ -58,6 +52,8 @@ function AddTask() {
   const qc = useQueryClient()
   const { showSuccessToast } = useCustomToast()
   const deals = useDealPicker(open)
+  const STATUSES = useMasterData(MD.TASK_STATUS)
+  const PRIORITIES = useMasterData(MD.TASK_PRIORITY)
   const [dealId, setDealId] = useState("")
   const [dealName, setDealName] = useState("")
   const { register, handleSubmit, reset, setValue } = useForm<any>({
@@ -148,6 +144,8 @@ function EditTask({ task }: { task: TaskPublic }) {
   const qc = useQueryClient()
   const { showSuccessToast } = useCustomToast()
   const deals = useDealPicker(open)
+  const STATUSES = useMasterData(MD.TASK_STATUS)
+  const PRIORITIES = useMasterData(MD.TASK_PRIORITY)
   const [dealId, setDealId] = useState(task.deal_id ?? "")
   const [dealName, setDealName] = useState(task.deal_name ?? "")
   const { register, handleSubmit, setValue, reset } = useForm<any>()
@@ -244,6 +242,7 @@ function LogActivity() {
   const qc = useQueryClient()
   const { showSuccessToast } = useCustomToast()
   const deals = useDealPicker(open)
+  const ACT_TYPES = useMasterData(MD.ACTIVITY_TYPE)
   const [dealId, setDealId] = useState("")
   const [dealName, setDealName] = useState("")
   const today = new Date().toISOString().split("T")[0]
@@ -401,6 +400,7 @@ function ActivityItem({ activity }: { activity: ActivityPublic }) {
 
 function ActivitiesPage() {
   const [statusFilter, setStatusFilter] = useState("")
+  const STATUSES = useMasterData(MD.TASK_STATUS)
 
   const { data: tasksData } = useQuery({
     queryKey: ["tasks", { status: statusFilter }],
