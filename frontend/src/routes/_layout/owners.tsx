@@ -12,7 +12,8 @@ import {
 } from "@/client"
 import { useNavigate } from "@tanstack/react-router"
 import { AddProject } from "@/components/Projects/AddProject"
-import { Building2 } from "lucide-react"
+import { Building2, Briefcase, Users as UsersIcon, MessageSquare, Activity } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AddOwner } from "@/components/Owners/AddOwner"
 import { AddContact } from "@/components/Owners/AddContact"
 import { EditOwner } from "@/components/Owners/EditOwner"
@@ -117,186 +118,272 @@ function OwnerDetail({ owner }: { owner: OwnerPublic }) {
   const projectsList = (projects ?? []) as ProjectPublic[]
   const dealsList = (ownerDeals ?? []) as any[]
 
+  const projectCount = (owner as any).project_count ?? 0
+  const contactCount = contacts?.length ?? 0
+  const interactionCount = interactions?.length ?? 0
+
   return (
-    <div className="flex flex-col gap-4 overflow-y-auto pr-1">
-      {/* Header card */}
-      <div className="rounded-lg border bg-card p-4">
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div>
-            <h2 className="text-xl font-semibold">{owner.company}</h2>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              {owner.owner_type} · {owner.country} · Priority: {owner.priority}
-            </p>
+    <div className="flex flex-col gap-4 h-full overflow-hidden">
+      {/* ── Pinned Header (always visible) ── */}
+      <div className="rounded-lg border bg-card p-4 flex-shrink-0">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3 min-w-0 flex-1">
+            {/* Company avatar */}
+            <div className="h-12 w-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-lg flex-shrink-0">
+              {owner.company.slice(0, 2).toUpperCase()}
+            </div>
+            <div className="min-w-0 flex-1">
+              <h2 className="text-xl font-semibold leading-tight truncate">{owner.company}</h2>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {owner.owner_type} · {owner.country} · Priority: {owner.priority}
+              </p>
+              <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                <Badge label={owner.relationship} colorMap={REL_COLOR} />
+                <Badge label={owner.financial_health ? `Financial: ${owner.financial_health}` : null} colorMap={FH_COLOR} />
+                <Badge label={owner.catchup_status} colorMap={CATCHUP_COLOR} />
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            <Badge label={owner.relationship} colorMap={REL_COLOR} />
-            <Badge label={owner.financial_health ? `Financial: ${owner.financial_health}` : null} colorMap={FH_COLOR} />
+          <div className="flex items-center gap-1 flex-shrink-0">
             <EditOwner owner={owner} />
             <DeleteOwner owner={owner} />
           </div>
         </div>
 
-        {/* Mini stats */}
-        <div className="grid grid-cols-5 gap-2 mb-3">
+        {/* Compact mini stats — 4 boxes */}
+        <div className="grid grid-cols-4 gap-2 mt-3">
           {[
-            { label: "Catch-up", value: owner.catchup_status, sub: owner.next_catchup ? `Next: ${owner.next_catchup}` : "" },
-            { label: "Last Met", value: owner.last_interaction ?? "—", sub: "Latest interaction" },
-            { label: "Projects", value: String((owner as any).project_count ?? 0), sub: "Assets" },
-            { label: "Deals", value: String(owner.deal_count), sub: "Active + closed" },
-            { label: "Portfolio", value: owner.assets ?? "—", sub: "" },
+            { icon: Building2, label: "Projects", value: String(projectCount) },
+            { icon: Briefcase, label: "Deals", value: String(owner.deal_count) },
+            { icon: UsersIcon, label: "Contacts", value: String(contactCount) },
+            { icon: MessageSquare, label: "Last Met", value: owner.last_interaction ?? "—" },
           ].map(s => (
-            <div key={s.label} className="rounded-md bg-muted/50 p-2.5">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{s.label}</p>
-              <p className="text-sm font-semibold mt-0.5 truncate">{s.value}</p>
-              {s.sub && <p className="text-[10px] text-muted-foreground">{s.sub}</p>}
+            <div key={s.label} className="rounded-md bg-muted/40 px-3 py-2 flex items-center gap-2">
+              <s.icon className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{s.label}</p>
+                <p className="text-sm font-bold truncate">{s.value}</p>
+              </div>
             </div>
           ))}
         </div>
-
-        {owner.strategic_value && (
-          <div className="rounded-md bg-muted/30 border px-3 py-2 text-sm">
-            <span className="font-semibold">Strategic value: </span>{owner.strategic_value}
-          </div>
-        )}
       </div>
 
-      {/* Projects on this Owner */}
-      <div className="rounded-lg border bg-card p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold text-sm flex items-center gap-2">
-            <Building2 className="h-4 w-4 text-muted-foreground" />
-            Projects ({projectsList.length})
-          </h3>
-          <AddProject
-            defaultOwnerId={owner.id}
-            trigger={<Button size="sm" variant="outline"><Building2 className="h-3.5 w-3.5 mr-1" />Add Project</Button>}
-          />
-        </div>
-        {projectsList.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No projects yet. Add the first hotel asset for this owner.</p>
-        ) : (
-          <div className="grid grid-cols-1 gap-2">
-            {projectsList.map(p => (
-              <div key={p.id}
-                className="rounded-md border bg-muted/20 hover:bg-muted/40 p-2.5 cursor-pointer transition-colors"
-                onClick={() => navigate({ to: "/projects/$projectId" as any, params: { projectId: p.id } })}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{p.name}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {p.city ?? p.country} · {p.keys ?? "—"} keys · {p.project_type ?? "—"}
-                    </p>
-                  </div>
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">{p.status}</span>
+      {/* ── Tabs ── */}
+      <Tabs defaultValue="overview" className="flex-1 min-h-0 flex flex-col">
+        <TabsList className="grid grid-cols-4 w-full flex-shrink-0">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="projects">Projects {projectCount > 0 && <span className="ml-1 text-[10px] text-muted-foreground">({projectCount})</span>}</TabsTrigger>
+          <TabsTrigger value="deals">Deals {owner.deal_count > 0 && <span className="ml-1 text-[10px] text-muted-foreground">({owner.deal_count})</span>}</TabsTrigger>
+          <TabsTrigger value="activity">Activity {interactionCount > 0 && <span className="ml-1 text-[10px] text-muted-foreground">({interactionCount})</span>}</TabsTrigger>
+        </TabsList>
+
+        <div className="flex-1 min-h-0 overflow-y-auto mt-3">
+          {/* ── Overview Tab ── */}
+          <TabsContent value="overview" className="flex flex-col gap-4 m-0">
+            {/* Strategic value */}
+            {owner.strategic_value ? (
+              <div className="rounded-lg border-l-4 border-l-primary bg-primary/5 px-4 py-3">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-primary mb-1">Strategic Value</p>
+                <p className="text-sm">{owner.strategic_value}</p>
+              </div>
+            ) : (
+              <div className="rounded-lg border bg-muted/30 px-4 py-3 text-sm text-muted-foreground italic">
+                No strategic value notes. Add via Edit.
+              </div>
+            )}
+
+            {/* Portfolio overview */}
+            {owner.assets && (
+              <div className="rounded-lg border bg-card p-4">
+                <h3 className="font-semibold text-sm mb-2">Portfolio</h3>
+                <p className="text-sm">{owner.assets}</p>
+              </div>
+            )}
+
+            {/* Catch-up details */}
+            <div className="rounded-lg border bg-card p-4">
+              <h3 className="font-semibold text-sm mb-3">Catch-up Cadence</h3>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Status</p>
+                  <Badge label={owner.catchup_status} colorMap={CATCHUP_COLOR} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Next Catch-up</p>
+                  <p className="text-sm font-medium mt-1">{owner.next_catchup ?? "Not scheduled"}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Last Interaction</p>
+                  <p className="text-sm font-medium mt-1">{owner.last_interaction ?? "—"}</p>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+            </div>
 
-      {/* Deals across this Owner's projects */}
-      <div className="rounded-lg border bg-card p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold text-sm">All Deals ({dealsList.length})</h3>
-        </div>
-        {dealsList.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No deals across this owner's projects yet.</p>
-        ) : (
-          <div className="grid grid-cols-1 gap-2 max-h-[280px] overflow-y-auto">
-            {dealsList.map(d => (
-              <div key={d.id}
-                className="rounded-md border bg-muted/20 hover:bg-muted/40 p-2.5 cursor-pointer transition-colors"
-                onClick={() => navigate({ to: "/deals/$dealId" as any, params: { dealId: d.id } })}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{d.name}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {d.deal_type ?? "HMA"} · {d.stage} · {d.probability ?? 0}%
-                    </p>
-                  </div>
-                  <span className="text-xs font-semibold tabular-nums">
-                    {d.pipeline_value ? `$${(d.pipeline_value / 1_000_000).toFixed(1)}M` : "—"}
-                  </span>
-                </div>
+            {/* Contacts / Relationship Map */}
+            <div className="rounded-lg border bg-card p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-sm">Relationship Map · Fusion ↔ {owner.company}</h3>
+                <AddContact ownerId={owner.id} />
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+              {contacts && contacts.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        {["Fusion","Owner Contact","Strength","Last Met","Note",""].map(h => (
+                          <th key={h} className="text-left text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground pb-2 pr-3">
+                            {h}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {contacts.map((c: OwnerContactPublic) => (
+                        <tr key={c.id} className="border-b last:border-0 hover:bg-muted/20">
+                          <td className="py-2 pr-3">
+                            {c.senior_flag && (
+                              <span className="inline-block bg-amber-100 text-amber-700 text-[9px] font-bold px-1 rounded mr-1">C</span>
+                            )}
+                            {c.fusion_role}
+                          </td>
+                          <td className="py-2 pr-3 font-medium">{c.owner_contact}</td>
+                          <td className="py-2 pr-3">
+                            <Badge label={c.strength} colorMap={{ Strong: "bg-green-100 text-green-700", Warm: "bg-amber-100 text-amber-700", New: "bg-gray-100 text-gray-600" }} />
+                          </td>
+                          <td className="py-2 pr-3 text-muted-foreground">{c.last_met || "—"}</td>
+                          <td className="py-2 pr-2 text-muted-foreground text-xs">{c.note || "—"}</td>
+                          <td className="py-2">
+                            <DeleteContactBtn contactId={c.id} ownerId={owner.id} />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-sm text-muted-foreground py-4 text-center">
+                  No contacts yet. Click <span className="font-medium">Add Contact</span> to map the relationship.
+                </div>
+              )}
+            </div>
+          </TabsContent>
 
-      {/* Contacts table */}
-      <div className="rounded-lg border bg-card p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold text-sm">Relationship Map · Fusion ↔ {owner.company}</h3>
-          <AddContact ownerId={owner.id} />
-        </div>
-        {contacts && contacts.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  {["Fusion","Owner Contact","Strength","Last Met","Note",""].map(h => (
-                    <th key={h} className="text-left text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground pb-2 pr-3">
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {contacts.map((c: OwnerContactPublic) => (
-                  <tr key={c.id} className="border-b last:border-0 hover:bg-muted/20">
-                    <td className="py-2 pr-3">
-                      {c.senior_flag && (
-                        <span className="inline-block bg-amber-100 text-amber-700 text-[9px] font-bold px-1 rounded mr-1">C</span>
+          {/* ── Projects Tab ── */}
+          <TabsContent value="projects" className="m-0">
+            <div className="rounded-lg border bg-card p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-sm flex items-center gap-2">
+                  <Building2 className="h-4 w-4 text-muted-foreground" />
+                  Hotel Assets ({projectsList.length})
+                </h3>
+                <AddProject
+                  defaultOwnerId={owner.id}
+                  trigger={<Button size="sm"><Building2 className="h-3.5 w-3.5 mr-1" />Add Project</Button>}
+                />
+              </div>
+              {projectsList.length === 0 ? (
+                <div className="text-center py-8">
+                  <Building2 className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">No projects yet</p>
+                  <p className="text-xs text-muted-foreground mt-1">Add the first hotel asset for this owner.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  {projectsList.map(p => (
+                    <div key={p.id}
+                      className="rounded-md border bg-muted/20 hover:bg-muted/40 p-3 cursor-pointer transition-colors"
+                      onClick={() => navigate({ to: "/projects/$projectId" as any, params: { projectId: p.id } })}
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <p className="font-semibold text-sm">{p.name}</p>
+                        <span className="text-[10px] font-semibold uppercase text-muted-foreground whitespace-nowrap">{p.status}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {p.city ?? p.country} · {p.keys ?? "—"} keys
+                      </p>
+                      {p.project_type && (
+                        <p className="text-[10px] text-muted-foreground mt-0.5">{p.project_type}</p>
                       )}
-                      {c.fusion_role}
-                    </td>
-                    <td className="py-2 pr-3 font-medium">{c.owner_contact}</td>
-                    <td className="py-2 pr-3">
-                      <Badge label={c.strength} colorMap={{ Strong: "bg-green-100 text-green-700", Warm: "bg-amber-100 text-amber-700", New: "bg-gray-100 text-gray-600" }} />
-                    </td>
-                    <td className="py-2 pr-3 text-muted-foreground">{c.last_met || "—"}</td>
-                    <td className="py-2 pr-2 text-muted-foreground text-xs">{c.note || "—"}</td>
-                    <td className="py-2">
-                      <DeleteContactBtn contactId={c.id} ownerId={owner.id} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="text-sm text-muted-foreground py-2">
-            No contacts yet. Click <span className="font-medium">Add Contact</span> to map the relationship.
-          </div>
-        )}
-      </div>
-
-      {/* Interactions */}
-      <div className="rounded-lg border bg-card p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold text-sm">Interactions</h3>
-          <LogInteraction ownerId={owner.id} />
-        </div>
-        {interactions && interactions.length > 0 ? (
-          <div className="flex flex-col gap-2">
-            {interactions.map((i: OwnerInteractionPublic) => (
-              <div key={i.id} className="rounded-md bg-muted/40 p-2.5">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold">{i.interaction_type}</span>
-                  <span className="text-xs text-muted-foreground">{i.date}</span>
+                    </div>
+                  ))}
                 </div>
-                {i.note && <p className="text-xs text-muted-foreground mt-1">{i.note}</p>}
+              )}
+            </div>
+          </TabsContent>
+
+          {/* ── Deals Tab ── */}
+          <TabsContent value="deals" className="m-0">
+            <div className="rounded-lg border bg-card p-4">
+              <h3 className="font-semibold text-sm mb-3">All Deals across {owner.company}'s Projects ({dealsList.length})</h3>
+              {dealsList.length === 0 ? (
+                <div className="text-center py-8">
+                  <Briefcase className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">No deals yet</p>
+                  <p className="text-xs text-muted-foreground mt-1">Create a project first, then add deals from there.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-2">
+                  {dealsList.map(d => (
+                    <div key={d.id}
+                      className="rounded-md border bg-muted/20 hover:bg-muted/40 p-3 cursor-pointer transition-colors flex items-center gap-3"
+                      onClick={() => navigate({ to: "/deals/$dealId" as any, params: { dealId: d.id } })}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm truncate">{d.name}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {d.deal_type ?? "HMA"} · {d.stage} · {d.probability ?? 0}% prob
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold tabular-nums">
+                          {d.pipeline_value ? `$${(d.pipeline_value / 1_000_000).toFixed(1)}M` : "—"}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground">pipeline</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* ── Activity Tab ── */}
+          <TabsContent value="activity" className="m-0">
+            <div className="rounded-lg border bg-card p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-sm flex items-center gap-2">
+                  <Activity className="h-4 w-4 text-muted-foreground" />
+                  Interactions Timeline
+                </h3>
+                <LogInteraction ownerId={owner.id} />
               </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">No interactions recorded yet.</p>
-        )}
-      </div>
+              {interactions && interactions.length > 0 ? (
+                <div className="relative pl-5 border-l-2 border-muted flex flex-col gap-3">
+                  {interactions.map((i: OwnerInteractionPublic) => (
+                    <div key={i.id} className="relative">
+                      <div className="absolute -left-[26px] top-1 h-2.5 w-2.5 rounded-full bg-primary border-2 border-background" />
+                      <div className="rounded-md bg-muted/40 p-2.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold">{i.interaction_type}</span>
+                          <span className="text-xs text-muted-foreground">{i.date}</span>
+                        </div>
+                        {i.note && <p className="text-xs text-muted-foreground mt-1">{i.note}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <MessageSquare className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">No interactions yet</p>
+                  <p className="text-xs text-muted-foreground mt-1">Log meetings, calls, dinners, site visits...</p>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        </div>
+      </Tabs>
     </div>
   )
 }
@@ -366,7 +453,7 @@ function OwnersPage() {
           <p className="text-sm text-muted-foreground">Add your first owner to get started.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-[300px_1fr] gap-4 min-h-0 flex-1">
+        <div className="grid grid-cols-[340px_1fr] gap-4 min-h-0 flex-1">
           {/* Owner list */}
           <div className="flex flex-col gap-1.5 overflow-y-auto">
             {owners.map(o => (
