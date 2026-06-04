@@ -212,7 +212,7 @@ export const dealColumns: ColumnDef<DealPublic>[] = [
   },
   {
     id: "actions",
-    header: "",
+    header: () => <span className="text-[10.5px] font-semibold uppercase tracking-wider">Actions</span>,
     enableHiding: false,
     cell: ({ row }) => (
       <div className="flex items-center gap-0.5">

@@ -69,7 +69,10 @@ export function DataTable<TData, TValue>({
     return (
       <TableHead
         key={header.id}
-        className={isSticky ? "sticky right-0 bg-card border-l shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.05)] z-10" : ""}
+        className={isSticky
+          ? "sticky right-0 bg-muted border-l shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.05)] z-10"
+          : ""
+        }
       >
         {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
       </TableHead>
@@ -81,7 +84,10 @@ export function DataTable<TData, TValue>({
     return (
       <TableCell
         key={cell.id}
-        className={isSticky ? "sticky right-0 bg-card border-l shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.05)] z-10" : ""}
+        className={isSticky
+          ? "sticky right-0 bg-card border-l shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.05)] z-10 group-hover:bg-muted/30 transition-colors"
+          : ""
+        }
       >
         {flexRender(cell.column.columnDef.cell, cell.getContext())}
       </TableCell>
@@ -101,7 +107,7 @@ export function DataTable<TData, TValue>({
         <TableBody>
           {table.getRowModel().rows.length ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
+              <TableRow key={row.id} className="group">
                 {row.getVisibleCells().map(bodyCell)}
               </TableRow>
             ))
