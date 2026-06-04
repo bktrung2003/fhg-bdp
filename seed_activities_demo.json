@@ -1,0 +1,360 @@
+{
+  "deals": [],
+  "owners": [],
+  "milestones": [],
+  "feasibility_snapshots": [],
+
+  "tasks": [
+    {
+      "title": "Escalate Hoi An licensing risk to COO + Legal Counsel",
+      "deal_name": "Fusion Heritage Hoi An",
+      "task_owner": "Legal",
+      "due_date": "2026-05-28",
+      "priority": "High",
+      "status": "Blocked",
+      "note": "Heritage conversion permits still unclear after 4 weeks. Need COO escalation to local authority contacts."
+    },
+    {
+      "title": "Send LOI countersignature reminder to BIM Group Chairman",
+      "deal_name": "Fusion Retreat Phu Quoc",
+      "task_owner": "BD Director VN",
+      "due_date": "2026-06-02",
+      "priority": "High",
+      "status": "Open",
+      "note": "LOI sent 12 May, awaiting countersignature. Follow up directly with Chairman."
+    },
+    {
+      "title": "Submit BD weekly pack to CEO before Monday review",
+      "task_owner": "BD Director",
+      "due_date": "2026-06-03",
+      "priority": "Medium",
+      "status": "Open",
+      "note": "Standalone task — internal reporting cycle."
+    },
+
+    {
+      "title": "COO review Sun Group revised commercial terms",
+      "deal_name": "Fusion Resort Da Nang",
+      "task_owner": "COO",
+      "due_date": "2026-06-04",
+      "priority": "High",
+      "status": "Open",
+      "note": "Sun Group proposed 2.75% base fee + tech services capped at $300K. COO decision needed before next call."
+    },
+    {
+      "title": "Send revised proposal v4 to Central Group Bangkok",
+      "deal_name": "Fusion Grand Bangkok",
+      "task_owner": "BD Director TH",
+      "due_date": "2026-06-04",
+      "priority": "High",
+      "status": "Open",
+      "note": "Include itemised technical services scope as Central VP requested."
+    },
+    {
+      "title": "Confirm Vingroup board review outcome and next steps",
+      "deal_name": "Fusion Suites Saigon",
+      "task_owner": "BD Manager VN",
+      "due_date": "2026-06-04",
+      "priority": "Medium",
+      "status": "In Progress",
+      "note": "Board met Mon, awaiting written outcome via WhatsApp from Hospitality Development Director."
+    },
+    {
+      "title": "Update fee forecast model for Q3 board pack",
+      "task_owner": "Finance",
+      "due_date": "2026-06-04",
+      "priority": "Low",
+      "status": "Open",
+      "note": "Standalone — quarterly internal model refresh."
+    },
+
+    {
+      "title": "Site visit Nha Trang KDI beachfront plot — joint with COO",
+      "deal_name": "Fusion Bay Nha Trang",
+      "task_owner": "BD Manager VN",
+      "due_date": "2026-06-05",
+      "priority": "Medium",
+      "status": "Open",
+      "note": "Logistics confirmed. COO joining via afternoon flight. Owner expects 300-key luxury positioning."
+    },
+    {
+      "title": "Legal review of HMA draft v2 for Phu Quoc",
+      "deal_name": "Fusion Retreat Phu Quoc",
+      "task_owner": "Legal",
+      "due_date": "2026-06-05",
+      "priority": "High",
+      "status": "In Progress",
+      "note": "Fusion Legal team reviewing BIM's redlined draft. Key open: termination clauses + fee escalation."
+    },
+    {
+      "title": "WhatsApp Sun Group Chairman — thank-you note post-dinner",
+      "deal_name": "Fusion Resort Da Nang",
+      "task_owner": "CEO",
+      "due_date": "2026-06-05",
+      "priority": "Low",
+      "status": "Open",
+      "note": "Personal touch from CEO — reinforces strategic relationship for future expansion."
+    },
+
+    {
+      "title": "Schedule Q3 catch-up dinner with Vingroup Group CEO",
+      "deal_name": "Fusion Suites Saigon",
+      "task_owner": "BD Director VN",
+      "due_date": "2026-06-06",
+      "priority": "Medium",
+      "status": "Open",
+      "note": "Strategic relationship cadence. Last met 30 Apr."
+    },
+    {
+      "title": "Prepare Ayala Land qualification meeting brief",
+      "deal_name": "Fusion Manila Bay",
+      "task_owner": "BD Director APAC",
+      "due_date": "2026-06-07",
+      "priority": "Medium",
+      "status": "Open",
+      "note": "Need to verify ownership structure + decision makers before formal proposal."
+    },
+    {
+      "title": "Confirm NDA countersignature Central Phuket Wellness",
+      "deal_name": "Fusion Phuket Wellness",
+      "task_owner": "BD Director TH",
+      "due_date": "2026-06-07",
+      "priority": "Medium",
+      "status": "Open",
+      "note": "Central Legal sent back signed copy. BD to file in document register and update stage."
+    },
+    {
+      "title": "Sun Group expansion meeting prep — Phuket / Bali angle",
+      "deal_name": "Fusion Resort Da Nang",
+      "task_owner": "BD Director VN",
+      "due_date": "2026-06-06",
+      "priority": "High",
+      "status": "Open",
+      "note": "Chairman hinted at APAC expansion. Prepare market study + competitive landscape for Phuket and Bali."
+    },
+
+    {
+      "title": "Qualify Ciputra Group capex readiness for Bali project",
+      "deal_name": "Fusion Resort Bali",
+      "task_owner": "BD Director APAC",
+      "due_date": "2026-06-20",
+      "priority": "Low",
+      "status": "Open",
+      "note": "Need due diligence on Ciputra's funding pipeline before formal proposal."
+    },
+    {
+      "title": "Assess Sydney labour cost sensitivity for fee model",
+      "deal_name": "Fusion Sydney Harbour",
+      "task_owner": "Finance",
+      "due_date": "2026-06-15",
+      "priority": "Medium",
+      "status": "Open",
+      "note": "Australia labor + visa costs may shift fee threshold. Refresh feasibility."
+    },
+    {
+      "title": "Sakura REIT follow-up call — Tokyo market entry",
+      "deal_name": "Fusion Kyoto Retreat",
+      "task_owner": "BD Director APAC",
+      "due_date": "2026-06-25",
+      "priority": "Low",
+      "status": "Open",
+      "note": "Investment Director showed initial interest. Schedule Q3 deeper conversation."
+    },
+    {
+      "title": "Annual brand strategy review — luxury vs resort mix",
+      "task_owner": "BD Director",
+      "due_date": "2026-07-01",
+      "priority": "Medium",
+      "status": "Open",
+      "note": "Standalone — strategic review for board pack."
+    },
+
+    {
+      "title": "Build new fee model template for branded residences segment",
+      "task_owner": "Finance",
+      "priority": "Low",
+      "status": "Open",
+      "note": "No specific deadline — needed before Sun Group Residences proposal in Q4."
+    },
+
+    {
+      "title": "Send Sun Group Chairman dinner thank-you note",
+      "deal_name": "Fusion Resort Da Nang",
+      "task_owner": "BD Manager VN",
+      "due_date": "2026-06-02",
+      "priority": "Low",
+      "status": "Done",
+      "note": "Done — handwritten note couriered."
+    },
+    {
+      "title": "Confirm site visit Phu Quoc logistics with BIM team",
+      "deal_name": "Fusion Retreat Phu Quoc",
+      "task_owner": "BD Manager VN",
+      "due_date": "2026-06-01",
+      "priority": "Medium",
+      "status": "Done",
+      "note": "Hotel booking + transport confirmed."
+    },
+    {
+      "title": "Update Owner CRM profile Vingroup — new asset additions",
+      "deal_name": "Fusion Suites Saigon",
+      "task_owner": "BD Manager VN",
+      "due_date": "2026-06-02",
+      "priority": "Low",
+      "status": "Done",
+      "note": "Added 2 new hotels to Vingroup portfolio in CRM."
+    },
+    {
+      "title": "Prepare COO weekly risk report",
+      "task_owner": "BD Director",
+      "due_date": "2026-06-03",
+      "priority": "Medium",
+      "status": "Done",
+      "note": "Standalone — completed and circulated."
+    },
+    {
+      "title": "Draft proposal v3 for Vingroup Saigon HMA",
+      "deal_name": "Fusion Suites Saigon",
+      "task_owner": "BD Manager VN",
+      "due_date": "2026-05-30",
+      "priority": "High",
+      "status": "Done",
+      "note": "Submitted 5 May via secure portal."
+    }
+  ],
+
+  "activities": [
+    {
+      "type": "Meeting",
+      "date": "2026-06-04",
+      "deal_name": "Fusion Resort Da Nang",
+      "note": "Sun Group CEO reviewed revised commercial terms over coffee. Positive sentiment overall — interested in moving to LOI within 2 weeks if COO confirms revised fee structure (2.75% base + capped tech services)."
+    },
+    {
+      "type": "WhatsApp summary",
+      "date": "2026-06-04",
+      "deal_name": "Fusion Grand Bangkok",
+      "note": "Central Group VP Development asked for itemised technical services breakdown. Wants to compare against IHG/Accor benchmarks."
+    },
+    {
+      "type": "Phone call",
+      "date": "2026-06-04",
+      "deal_name": "Fusion Retreat Phu Quoc",
+      "note": "BIM Group Chairman's office confirms LOI countersignature pending final board sign-off this Friday."
+    },
+
+    {
+      "type": "Pre-opening review",
+      "date": "2026-06-03",
+      "deal_name": "Fusion City Hanoi",
+      "note": "PMS vendor delayed contract finalisation. COO escalated to CEO and vendor leadership. Licensing approval also at risk — local authority review extended by 2 weeks."
+    },
+    {
+      "type": "Meeting",
+      "date": "2026-06-03",
+      "deal_name": "Fusion Suites Saigon",
+      "note": "Vingroup board reviewed Proposal v3. Hospitality Development Director confirmed positive direction. Written outcome expected by Monday next week."
+    },
+    {
+      "type": "Site visit",
+      "date": "2026-06-03",
+      "deal_name": "Fusion Bay Nha Trang",
+      "note": "Toured KDI Holdings' beachfront plot. Owner aspires to 300-key luxury beach resort. Site has direct beach access, clean title. Some flooding concerns during monsoon — needs design mitigation."
+    },
+
+    {
+      "type": "Dinner",
+      "date": "2026-06-02",
+      "deal_name": "Fusion Resort Da Nang",
+      "note": "Sun Group Chairman dinner at private residence. Strategic conversation: signaled interest in Fusion partnership for Phuket and Bali assets if APAC mandate expands. CEO to follow up with formal letter of intent."
+    },
+    {
+      "type": "WhatsApp summary",
+      "date": "2026-06-02",
+      "deal_name": "Fusion Grand Bangkok",
+      "note": "Sent Central Group revised proposal preview. Owner team reviewing internally."
+    },
+    {
+      "type": "Meeting",
+      "date": "2026-06-02",
+      "deal_name": "Fusion Retreat Phu Quoc",
+      "note": "Aligned on HMA terms with BIM Asset Director. Termination clause + fee escalation language to be revised by BIM legal next week."
+    },
+
+    {
+      "type": "Proposal sent",
+      "date": "2026-06-01",
+      "deal_name": "Fusion Suites Saigon",
+      "note": "Proposal v3 submitted to Vingroup via secure portal. Includes branded residences upside scenario."
+    },
+    {
+      "type": "Meeting",
+      "date": "2026-06-01",
+      "deal_name": "Fusion Heritage Hoi An",
+      "note": "Met BRG asset team. Heritage conversion remains blocked by local licensing. Owner concerned about timeline slip. BDD considering whether to maintain pipeline status."
+    },
+    {
+      "type": "NDA signed",
+      "date": "2026-06-01",
+      "deal_name": "Fusion Manila Bay",
+      "note": "NDA executed via DocuSign with Ayala Land. Formal qualification phase begins."
+    },
+
+    {
+      "type": "Site visit",
+      "date": "2026-05-28",
+      "deal_name": "Fusion Resort Da Nang",
+      "note": "Site visit with Sun Group asset team. Owner requested wellness programming examples — Fusion to provide 3 brand case studies."
+    },
+    {
+      "type": "LOI signed",
+      "date": "2026-05-28",
+      "deal_name": "Fusion Retreat Phu Quoc",
+      "note": "LOI executed in person with BIM Chairman. HMA drafting commences. Move stage to LOI Signed in pipeline."
+    },
+    {
+      "type": "Meeting",
+      "date": "2026-05-28",
+      "deal_name": "Fusion Grand Bangkok",
+      "note": "Strategic alignment with Central VP Development on Bangkok + Phuket pipeline. Open to multi-asset relationship."
+    },
+
+    {
+      "type": "WhatsApp summary",
+      "date": "2026-05-25",
+      "deal_name": "Fusion Resort Da Nang",
+      "note": "Sun Group Chairman pinged about a separate Phuket land bank opportunity — Chairman thinks Fusion brand would fit. CEO to call back."
+    },
+    {
+      "type": "Pre-opening review",
+      "date": "2026-05-25",
+      "deal_name": "Fusion City Hanoi",
+      "note": "Recruitment Plan flagged Amber: department heads pending board approval. HR Director driving resolution."
+    },
+
+    {
+      "type": "Phone call",
+      "date": "2026-05-22",
+      "deal_name": "Fusion Kyoto Retreat",
+      "note": "Sakura REIT Investment Director responded to intro email. Interested in Japan market entry but wants local partner clarity first."
+    },
+    {
+      "type": "Meeting",
+      "date": "2026-05-22",
+      "note": "Internal weekly BD review with COO. Escalated Hoi An licensing risk and Hanoi pre-opening PMS issue. Two items now flagged Red on watchlist."
+    },
+
+    {
+      "type": "Other",
+      "date": "2026-05-20",
+      "deal_name": "Fusion Resort Bali",
+      "note": "Inbound enquiry from Ciputra Group — Bali resort partnership interest. Qualification phase to begin once NDA executed."
+    },
+    {
+      "type": "Proposal sent",
+      "date": "2026-05-18",
+      "deal_name": "Fusion Retreat Phu Quoc",
+      "note": "Pre-LOI proposal sent to BIM Group ahead of in-person LOI signing."
+    }
+  ]
+}
