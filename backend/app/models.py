@@ -164,6 +164,15 @@ class DealStage(str, Enum):
     LOST = "Lost"
 
 
+class DealType(str, Enum):
+    HMA = "HMA"
+    TSA = "TSA"
+    FRANCHISE = "Franchise"
+    CONSULTING = "Consulting"
+    PRE_OPENING = "Pre-opening"
+    OTHER = "Other"
+
+
 class DealRisk(str, Enum):
     GREEN = "Green"
     AMBER = "Amber"
@@ -923,12 +932,3 @@ class ProjectPublic(ProjectBase):
 class ProjectsPublic(SQLModel):
     data: list[ProjectPublic]
     count: int
-
-
-class DealType(str, Enum):
-    HMA = "HMA"
-    TSA = "TSA"
-    FRANCHISE = "Franchise"
-    CONSULTING = "Consulting"
-    PRE_OPENING = "Pre-opening"
-    OTHER = "Other"
