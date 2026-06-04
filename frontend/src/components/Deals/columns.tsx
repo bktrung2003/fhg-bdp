@@ -74,9 +74,11 @@ function DealNameCell({ deal }: { deal: DealPublic }) {
   const navigate = useNavigate()
   const projectName = (deal as any).project_name as string | undefined
   // Only show the project line if deal name doesn't already contain it
+  // Normalize Unicode (NFC) + trim + lowercase to handle Vietnamese diacritics
+  const norm = (s: string) => s.normalize("NFC").trim().toLowerCase()
   const showProjectLine =
     projectName &&
-    !deal.name.toLowerCase().includes(projectName.toLowerCase())
+    !norm(deal.name).includes(norm(projectName))
 
   return (
     <div
