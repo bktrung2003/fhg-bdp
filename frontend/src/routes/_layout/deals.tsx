@@ -162,7 +162,13 @@ function DealsPage() {
         <DealKanban deals={deals} stages={STAGES} />
       ) : (
         <div className="rounded-lg border bg-card overflow-x-auto w-full">
-          <DataTable columns={dealColumns} data={deals} />
+          <DataTable
+            columns={dealColumns}
+            data={deals}
+            storageKey="deals-table"
+            stickyRightColumns={["actions"]}
+            defaultHidden={["region", "keys", "opening_target"]}
+          />
         </div>
       )}
     </div>

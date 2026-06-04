@@ -213,6 +213,7 @@ export const dealColumns: ColumnDef<DealPublic>[] = [
   {
     id: "actions",
     header: "",
+    enableHiding: false,
     cell: ({ row }) => (
       <div className="flex items-center gap-0.5">
         <StageChange deal={row.original} />
