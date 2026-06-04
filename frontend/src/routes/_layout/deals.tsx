@@ -8,6 +8,7 @@ import { AddDeal } from "@/components/Deals/AddDeal"
 import { dealColumns } from "@/components/Deals/columns"
 import { DealKanban } from "@/components/Deals/DealKanban"
 import { DataTable } from "@/components/Common/DataTable"
+import { ColumnPicker, useColumnVisibility, type ColumnSpec } from "@/components/Common/ColumnPicker"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -30,9 +31,29 @@ export const Route = createFileRoute("/_layout/deals")({
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
+// Column specs for picker
+const DEAL_COLUMN_SPECS: ColumnSpec[] = [
+  { id: "deal_number", label: "Record #" },
+  { id: "updated_at", label: "Modified" },
+  { id: "owner_name", label: "Developer / Owner" },
+  { id: "name", label: "Deal" },
+  { id: "deal_type", label: "Type" },
+  { id: "probability", label: "Probability" },
+  { id: "country", label: "Country" },
+  { id: "region", label: "Region" },
+  { id: "keys", label: "Keys" },
+  { id: "stage", label: "Stage" },
+  { id: "risk", label: "Risk" },
+  { id: "bd_owner", label: "Dev. Lead" },
+  { id: "pipeline_value", label: "Pipeline Value" },
+  { id: "opening_target", label: "Opening" },
+  { id: "actions", label: "Actions", fixed: true },
+]
+
 function DealsPage() {
   const STAGES = useMasterData(MD.DEAL_STAGE)
   const RISKS = useMasterData(MD.DEAL_RISK)
+  const { visibility, setVisibility } = useColumnVisibility("deals-table", ["region", "keys", "opening_target"])
   const [search, setSearch] = useState("")
   const [stage, setStage] = useState<string>("")
   const [risk, setRisk] = useState<string>("")
@@ -139,6 +160,17 @@ function DealsPage() {
             Clear
           </Button>
         )}
+
+        {/* Push column picker to right end of filter bar */}
+        <div className="ml-auto">
+          {view === "table" && (
+            <ColumnPicker
+              columns={DEAL_COLUMN_SPECS}
+              visibility={visibility}
+              onVisibilityChange={setVisibility}
+            />
+          )}
+        </div>
       </div>
 
       {/* Content */}
@@ -165,9 +197,9 @@ function DealsPage() {
           <DataTable
             columns={dealColumns}
             data={deals}
-            storageKey="deals-table"
             stickyRightColumns={["actions"]}
-            defaultHidden={["region", "keys", "opening_target"]}
+            columnVisibility={visibility}
+            onColumnVisibilityChange={setVisibility}
           />
         </div>
       )}

@@ -11,20 +11,10 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  Settings2,
-  Check,
 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import {
   Select,
   SelectContent,
@@ -46,51 +36,34 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   /** Column IDs to pin/freeze on right (typically "actions") */
   stickyRightColumns?: string[]
-  /** localStorage key to persist column visibility */
-  storageKey?: string
-  /** Default hidden columns (only used if no saved visibility) */
-  defaultHidden?: string[]
+  /** Externally controlled column visibility (use with ColumnPicker) */
+  columnVisibility?: VisibilityState
+  onColumnVisibilityChange?: (next: VisibilityState) => void
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   stickyRightColumns = [],
-  storageKey,
-  defaultHidden = [],
+  columnVisibility,
+  onColumnVisibilityChange,
 }: DataTableProps<TData, TValue>) {
-  // Column visibility state with localStorage persistence
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => {
-    if (storageKey && typeof window !== "undefined") {
-      const saved = localStorage.getItem(`cols:${storageKey}`)
-      if (saved) {
-        try { return JSON.parse(saved) } catch {}
-      }
-    }
-    // Initial state — hide defaults
-    const state: VisibilityState = {}
-    defaultHidden.forEach(id => { state[id] = false })
-    return state
-  })
-
-  useEffect(() => {
-    if (storageKey) {
-      localStorage.setItem(`cols:${storageKey}`, JSON.stringify(columnVisibility))
-    }
-  }, [columnVisibility, storageKey])
-
   const table = useReactTable({
     data,
     columns,
-    state: { columnVisibility },
-    onColumnVisibilityChange: setColumnVisibility,
+    state: columnVisibility ? { columnVisibility } : undefined,
+    onColumnVisibilityChange: onColumnVisibilityChange as any,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   })
 
-  const allColumns = table.getAllColumns().filter(c => c.getCanHide())
+  // Sync external visibility into table
+  useEffect(() => {
+    if (columnVisibility) {
+      table.setColumnVisibility(columnVisibility)
+    }
+  }, [columnVisibility, table])
 
-  // Header cell — sticky support
   const headerCell = (header: any) => {
     const isSticky = stickyRightColumns.includes(header.column.id)
     return (
@@ -103,7 +76,6 @@ export function DataTable<TData, TValue>({
     )
   }
 
-  // Body cell — sticky support
   const bodyCell = (cell: any) => {
     const isSticky = stickyRightColumns.includes(cell.column.id)
     return (
@@ -117,43 +89,7 @@ export function DataTable<TData, TValue>({
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      {/* Toolbar: column picker */}
-      <div className="flex items-center justify-end gap-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-8">
-              <Settings2 className="h-3.5 w-3.5 mr-1.5" />
-              Columns
-              <span className="ml-1.5 text-[10px] text-muted-foreground">
-                {table.getVisibleLeafColumns().length}/{allColumns.length}
-              </span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {allColumns.map(col => {
-              const headerLabel = typeof col.columnDef.header === "string"
-                ? col.columnDef.header
-                : col.id
-              return (
-                <DropdownMenuItem
-                  key={col.id}
-                  onSelect={(e) => { e.preventDefault(); col.toggleVisibility() }}
-                  className="capitalize cursor-pointer"
-                >
-                  <span className="w-4 mr-2">
-                    {col.getIsVisible() && <Check className="h-3.5 w-3.5" />}
-                  </span>
-                  {headerLabel || col.id}
-                </DropdownMenuItem>
-              )
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-
+    <div className="flex flex-col">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
