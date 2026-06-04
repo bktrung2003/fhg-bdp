@@ -9,6 +9,7 @@ from app.api.deps import CurrentUser, SessionDep
 from app.models import (
     Activity, ActivityCreate, ActivityPublic, ActivitiesPublic,
     Message, Task, TaskCreate, TaskPublic, TasksPublic, TaskStatus, TaskUpdate,
+    User,
 )
 
 router = APIRouter()
@@ -16,13 +17,25 @@ router = APIRouter()
 TODAY = datetime.now(timezone.utc).date().isoformat()
 
 
-def _task_public(t: Task) -> TaskPublic:
+def _task_public(t: Task, session: SessionDep | None = None) -> TaskPublic:
     overdue = (
         t.status not in (TaskStatus.DONE,)
         and t.due_date is not None
         and t.due_date < TODAY
     )
-    return TaskPublic(**t.model_dump(), is_overdue=overdue)
+    owner_name = None
+    owner_role = None
+    if t.task_owner_id and session is not None:
+        u = session.get(User, t.task_owner_id)
+        if u:
+            owner_name = u.full_name or u.email
+            owner_role = u.role
+    return TaskPublic(
+        **t.model_dump(),
+        is_overdue=overdue,
+        task_owner_name=owner_name,
+        task_owner_role=owner_role,
+    )
 
 
 # ── TASKS ─────────────────────────────────────────────────────────────────────
@@ -53,7 +66,7 @@ def list_tasks(
     tasks = session.exec(
         stmt.order_by(col(Task.due_date).asc().nullslast()).offset(skip).limit(limit)
     ).all()
-    return TasksPublic(data=[_task_public(t) for t in tasks], count=count)
+    return TasksPublic(data=[_task_public(t, session) for t in tasks], count=count)
 
 
 @task_router.post("/", response_model=TaskPublic, status_code=201)
@@ -66,7 +79,7 @@ def create_task(*, session: SessionDep, current_user: CurrentUser, task_in: Task
     session.add(task)
     session.commit()
     session.refresh(task)
-    return _task_public(task)
+    return _task_public(task, session)
 
 
 @task_router.put("/{id}", response_model=TaskPublic)
@@ -83,7 +96,7 @@ def update_task(
     session.add(task)
     session.commit()
     session.refresh(task)
-    return _task_public(task)
+    return _task_public(task, session)
 
 
 @task_router.delete("/{id}", response_model=Message)

@@ -564,7 +564,8 @@ class TaskBase(_EnumAsStr):
     title: str = Field(min_length=1, max_length=500)
     deal_id: uuid.UUID | None = Field(default=None)
     deal_name: str | None = Field(default=None, max_length=255)   # denormalized for display
-    task_owner: str | None = Field(default=None, max_length=100)  # free text e.g. "COO", "Legal"
+    task_owner_id: uuid.UUID | None = Field(default=None)         # PRIMARY: link to User
+    task_owner: str | None = Field(default=None, max_length=100)  # fallback/legacy free text
     due_date: str | None = Field(default=None, max_length=20)     # "2026-06-15"
     priority: TaskPriority = Field(default=TaskPriority.MEDIUM, sa_type=String(20))
     status: TaskStatus = Field(default=TaskStatus.OPEN, sa_type=String(20))
@@ -579,6 +580,7 @@ class TaskUpdate(SQLModel):
     title: str | None = Field(default=None, min_length=1, max_length=500)
     deal_id: uuid.UUID | None = None
     deal_name: str | None = Field(default=None, max_length=255)
+    task_owner_id: uuid.UUID | None = None
     task_owner: str | None = Field(default=None, max_length=100)
     due_date: str | None = Field(default=None, max_length=20)
     priority: TaskPriority | None = None
@@ -600,7 +602,10 @@ class Task(TaskBase, table=True):
 class TaskPublic(TaskBase):
     id: uuid.UUID
     created_by_id: uuid.UUID
-    is_overdue: bool = False   # computed
+    is_overdue: bool = False
+    # Enriched from User relationship
+    task_owner_name: str | None = None
+    task_owner_role: str | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
 

@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 import {
-  TasksService, ActivitiesService, DealsService,
+  TasksService, ActivitiesService, DealsService, UsersService,
   type TaskPublic, type ActivityPublic,
   type TaskCreate, type TaskUpdate, type ActivityCreate,
 } from "@/client"
@@ -50,6 +50,17 @@ function useDealPicker(enabled: boolean) {
   return data?.data ?? []
 }
 
+// ── Users Picker Hook ─────────────────────────────────────────────────────────
+
+function useUsersPicker(enabled: boolean) {
+  const { data } = useQuery({
+    queryKey: ["users-team"],
+    queryFn: () => UsersService.listTeam(),
+    enabled,
+  })
+  return data?.data ?? []
+}
+
 // ── Add Task Dialog ───────────────────────────────────────────────────────────
 
 function AddTask() {
@@ -57,17 +68,19 @@ function AddTask() {
   const qc = useQueryClient()
   const { showSuccessToast } = useCustomToast()
   const deals = useDealPicker(open)
+  const users = useUsersPicker(open)
   const STATUSES = useMasterData(MD.TASK_STATUS)
   const PRIORITIES = useMasterData(MD.TASK_PRIORITY)
   const [dealId, setDealId] = useState("")
   const [dealName, setDealName] = useState("")
+  const [ownerId, setOwnerId] = useState("")
   const { register, handleSubmit, reset, setValue } = useForm<any>({
     defaultValues: { priority_s: "Medium", status_s: "Open" },
   })
 
   const mut = useMutation({
     mutationFn: (d: TaskCreate) => TasksService.createTask({ requestBody: d }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["tasks"] }); showSuccessToast("Task added."); reset(); setDealId(""); setDealName(""); setOpen(false) },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["tasks"] }); showSuccessToast("Task added."); reset(); setDealId(""); setDealName(""); setOwnerId(""); setOpen(false) },
   })
 
   const handleDeal = (v: string) => {
@@ -78,6 +91,7 @@ function AddTask() {
 
   const onSubmit = (d: any) => mut.mutate({
     title: d.title, deal_id: dealId || undefined, deal_name: dealName || undefined,
+    task_owner_id: ownerId || undefined,
     task_owner: d.task_owner || undefined, due_date: d.due_date || undefined,
     priority: d.priority_s, status: d.status_s, note: d.note || undefined,
   })
@@ -120,8 +134,19 @@ function AddTask() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Task Owner</Label>
-                <Input {...register("task_owner")} placeholder="e.g. COO, Legal" />
+                <Label>Assigned To *</Label>
+                <Select value={ownerId || "__none__"} onValueChange={v => setOwnerId(v === "__none__" ? "" : v)}>
+                  <SelectTrigger><SelectValue placeholder="Pick user..." /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— Unassigned —</SelectItem>
+                    {users.map(u => (
+                      <SelectItem key={u.id} value={u.id}>
+                        {u.full_name || u.email}
+                        <span className="text-muted-foreground text-xs ml-1">· {u.role}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-1.5">
                 <Label>Due Date</Label>
@@ -165,16 +190,19 @@ function EditTask({ task }: { task: TaskPublic }) {
   const qc = useQueryClient()
   const { showSuccessToast } = useCustomToast()
   const deals = useDealPicker(open)
+  const users = useUsersPicker(open)
   const STATUSES = useMasterData(MD.TASK_STATUS)
   const PRIORITIES = useMasterData(MD.TASK_PRIORITY)
   const [dealId, setDealId] = useState(task.deal_id ?? "")
   const [dealName, setDealName] = useState(task.deal_name ?? "")
+  const [ownerId, setOwnerId] = useState((task as any).task_owner_id ?? "")
   const { register, handleSubmit, setValue, reset } = useForm<any>()
 
   useEffect(() => {
     if (open) {
-      reset({ title: task.title, task_owner: task.task_owner ?? "", due_date: task.due_date ?? "", note: task.note ?? "" })
+      reset({ title: task.title, due_date: task.due_date ?? "", note: task.note ?? "" })
       setDealId(task.deal_id ?? ""); setDealName(task.deal_name ?? "")
+      setOwnerId((task as any).task_owner_id ?? "")
     }
   }, [open, task, reset])
 
@@ -191,7 +219,8 @@ function EditTask({ task }: { task: TaskPublic }) {
 
   const onSubmit = (d: any) => mut.mutate({
     title: d.title, deal_id: dealId || undefined, deal_name: dealName || undefined,
-    task_owner: d.task_owner || undefined, due_date: d.due_date || undefined,
+    task_owner_id: ownerId || undefined,
+    due_date: d.due_date || undefined,
     priority: d.priority_s ?? task.priority, status: d.status_s ?? task.status,
     note: d.note || undefined,
   })
@@ -220,8 +249,19 @@ function EditTask({ task }: { task: TaskPublic }) {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label>Task Owner</Label>
-              <Input {...register("task_owner")} />
+              <Label>Assigned To</Label>
+              <Select value={ownerId || "__none__"} onValueChange={v => setOwnerId(v === "__none__" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Pick user..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">— Unassigned —</SelectItem>
+                  {users.map(u => (
+                    <SelectItem key={u.id} value={u.id}>
+                      {u.full_name || u.email}
+                      <span className="text-muted-foreground text-xs ml-1">· {u.role}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <Label>Due Date</Label>
@@ -357,7 +397,20 @@ function TaskRow({ task }: { task: TaskPublic }) {
           </div>
         </div>
       </td>
-      <td className="py-2.5 pr-3 text-sm">{task.task_owner ?? "—"}</td>
+      <td className="py-2.5 pr-3 text-sm">
+        {(task as any).task_owner_name ? (
+          <div>
+            <p className="text-sm">{(task as any).task_owner_name}</p>
+            {(task as any).task_owner_role && (
+              <p className="text-[10px] text-muted-foreground">{(task as any).task_owner_role}</p>
+            )}
+          </div>
+        ) : task.task_owner ? (
+          <span className="text-sm text-muted-foreground italic">{task.task_owner}</span>
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        )}
+      </td>
       <td className="py-2.5 pr-3">
         <span className={`text-xs font-medium ${task.is_overdue ? "text-red-600 font-semibold" : "text-muted-foreground"}`}>{task.due_date ?? "—"}</span>
       </td>
