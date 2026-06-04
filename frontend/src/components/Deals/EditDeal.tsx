@@ -87,7 +87,7 @@ export function EditDeal({ deal }: Props) {
           <Pencil className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Deal — {deal.name}</DialogTitle>
         </DialogHeader>

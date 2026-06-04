@@ -123,7 +123,7 @@ function DealWorkspace() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <StageChange deal={deal} />
+          <StageChange deal={deal} size="full" />
           <EditDeal deal={deal} />
         </div>
       </div>

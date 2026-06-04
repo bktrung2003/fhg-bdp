@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, GitBranch } from "lucide-react"
+// ArrowRight used in stage progression display below
 import { useState, useEffect } from "react"
 
 import { DealsService, type DealPublic, type StageChangeRequest } from "@/client"
@@ -30,9 +31,9 @@ const STAGE_COLOR: Record<string, string> = {
 }
 
 interface FormFields { note: string; next_action: string }
-interface Props { deal: DealPublic }
+interface Props { deal: DealPublic; size?: "icon" | "full" }
 
-export function StageChange({ deal }: Props) {
+export function StageChange({ deal, size = "icon" }: Props) {
   const [open, setOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -92,9 +93,21 @@ export function StageChange({ deal }: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Change stage">
-          <ArrowRight className="h-3.5 w-3.5" />
-        </Button>
+        {size === "full" ? (
+          <Button variant="outline" size="sm" className="border-primary/30 text-primary hover:bg-primary/10 hover:text-primary">
+            <GitBranch className="h-3.5 w-3.5 mr-1.5" />
+            Move Stage
+          </Button>
+        ) : (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 text-primary hover:bg-primary/10 hover:text-primary"
+            title="Move stage"
+          >
+            <GitBranch className="h-4 w-4" />
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
