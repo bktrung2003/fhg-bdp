@@ -30,7 +30,7 @@ const STATUS_COLOR: Record<string, string> = {
 }
 
 const fmtM = (n?: number | null) => n != null ? `$${(n / 1_000_000).toFixed(1)}M` : "—"
-const projNumber = (n?: number | null) => n != null ? `FUS-P-${String(n).padStart(5, "0")}` : "—"
+const projNumber = (n?: number | null) => n != null ? `FHG-P-${String(n).padStart(5, "0")}` : "—"
 
 function ProjectsPage() {
   const navigate = useNavigate()

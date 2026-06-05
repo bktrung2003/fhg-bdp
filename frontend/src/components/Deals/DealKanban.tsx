@@ -55,7 +55,7 @@ const TERMINAL_STAGES = ["Lost", "Opened"]
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const fmtM = (n?: number | null) => n != null ? `$${(n / 1_000_000).toFixed(1)}M` : "—"
-const dealNum = (n?: number | null) => n != null ? `FUS-${String(n).padStart(5, "0")}` : ""
+const dealNum = (n?: number | null) => n != null ? `FHG-${String(n).padStart(5, "0")}` : ""
 
 // ── Stage Change Dialog ──────────────────────────────────────────────────────
 

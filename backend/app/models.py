@@ -264,7 +264,7 @@ class DealUpdate(SQLModel):
 
 class Deal(DealBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    deal_number: int | None = Field(default=None, index=True)  # FUS-00001
+    deal_number: int | None = Field(default=None, index=True)  # FHG-00001
 
     bd_owner_id: uuid.UUID | None = Field(
         default=None, foreign_key="user.id", nullable=True, ondelete="SET NULL"
@@ -952,7 +952,7 @@ class ProjectUpdate(SQLModel):
 
 class Project(ProjectBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    project_number: int | None = Field(default=None, index=True)  # FUS-P-00001
+    project_number: int | None = Field(default=None, index=True)  # FHG-P-00001
     created_by_id: uuid.UUID = Field(foreign_key="user.id", ondelete="CASCADE")
     created_at: datetime | None = Field(
         default_factory=get_datetime_utc, sa_type=DateTime(timezone=True)

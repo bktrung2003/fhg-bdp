@@ -543,7 +543,7 @@ function PipelineScorecardTab() {
               return (
                 <tr key={row.assessment_id} className="border-t hover:bg-muted/30">
                   <td className="px-3 py-2 font-medium">
-                    {row.deal_number && <span className="font-mono text-[10px] text-muted-foreground mr-1">FUS-{String(row.deal_number).padStart(5,"0")}</span>}
+                    {row.deal_number && <span className="font-mono text-[10px] text-muted-foreground mr-1">FHG-{String(row.deal_number).padStart(5,"0")}</span>}
                     {row.deal_name}
                   </td>
                   <td className="px-3 py-2">{row.stage ?? "—"}</td>

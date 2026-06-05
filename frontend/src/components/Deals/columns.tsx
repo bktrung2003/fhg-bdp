@@ -24,7 +24,7 @@ function fmtMoney(v: number | null | undefined) {
 
 function dealNumber(n: number | null | undefined) {
   if (n == null) return "—"
-  return `FUS-${String(n).padStart(5, "0")}`
+  return `FHG-${String(n).padStart(5, "0")}`
 }
 
 // ── Stage badge ───────────────────────────────────────────────────────────────
@@ -98,7 +98,7 @@ function DealNameCell({ deal }: { deal: DealPublic }) {
 }
 
 function projectIdFmt(n?: number | null) {
-  return n != null ? `FUS-P-${String(n).padStart(5, "0")}` : "—"
+  return n != null ? `FHG-P-${String(n).padStart(5, "0")}` : "—"
 }
 
 // Project ID cell → click → /projects/{id}

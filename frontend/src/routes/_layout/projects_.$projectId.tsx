@@ -30,7 +30,7 @@ const STAGE_COLOR: Record<string, string> = {
 
 const fmtM = (n?: number | null) => n != null ? `$${(n / 1_000_000).toFixed(1)}M` : "—"
 const fmtMoney = (n?: number | null) => n != null ? `$${Math.round(n).toLocaleString("en-US")}` : "—"
-const projNum = (n?: number | null) => n != null ? `FUS-P-${String(n).padStart(5, "0")}` : "—"
+const projNum = (n?: number | null) => n != null ? `FHG-P-${String(n).padStart(5, "0")}` : "—"
 
 function ProjectWorkspace() {
   const { projectId } = Route.useParams()
