@@ -97,11 +97,92 @@ export function FinancialModelSection({ dealId, dealName }: Props) {
     }
   }
 
-  // F4: Print
+  // F4: Print via popup window — copies section HTML + stylesheets into new
+  // window then prints there. Avoids SPA layout conflicts and produces a
+  // clean A4 PDF when user picks "Save as PDF" in browser print dialog.
   const handlePrint = () => {
-    document.body.classList.add("printing-financial")
-    window.print()
-    setTimeout(() => document.body.classList.remove("printing-financial"), 500)
+    const section = document.getElementById("financial-model-section")
+    if (!section) return
+    const w = window.open("", "_blank", "width=900,height=1200")
+    if (!w) {
+      alert("Popup blocked — please allow popups for this site and try again.")
+      return
+    }
+    // Capture all stylesheets currently applied (Vite injects <style> tags in dev)
+    const styleNodes = Array.from(document.head.querySelectorAll('style, link[rel="stylesheet"]'))
+    const styles = styleNodes.map(n => n.outerHTML).join("\n")
+    const now = new Date()
+    const dateStr = now.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
+    const timeStr = now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
+    const sectionHtml = section.innerHTML
+
+    w.document.write(`<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Financial Model — ${dealName}</title>
+${styles}
+<style>
+  @page { size: A4 portrait; margin: 12mm; }
+  html, body {
+    margin: 0; padding: 0;
+    background: white;
+    color: #111;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  body { padding: 16px 14px; }
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .no-print { display: none !important; }
+  .print-header {
+    border-bottom: 2px solid #111;
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+  }
+  .print-header h1 {
+    font-size: 18px; font-weight: 700; margin: 0 0 4px;
+  }
+  .print-header .meta {
+    font-size: 11px; color: #666;
+  }
+  .print-footer {
+    margin-top: 20px;
+    padding-top: 8px;
+    border-top: 1px solid #ddd;
+    font-size: 9px; color: #999;
+    text-align: center;
+  }
+  /* Avoid breaking tables and cards mid-page */
+  table, .rounded-lg { page-break-inside: avoid; }
+  svg { max-width: 100%; height: auto; page-break-inside: avoid; }
+  /* Ensure backgrounds and borders survive print */
+  .border, [class*="bg-"], [class*="border-"] { border-color: currentColor; }
+</style>
+</head>
+<body>
+  <div class="print-header">
+    <h1>Financial Model — ${escapeHtml(dealName)}</h1>
+    <div class="meta">Generated ${dateStr} at ${timeStr} · Fusion BD CORE OS</div>
+  </div>
+  ${sectionHtml}
+  <div class="print-footer">Confidential — Fusion Hotel Group · Business Development</div>
+</body>
+</html>`)
+    w.document.close()
+
+    // Give stylesheets a moment to load, then print
+    const triggerPrint = () => {
+      try { w.focus() } catch {}
+      w.print()
+      // Don't auto-close — user may want to print again. They can close manually.
+    }
+    if (w.document.readyState === "complete") {
+      setTimeout(triggerPrint, 300)
+    } else {
+      w.addEventListener("load", () => setTimeout(triggerPrint, 300))
+    }
   }
 
   const paybackTone = outputs.paybackYears > 0 && outputs.paybackYears < BENCHMARKS.paybackGood
@@ -334,55 +415,90 @@ function ScenarioComparison({
 
 // ── F3: Tornado chart (pure SVG, no dep) ─────────────────────────────────────
 
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c] as string))
+}
+
 function TornadoChart({ data }: { data: TornadoBar[] }) {
   if (!data || data.length === 0) return null
-  // Find max absolute deviation from base across all bars
   const base = data[0]?.baseValue ?? 0
   const maxDev = Math.max(...data.map(b => Math.max(Math.abs(b.upValue - base), Math.abs(b.downValue - base))))
   if (maxDev === 0) return <p className="text-xs text-muted-foreground">No sensitivity — outputs flat.</p>
 
-  const barH = 22
-  const gap = 6
-  const labelW = 110
-  const chartW = 360
-  const totalH = data.length * (barH + gap)
+  // Layout zones (fixed widths so nothing collides):
+  //  [ varLabel | downVal | leftHalf | rightHalf | upVal ]
+  //    120px      60px       180px     180px        60px
+  const varLabelW = 120
+  const downValW = 60
+  const halfW = 180
+  const upValW = 60
+  const padX = 8
+  const totalW = padX + varLabelW + downValW + halfW + halfW + upValW + padX
+  const centerX = padX + varLabelW + downValW + halfW
 
-  const xScale = (v: number) => (v / maxDev) * (chartW / 2)
+  const barH = 22
+  const gap = 8
+  const totalH = data.length * (barH + gap) + 36
+
+  const xScale = (v: number) => (v / maxDev) * halfW
 
   return (
     <div className="overflow-x-auto">
-      <svg viewBox={`0 0 ${labelW + chartW + 80} ${totalH + 30}`} className="w-full max-w-[700px]">
+      <svg viewBox={`0 0 ${totalW} ${totalH}`} className="w-full max-w-[760px]">
         {/* Center line */}
-        <line x1={labelW + chartW / 2} y1={0} x2={labelW + chartW / 2} y2={totalH + 20} stroke="#9ca3af" strokeDasharray="2,2" />
-        <text x={labelW + chartW / 2} y={totalH + 28} textAnchor="middle" className="text-[9px] fill-muted-foreground">
+        <line x1={centerX} y1={4} x2={centerX} y2={totalH - 28} stroke="#9ca3af" strokeDasharray="3,3" />
+        <text x={centerX} y={totalH - 14} textAnchor="middle" className="text-[10px] fill-muted-foreground font-medium">
           Base NOI: {fmtM(base)}
         </text>
+        {/* Zone separators (subtle) */}
+        <line x1={padX + varLabelW} y1={4} x2={padX + varLabelW} y2={totalH - 28} stroke="#e5e7eb" />
+        <line x1={totalW - padX - upValW} y1={4} x2={totalW - padX - upValW} y2={totalH - 28} stroke="#e5e7eb" />
+
         {data.map((b, i) => {
-          const y = i * (barH + gap)
-          const downDev = b.downValue - base   // negative
-          const upDev   = b.upValue - base     // positive
-          const downX = labelW + chartW / 2 + xScale(Math.min(downDev, 0))
-          const downW = Math.abs(xScale(downDev))
-          const upX   = labelW + chartW / 2
-          const upW   = xScale(Math.max(upDev, 0))
+          const y = i * (barH + gap) + 4
+          const ty = y + barH / 2 + 3.5
+          const downDev = b.downValue - base
+          const upDev   = b.upValue - base
+          const downBarStart = centerX + xScale(Math.min(downDev, 0))
+          const downBarW = Math.abs(xScale(downDev))
+          const upBarStart = centerX
+          const upBarW = xScale(Math.max(upDev, 0))
           return (
             <g key={b.variable}>
-              <text x={labelW - 5} y={y + barH / 2 + 3} textAnchor="end" className="text-[10px] fill-foreground font-medium">
+              {/* Variable name — own zone, never overlaps */}
+              <text x={padX + varLabelW - 6} y={ty} textAnchor="end"
+                    className="text-[11px] fill-foreground font-semibold">
                 {b.label}
               </text>
-              {/* Down (red) */}
-              <rect x={downX} y={y} width={downW} height={barH} fill="rgb(248,113,113)" rx="2" />
-              <text x={downX - 3} y={y + barH / 2 + 3} textAnchor="end" className="text-[9px] fill-red-700 font-semibold">
+              {/* Down value — own zone, right-aligned */}
+              <text x={padX + varLabelW + downValW - 4} y={ty} textAnchor="end"
+                    className="text-[10px] fill-red-700 font-semibold tabular-nums">
                 {fmtM(b.downValue)}
               </text>
-              {/* Up (green) */}
-              <rect x={upX} y={y} width={upW} height={barH} fill="rgb(74,222,128)" rx="2" />
-              <text x={upX + upW + 3} y={y + barH / 2 + 3} className="text-[9px] fill-emerald-700 font-semibold">
+              {/* Down bar */}
+              {downBarW > 0 && (
+                <rect x={downBarStart} y={y} width={downBarW} height={barH} fill="rgb(248,113,113)" rx="3" />
+              )}
+              {/* Up bar */}
+              {upBarW > 0 && (
+                <rect x={upBarStart} y={y} width={upBarW} height={barH} fill="rgb(74,222,128)" rx="3" />
+              )}
+              {/* Up value — own zone, left-aligned */}
+              <text x={totalW - padX - upValW + 4} y={ty} textAnchor="start"
+                    className="text-[10px] fill-emerald-700 font-semibold tabular-nums">
                 {fmtM(b.upValue)}
               </text>
             </g>
           )
         })}
+
+        {/* Header strip */}
+        <text x={padX + varLabelW + downValW - 4} y={totalH - 2} textAnchor="end" className="text-[9px] fill-muted-foreground">
+          −20%
+        </text>
+        <text x={totalW - padX - upValW + 4} y={totalH - 2} className="text-[9px] fill-muted-foreground">
+          +20%
+        </text>
       </svg>
       <p className="text-[10px] text-muted-foreground italic mt-2">
         💡 Top variable = biggest impact on Owner NOI. Focus due diligence + Owner negotiations there.
