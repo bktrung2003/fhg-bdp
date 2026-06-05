@@ -756,11 +756,17 @@ function ActivitiesPage() {
       if (!res.ok) throw new Error(await res.text())
       return res.json()
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data: any, variables) => {
       qc.invalidateQueries({ queryKey: ["tasks"] })
       showSuccessToast(data?.message ?? "Updated.")
       setSelectedTaskIds(new Set())
       setBulkOwnerId("")
+      // If this was a reassign and an assignee filter is active, clear it so the
+      // user sees the tasks land on the new owner instead of disappearing.
+      if (variables.ownerId && assigneeFilter) {
+        setAssigneeFilter("")
+        setTimeout(() => showSuccessToast("Cleared filter — viewing all tasks"), 400)
+      }
     },
     onError: () => showErrorToast("Bulk update failed."),
   })
@@ -952,7 +958,11 @@ function ActivitiesPage() {
               </Button>
               <div className="flex items-center gap-1.5">
                 <Select value={bulkOwnerId || "__none__"} onValueChange={v => setBulkOwnerId(v === "__none__" ? "" : v)}>
-                  <SelectTrigger className="h-8 w-[180px] text-xs"><SelectValue placeholder="Reassign to..." /></SelectTrigger>
+                  <SelectTrigger
+                    className={`h-8 w-[200px] text-xs ${!bulkOwnerId ? "border-amber-400 ring-1 ring-amber-200" : "border-emerald-400"}`}
+                  >
+                    <SelectValue placeholder="① Pick new owner →" />
+                  </SelectTrigger>
                   <SelectContent>
                     {users.map(u => (
                       <SelectItem key={u.id} value={u.id}>{u.full_name || u.email} · {u.role}</SelectItem>
@@ -960,8 +970,9 @@ function ActivitiesPage() {
                   </SelectContent>
                 </Select>
                 <Button size="sm" variant="outline" disabled={!bulkOwnerId}
+                  title={!bulkOwnerId ? "Pick a user from the dropdown first" : `Reassign ${selectedCount} task(s) to selected user`}
                   onClick={() => bulkUpdateMut.mutate({ ids: Array.from(selectedTaskIds), ownerId: bulkOwnerId })}>
-                  <UsersGroup className="h-3.5 w-3.5 mr-1" />Reassign
+                  <UsersGroup className="h-3.5 w-3.5 mr-1" />② Reassign
                 </Button>
               </div>
               <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50"

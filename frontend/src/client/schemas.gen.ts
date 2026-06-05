@@ -523,6 +523,12 @@ export const DealCreateSchema = {
             ],
             title: 'Probability'
         },
+        probability_source: {
+            type: 'string',
+            maxLength: 10,
+            title: 'Probability Source',
+            default: 'auto'
+        },
         pipeline_value: {
             anyOf: [
                 {
@@ -716,6 +722,12 @@ export const DealPublicSchema = {
                 }
             ],
             title: 'Probability'
+        },
+        probability_source: {
+            type: 'string',
+            maxLength: 10,
+            title: 'Probability Source',
+            default: 'auto'
         },
         pipeline_value: {
             anyOf: [
@@ -919,6 +931,30 @@ export const DealUpdateSchema = {
             ],
             title: 'Name'
         },
+        project_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Project Id'
+        },
+        deal_type: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 20
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Type'
+        },
         country: {
             anyOf: [
                 {
@@ -1023,6 +1059,18 @@ export const DealUpdateSchema = {
                 }
             ],
             title: 'Probability'
+        },
+        probability_source: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 10
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Probability Source'
         },
         pipeline_value: {
             anyOf: [

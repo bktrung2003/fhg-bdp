@@ -89,6 +89,7 @@ export type DealCreate = {
     opening_target?: (string | null);
     keys?: (number | null);
     probability?: (number | null);
+    probability_source?: string;
     pipeline_value?: (number | null);
     fee_forecast?: (number | null);
     risk?: DealRisk;
@@ -113,6 +114,7 @@ export type DealPublic = {
     opening_target?: (string | null);
     keys?: (number | null);
     probability?: (number | null);
+    probability_source?: string;
     pipeline_value?: (number | null);
     fee_forecast?: (number | null);
     risk?: DealRisk;
@@ -145,6 +147,8 @@ export type DealType = 'HMA' | 'TSA' | 'Franchise' | 'Consulting' | 'Pre-opening
 
 export type DealUpdate = {
     name?: (string | null);
+    project_id?: (string | null);
+    deal_type?: (string | null);
     country?: (string | null);
     region?: (APACRegion | null);
     city?: (string | null);
@@ -154,6 +158,7 @@ export type DealUpdate = {
     opening_target?: (string | null);
     keys?: (number | null);
     probability?: (number | null);
+    probability_source?: (string | null);
     pipeline_value?: (number | null);
     fee_forecast?: (number | null);
     risk?: (DealRisk | null);
