@@ -91,20 +91,21 @@ export function EditDeal({ deal }: Props) {
           <Pencil className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[92vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Deal — {deal.name}</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Project (rare to change) */}
-          <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
-            <Label className="flex items-center gap-1.5 text-xs">
-              <Briefcase className="h-3.5 w-3.5" />
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          {/* ── Section 1: Linked Project ── */}
+          <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
+            <h3 className="font-semibold text-sm flex items-center gap-2">
+              <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">1</span>
+              <Briefcase className="h-4 w-4" />
               Linked Project
-            </Label>
+            </h3>
             <Select value={projectId} onValueChange={setProjectId}>
-              <SelectTrigger><SelectValue placeholder="Select project..." /></SelectTrigger>
+              <SelectTrigger className="w-full"><SelectValue placeholder="Select project..." /></SelectTrigger>
               <SelectContent>
                 {projects.map(p => (
                   <SelectItem key={p.id} value={p.id}>{p.name} · {p.city ?? p.country}</SelectItem>
@@ -112,144 +113,178 @@ export function EditDeal({ deal }: Props) {
               </SelectContent>
             </Select>
             <p className="text-[10px] text-muted-foreground">
-              Location, keys, project type come from the linked project.
+              Location, keys, project type come from the linked project. Changing this rarely needed.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2 space-y-1.5">
+          {/* ── Section 2: Deal Details ── */}
+          <div className="rounded-lg border bg-card p-4 space-y-5">
+            <h3 className="font-semibold text-sm flex items-center gap-2">
+              <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">2</span>
+              Deal Details
+            </h3>
+
+            {/* Row A — Identity */}
+            <div className="space-y-1.5">
               <Label>Deal Name</Label>
               <Input {...register("name")} />
             </div>
 
-            <div className="space-y-1.5">
-              <Label>Deal Type</Label>
-              <Select value={currentDealType} onValueChange={(v) => {
-                setCurrentDealType(v)
-                setValue("deal_type", v as DealUpdate["deal_type"])
-              }}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {DEAL_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Row B — Classification: Type · Stage (read-only) · Brand · Dev Lead */}
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Classification</p>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div className="space-y-1.5">
+                  <Label>Deal Type</Label>
+                  <Select value={currentDealType} onValueChange={(v) => {
+                    setCurrentDealType(v)
+                    setValue("deal_type", v as DealUpdate["deal_type"])
+                  }}>
+                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {DEAL_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div className="space-y-1.5">
-              <Label>Brand</Label>
-              <Select defaultValue={deal.brand ?? ""} onValueChange={(v) => setValue("brand", v === "__none__" ? "" : v)}>
-                <SelectTrigger><SelectValue placeholder="Select brand..." /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">— None —</SelectItem>
-                  {BRANDS.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+                <div className="space-y-1.5">
+                  <Label className="flex items-center gap-1.5">
+                    Stage
+                    <span className="text-[9px] font-semibold bg-muted text-muted-foreground px-1.5 py-0.5 rounded">READ-ONLY</span>
+                  </Label>
+                  <Input value={deal.stage ?? ""} readOnly disabled className="bg-muted/50 cursor-not-allowed" />
+                  <p className="text-[10px] text-muted-foreground">Use "Move Stage" button to change.</p>
+                </div>
 
-            <div className="space-y-1.5">
-              <Label>Risk</Label>
-              <Select defaultValue={deal.risk ?? "Green"} onValueChange={(v) => setValue("risk", v as DealUpdate["risk"])}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {RISKS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+                <div className="space-y-1.5">
+                  <Label>Brand</Label>
+                  <Select defaultValue={deal.brand ?? ""} onValueChange={(v) => setValue("brand", v === "__none__" ? "" : v)}>
+                    <SelectTrigger className="w-full"><SelectValue placeholder="Select..." /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">— None —</SelectItem>
+                      {BRANDS.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div className="space-y-1.5">
-              <Label>Feasibility</Label>
-              <Select defaultValue={deal.feasibility ?? "TBD"} onValueChange={(v) => setValue("feasibility", v as DealUpdate["feasibility"])}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {FEASIBILITY.map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label>Development Lead</Label>
-              <Select value={bdOwnerId || "__none__"} onValueChange={(v) => setBdOwnerId(v === "__none__" ? "" : v)}>
-                <SelectTrigger><SelectValue placeholder="Assign BD lead..." /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">— Unassigned —</SelectItem>
-                  {users.map(u => (
-                    <SelectItem key={u.id} value={u.id}>
-                      {u.full_name || u.email}
-                      <span className="text-muted-foreground text-xs ml-1">· {u.role}</span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label className="flex items-center gap-1.5">
-                  Probability %
-                  {(deal as any).probability_source === "manual" ? (
-                    <span className="text-[9px] font-semibold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">MANUAL</span>
-                  ) : (
-                    <span className="text-[9px] font-semibold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">AUTO</span>
-                  )}
-                </Label>
-                {(deal as any).probability_source === "manual" && (
-                  <button type="button"
-                    className="text-[10px] text-blue-600 hover:underline"
-                    onClick={() => {
-                      const auto = probabilityForStage(deal.stage ?? "")
-                      if (auto !== undefined) {
-                        setValue("probability", auto)
-                        setValue("probability_source" as any, "auto")
-                      }
-                    }}>
-                    Reset to auto ({probabilityForStage(deal.stage ?? "") ?? "—"}%)
-                  </button>
-                )}
+                <div className="space-y-1.5">
+                  <Label>Development Lead</Label>
+                  <Select value={bdOwnerId || "__none__"} onValueChange={(v) => setBdOwnerId(v === "__none__" ? "" : v)}>
+                    <SelectTrigger className="w-full"><SelectValue placeholder="Unassigned" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">— Unassigned —</SelectItem>
+                      {users.map(u => (
+                        <SelectItem key={u.id} value={u.id}>
+                          {u.full_name || u.email}
+                          <span className="text-muted-foreground text-xs ml-1">· {u.role}</span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <Input {...register("probability")} type="number" min={0} max={100} />
-              <p className="text-[10px] text-muted-foreground">Changing this marks as manual. Stage changes won't auto-update.</p>
             </div>
-            {(() => {
-              const cfg = getDealTypeConfig(currentDealType)
-              return (
-                <>
-                  <div className="space-y-1.5">
+
+            {/* Row C — Governance: Risk · Feasibility · Probability */}
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Governance</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="space-y-1.5">
+                  <Label>Risk</Label>
+                  <Select defaultValue={deal.risk ?? "Green"} onValueChange={(v) => setValue("risk", v as DealUpdate["risk"])}>
+                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {RISKS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label>Feasibility</Label>
+                  <Select defaultValue={deal.feasibility ?? "TBD"} onValueChange={(v) => setValue("feasibility", v as DealUpdate["feasibility"])}>
+                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {FEASIBILITY.map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
                     <Label className="flex items-center gap-1.5">
-                      {cfg.pipelineValueLabel}
-                      <span className="text-[9px] font-semibold bg-muted text-muted-foreground px-1.5 py-0.5 rounded uppercase">
-                        {cfg.pipelineValueBadge}
-                      </span>
+                      Probability %
+                      {(deal as any).probability_source === "manual" ? (
+                        <span className="text-[9px] font-semibold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">MANUAL</span>
+                      ) : (
+                        <span className="text-[9px] font-semibold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">AUTO</span>
+                      )}
                     </Label>
-                    <Input {...register("pipeline_value")} type="number" min={0} />
-                    <p className="text-[10px] text-muted-foreground">{cfg.pipelineValueHint}</p>
+                    {(deal as any).probability_source === "manual" && (
+                      <button type="button"
+                        className="text-[10px] text-blue-600 hover:underline"
+                        onClick={() => {
+                          const auto = probabilityForStage(deal.stage ?? "")
+                          if (auto !== undefined) {
+                            setValue("probability", auto)
+                            setValue("probability_source" as any, "auto")
+                          }
+                        }}>
+                        Reset to auto ({probabilityForStage(deal.stage ?? "") ?? "—"}%)
+                      </button>
+                    )}
                   </div>
-                  {cfg.feeForecastVisible ? (
-                    <div className="space-y-1.5">
-                      <Label>{cfg.feeForecastLabel}</Label>
-                      <Input {...register("fee_forecast")} type="number" min={0} />
-                      <p className="text-[10px] text-muted-foreground">{cfg.feeForecastHint}</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-1.5">
-                      <Label className="text-muted-foreground">Fee Forecast</Label>
-                      <div className="rounded-md border border-dashed bg-muted/30 px-2.5 py-2 text-[11px] text-muted-foreground">
-                        ⓘ {cfg.feeForecastHint}
+                  <Input {...register("probability")} type="number" min={0} max={100} />
+                  <p className="text-[10px] text-muted-foreground">Changing this marks as manual.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Row D — Financial: Pipeline Value + Fee Forecast adapt to deal type */}
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Financial</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {(() => {
+                  const cfg = getDealTypeConfig(currentDealType)
+                  return (
+                    <>
+                      <div className="space-y-1.5">
+                        <Label className="flex items-center gap-1.5">
+                          {cfg.pipelineValueLabel} (USD)
+                          <span className="text-[9px] font-semibold bg-muted text-muted-foreground px-1.5 py-0.5 rounded uppercase">
+                            {cfg.pipelineValueBadge}
+                          </span>
+                        </Label>
+                        <Input {...register("pipeline_value")} type="number" min={0} />
+                        <p className="text-[10px] text-muted-foreground">{cfg.pipelineValueHint}</p>
                       </div>
-                    </div>
-                  )}
-                </>
-              )
-            })()}
+                      {cfg.feeForecastVisible ? (
+                        <div className="space-y-1.5">
+                          <Label>{cfg.feeForecastLabel} (USD)</Label>
+                          <Input {...register("fee_forecast")} type="number" min={0} />
+                          <p className="text-[10px] text-muted-foreground">{cfg.feeForecastHint}</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-1.5">
+                          <Label className="text-muted-foreground">Fee Forecast</Label>
+                          <div className="rounded-md border border-dashed bg-muted/30 px-3 py-2.5 text-[11px] text-muted-foreground h-[58px] flex items-start">
+                            ⓘ {cfg.feeForecastHint}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )
+                })()}
+              </div>
+            </div>
+
+            {/* Row E — Next Action */}
+            <div className="space-y-1.5">
+              <Label>Next Action</Label>
+              <Input {...register("next_action")} />
+            </div>
           </div>
 
-          <div className="space-y-1.5">
-            <Label>Next Action</Label>
-            <Input {...register("next_action")} />
-          </div>
-
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex justify-end gap-2 pt-2 border-t">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
             <Button type="submit" disabled={isSubmitting || mutation.isPending}>
               {mutation.isPending ? "Saving..." : "Save Changes"}
