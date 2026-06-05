@@ -243,11 +243,15 @@ function FinancialModelTab() {
 
   return (
     <div className="flex flex-col gap-6">
+      <div className="rounded-md bg-blue-50 border border-blue-200 px-3 py-2 text-xs text-blue-900">
+        💡 <b>Standalone playground</b> — for proper deal scenarios (Base / Worst / Upside comparison,
+        sensitivity analysis, print-friendly export), open the deal workspace and use the
+        Financial Model section there.
+      </div>
       {/* Subheader (parent already has page title) */}
       <div className="flex items-start justify-between gap-4">
         <p className="text-muted-foreground text-sm">
-          Excel logic moved into the system — fast, consistent, versioned per deal.
-          Use snapshots to compare Base / Optimistic / Conservative cases.
+          Quick what-if calculator. Save snapshots tied to a deal here, or use the deal workspace for full scenario analysis.
         </p>
         <div className="flex items-center gap-2">
           <Calculator className="h-5 w-5 text-muted-foreground" />

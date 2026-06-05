@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button"
 import { EditDeal } from "@/components/Deals/EditDeal"
 import { StageChange } from "@/components/Deals/StageChange"
 import { FeasibilityPanel } from "@/components/Feasibility/FeasibilityPanel"
+import { FinancialModelSection } from "@/components/Feasibility/FinancialModelSection"
 import useAuth from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout/deals_/$dealId")({
@@ -162,6 +163,9 @@ function DealWorkspace() {
 
       {/* Feasibility Assessment — 6-dimension scorecard */}
       {user && <FeasibilityPanel dealId={dealId} currentUserId={user.id} />}
+
+      {/* Financial Model — deal-scoped scenarios + sensitivity + print */}
+      <FinancialModelSection dealId={dealId} dealName={deal.name} />
 
       {/* 2-column: Tasks, Documents (Pre-opening moved to Project Workspace) */}
       <div className="grid grid-cols-2 gap-4">

@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from "react"
-import { ChevronDown, ChevronRight, BookOpen } from "lucide-react"
+import { ChevronDown, ChevronRight, BookOpen, Calculator } from "lucide-react"
+import { useQuery } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
+import { FeasibilityService } from "@/client"
 import { RecommendationBadge, type FeasibilityAssessmentPublic } from "./FeasibilityPanel"
 import { RUBRIC } from "./rubric"
+import { suggestFinancialScore, type FinancialInputs } from "./financialModel"
 
 // ── Criteria definitions (Spec 14.2) ─────────────────────────────────────────
 
@@ -125,9 +128,10 @@ interface Props {
   onSubmit: (data: any) => void
   isSubmitting: boolean
   initial: FeasibilityAssessmentPublic | null
+  dealId?: string  // F2: link to Financial Model snapshots
 }
 
-export function AssessFeasibilityModal({ open, onOpenChange, onSubmit, isSubmitting, initial }: Props) {
+export function AssessFeasibilityModal({ open, onOpenChange, onSubmit, isSubmitting, initial, dealId }: Props) {
   const [scores, setScores] = useState<Record<string, number>>({})
   const [strengths, setStrengths] = useState("")
   const [concerns, setConcerns] = useState("")
@@ -169,6 +173,35 @@ export function AssessFeasibilityModal({ open, onOpenChange, onSubmit, isSubmitt
   const total = useMemo(() => computeTotal(scores), [scores])
   const recommendation = useMemo(() => computeRecommendation(total), [total])
   const allFilled = PANELS.every(p => scores[p.key] >= 1 && scores[p.key] <= 5)
+
+  // F2: Fetch deal-scoped financial snapshots so user can auto-suggest Financial Score
+  const { data: snapshots } = useQuery({
+    queryKey: ["feasibility-snapshots", dealId],
+    queryFn: () => FeasibilityService.listSnapshots({ dealId: dealId! }),
+    enabled: open && !!dealId,
+  })
+
+  // Prefer "Base" labelled snapshot; fallback to most recent
+  const baseSnapshot = useMemo(() => {
+    if (!snapshots || snapshots.length === 0) return null
+    const base = snapshots.find(s => s.label === "Base")
+    return base ?? snapshots[0]
+  }, [snapshots])
+
+  const financialSuggestion = useMemo(() => {
+    if (!baseSnapshot) return null
+    try {
+      const inputs: FinancialInputs = JSON.parse(baseSnapshot.assumptions)
+      return suggestFinancialScore(inputs)
+    } catch { return null }
+  }, [baseSnapshot])
+
+  const applyFinancialSuggestion = () => {
+    if (!financialSuggestion) return
+    setScores(s => ({ ...s, financial_score: financialSuggestion.suggestedScore }))
+    // Auto-expand financial panel so user sees the score
+    setExpanded(e => ({ ...e, financial_score: true }))
+  }
 
   const handleSubmit = () => {
     if (!allFilled) return
@@ -234,6 +267,30 @@ export function AssessFeasibilityModal({ open, onOpenChange, onSubmit, isSubmitt
 
                 {isExpanded && (
                   <div className="px-4 pb-4 pt-1 border-t space-y-3">
+                    {/* F2: Auto-suggest from Financial Model — only for financial_score panel */}
+                    {panel.key === "financial_score" && financialSuggestion && (
+                      <div className="rounded-md border border-blue-200 bg-blue-50 px-3 py-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <Calculator className="h-3.5 w-3.5 text-blue-700" />
+                            <span className="text-xs font-semibold text-blue-900">
+                              Financial Model suggests: {financialSuggestion.suggestedScore}/5
+                            </span>
+                          </div>
+                          <Button size="sm" variant="outline" className="h-7 text-[10px] border-blue-300"
+                            onClick={applyFinancialSuggestion}>
+                            Apply
+                          </Button>
+                        </div>
+                        <p className="text-[10.5px] text-blue-700 mt-1">{financialSuggestion.rationale}</p>
+                      </div>
+                    )}
+                    {panel.key === "financial_score" && !financialSuggestion && dealId && (
+                      <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-800">
+                        💡 No financial snapshot saved for this deal. Build one in the deal workspace
+                        to get an evidence-based score suggestion.
+                      </div>
+                    )}
                     {/* Criteria to consider */}
                     <div>
                       <p className="text-[11px] text-muted-foreground mb-1.5">Criteria to consider:</p>

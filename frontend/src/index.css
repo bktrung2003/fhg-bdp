@@ -129,3 +129,29 @@
     cursor: pointer;
   }
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Print styles — F4 Financial Model PDF export
+   When body has class `printing-financial`, hide chrome and show only the
+   financial model section in print-friendly layout.
+   ────────────────────────────────────────────────────────────────────────── */
+
+@media print {
+  body.printing-financial * {
+    visibility: hidden;
+  }
+  body.printing-financial #financial-model-section,
+  body.printing-financial #financial-model-section * {
+    visibility: visible;
+  }
+  body.printing-financial #financial-model-section {
+    position: absolute;
+    left: 0; top: 0; width: 100%;
+    padding: 16px;
+    background: white;
+  }
+  body.printing-financial .no-print { display: none !important; }
+  body.printing-financial .print-section { border: none !important; }
+  @page { size: A4; margin: 12mm; }
+}
+

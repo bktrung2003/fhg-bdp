@@ -257,6 +257,7 @@ export function FeasibilityPanel({ dealId, currentUserId }: Props) {
           onSubmit={(d) => submitMut.mutate(d)}
           isSubmitting={submitMut.isPending}
           initial={null}
+          dealId={dealId}
         />
       </div>
     )
@@ -377,6 +378,7 @@ export function FeasibilityPanel({ dealId, currentUserId }: Props) {
         onSubmit={(d) => submitMut.mutate(d)}
         isSubmitting={submitMut.isPending}
         initial={current}
+        dealId={dealId}
       />
       {current && (
         <ReviewFeasibilityModal
