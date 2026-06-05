@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { type SubmitHandler, useForm } from "react-hook-form"
+import { Controller, type SubmitHandler, useForm } from "react-hook-form"
 import { Plus, Briefcase, AlertCircle } from "lucide-react"
 import { useState } from "react"
 
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { MoneyInput } from "@/components/ui/money-input"
 import {
   Select,
   SelectContent,
@@ -76,7 +77,7 @@ export function AddDeal({ defaultProjectId, trigger }: Props) {
   const users = usersData?.data ?? []
   const [bdOwnerId, setBdOwnerId] = useState("")
 
-  const { register, handleSubmit, reset, setValue, watch, formState: { errors, isSubmitting } } =
+  const { register, handleSubmit, reset, setValue, watch, control, formState: { errors, isSubmitting } } =
     useForm<FormData>({
       defaultValues: {
         stage_str: "Lead",
@@ -344,18 +345,22 @@ export function AddDeal({ defaultProjectId, trigger }: Props) {
                     <>
                       <div className="space-y-1.5">
                         <Label className="flex items-center gap-1.5">
-                          {cfg.pipelineValueLabel} (USD)
+                          {cfg.pipelineValueLabel}
                           <span className="text-[9px] font-semibold bg-muted text-muted-foreground px-1.5 py-0.5 rounded uppercase">
                             {cfg.pipelineValueBadge}
                           </span>
                         </Label>
-                        <Input {...register("pipeline_value")} type="number" min={0} placeholder="45000000" />
+                        <Controller name="pipeline_value" control={control} render={({ field }) =>
+                          <MoneyInput value={field.value as number | undefined} onChange={field.onChange} placeholder="45,000,000" />
+                        } />
                         <p className="text-[10px] text-muted-foreground">{cfg.pipelineValueHint}</p>
                       </div>
                       {cfg.feeForecastVisible ? (
                         <div className="space-y-1.5">
-                          <Label>{cfg.feeForecastLabel} (USD)</Label>
-                          <Input {...register("fee_forecast")} type="number" min={0} placeholder="1200000" />
+                          <Label>{cfg.feeForecastLabel}</Label>
+                          <Controller name="fee_forecast" control={control} render={({ field }) =>
+                            <MoneyInput value={field.value as number | undefined} onChange={field.onChange} placeholder="1,200,000" />
+                          } />
                           <p className="text-[10px] text-muted-foreground">{cfg.feeForecastHint}</p>
                         </div>
                       ) : (

@@ -16,6 +16,7 @@ import {
   BENCHMARKS, SCENARIO_LABELS,
 } from "./financialModel"
 import { FinancialModelHelp } from "./FinancialModelHelp"
+import { MoneyInput } from "@/components/ui/money-input"
 
 interface Props {
   dealId: string
@@ -278,7 +279,14 @@ ${styles}
             <NumInput label="GOP" value={inputs.gopPct} onChange={set("gopPct")} suffix="%" />
             <NumInput label="FFE Reserve" value={inputs.ffePct} onChange={set("ffePct")} suffix="%" />
             <NumInput label="Base Mgmt Fee" value={inputs.feePct} onChange={set("feePct")} suffix="%" />
-            <NumInput label="Project Cost" value={inputs.projectCost} onChange={set("projectCost")} suffix="$" />
+            <div className="space-y-1">
+              <Label className="text-xs">Project Cost</Label>
+              <MoneyInput
+                value={inputs.projectCost}
+                onChange={(v) => set("projectCost")(v ?? 0)}
+                placeholder="50,000,000"
+              />
+            </div>
           </div>
         )}
       </div>

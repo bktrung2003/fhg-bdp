@@ -11,6 +11,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { MoneyInput } from "@/components/ui/money-input"
 import useCustomToast from "@/hooks/useCustomToast"
 
 export const Route = createFileRoute("/_layout/feasibility")({
@@ -282,15 +283,11 @@ function FinancialModelTab() {
               <NumInput label="Base Mgmt Fee" value={inputs.feePct} onChange={set("feePct")} suffix="%" />
               <div className="col-span-2 space-y-1.5">
                 <Label className="text-xs">Project Cost</Label>
-                <div className="relative">
-                  <Input
-                    type="number"
-                    value={inputs.projectCost}
-                    onChange={e => set("projectCost")(parseFloat(e.target.value) || 0)}
-                    className="pr-10"
-                  />
-                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">USD</span>
-                </div>
+                <MoneyInput
+                  value={inputs.projectCost}
+                  onChange={(v) => set("projectCost")(v ?? 0)}
+                  placeholder="50,000,000"
+                />
                 <p className="text-xs text-muted-foreground">{fmtM(inputs.projectCost)}</p>
               </div>
             </div>
