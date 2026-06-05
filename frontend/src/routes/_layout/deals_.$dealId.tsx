@@ -165,7 +165,11 @@ function DealWorkspace() {
       {user && <FeasibilityPanel dealId={dealId} currentUserId={user.id} />}
 
       {/* Financial Model — deal-scoped scenarios + sensitivity + print */}
-      <FinancialModelSection dealId={dealId} dealName={deal.name} />
+      <FinancialModelSection
+        dealId={dealId}
+        dealName={deal.name}
+        dealKeys={deal.keys ?? undefined}
+      />
 
       {/* 2-column: Tasks, Documents (Pre-opening moved to Project Workspace) */}
       <div className="grid grid-cols-2 gap-4">

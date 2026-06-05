@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Calculator, Save, Trash2, BarChart3, Printer, ChevronDown, ChevronRight } from "lucide-react"
 
@@ -19,6 +19,9 @@ import {
 interface Props {
   dealId: string
   dealName: string
+  /** Number of keys (rooms) declared on the Deal record — auto-fills the
+   *  Rooms assumption so BD doesn't re-enter it (and can't get it wrong). */
+  dealKeys?: number
 }
 
 interface DealSnapshot extends FeasibilitySnapshotPublic {
@@ -26,14 +29,28 @@ interface DealSnapshot extends FeasibilitySnapshotPublic {
   parsedOutputs?: FinancialOutputs
 }
 
-export function FinancialModelSection({ dealId, dealName }: Props) {
+export function FinancialModelSection({ dealId, dealName, dealKeys }: Props) {
   const qc = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
-  const [inputs, setInputs] = useState<FinancialInputs>(DEFAULT_INPUTS)
+  // Auto-prefill Rooms from the deal record if available, so BD doesn't
+  // have to re-enter (and can't accidentally type a wrong number).
+  const [inputs, setInputs] = useState<FinancialInputs>(() =>
+    dealKeys && dealKeys > 0 ? { ...DEFAULT_INPUTS, rooms: dealKeys } : DEFAULT_INPUTS
+  )
   const [scenarioLabel, setScenarioLabel] = useState<string>("Base")
   const [customLabel, setCustomLabel] = useState("")
   const [collapsedInputs, setCollapsedInputs] = useState(false)
   const [showTornado, setShowTornado] = useState(false)
+
+  // Keep rooms in sync if deal.keys changes later (e.g. user updates Deal record
+  // in another tab and we re-render). Only override when current rooms still
+  // equals the default — don't overwrite a value the user has explicitly typed.
+  useEffect(() => {
+    if (dealKeys && dealKeys > 0 && inputs.rooms === DEFAULT_INPUTS.rooms) {
+      setInputs(p => ({ ...p, rooms: dealKeys }))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dealKeys])
 
   const outputs = useMemo(() => calculate(inputs), [inputs])
   const tornado = useMemo(() => computeTornado(inputs), [inputs])
@@ -227,7 +244,28 @@ ${styles}
         </button>
         {!collapsedInputs && (
           <div className="px-4 pb-4 grid grid-cols-2 md:grid-cols-4 gap-3 border-t pt-3">
-            <NumInput label="Rooms (keys)" value={inputs.rooms} onChange={set("rooms")} />
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5">
+                <Label className="text-xs">Rooms (keys)</Label>
+                {dealKeys && dealKeys > 0 && inputs.rooms === dealKeys && (
+                  <span title={`Auto-filled from deal record (${dealKeys} keys). Override if modelling a different scenario.`}
+                    className="text-[9px] font-semibold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">
+                    FROM DEAL
+                  </span>
+                )}
+                {dealKeys && dealKeys > 0 && inputs.rooms !== dealKeys && (
+                  <button type="button" title="Reset to deal's key count"
+                    onClick={() => set("rooms")(dealKeys)}
+                    className="text-[9px] font-semibold text-blue-600 hover:underline">
+                    ↺ Reset to {dealKeys}
+                  </button>
+                )}
+              </div>
+              <div className="relative">
+                <Input type="number" value={inputs.rooms} onChange={e => set("rooms")(parseFloat(e.target.value) || 0)}
+                  className="h-8 text-sm" />
+              </div>
+            </div>
             <NumInput label="ADR" value={inputs.adr} onChange={set("adr")} suffix="$" />
             <NumInput label="Occupancy" value={inputs.occupancy} onChange={set("occupancy")} suffix="%" />
             <NumInput label="Other Rev" value={inputs.otherRevPct} onChange={set("otherRevPct")} suffix="%" />

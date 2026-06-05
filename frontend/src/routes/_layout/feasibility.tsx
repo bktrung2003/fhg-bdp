@@ -238,7 +238,15 @@ function FinancialModelTab() {
   const handleDealSelect = (value: string) => {
     if (value === "__none__") { setSelectedDealId(""); setSelectedDealName(""); return }
     const d = deals.find(x => x.id === value)
-    if (d) { setSelectedDealId(d.id); setSelectedDealName(d.name) }
+    if (d) {
+      setSelectedDealId(d.id)
+      setSelectedDealName(d.name)
+      // Auto-map deal.keys → Rooms assumption (UX: don't make BD re-type)
+      if (d.keys && d.keys > 0) {
+        setInputs(p => ({ ...p, rooms: d.keys as number }))
+        showSuccessToast(`Loaded ${d.keys} keys from "${d.name}".`)
+      }
+    }
   }
 
   return (
