@@ -209,12 +209,25 @@ export type FeasibilityAssessmentCreate = {
     technical_score: number;
     strengths?: (string | null);
     concerns?: (string | null);
+    competitive_landscape?: (string | null);
+    deal_killers?: (string | null);
     conditions_to_proceed?: (string | null);
 };
 
 export type FeasibilityAssessmentHistory = {
     data: Array<FeasibilityAssessmentPublic>;
     count: number;
+};
+
+/**
+ * Quick-edit text fields on current assessment, no version bump.
+ */
+export type FeasibilityAssessmentNotesUpdate = {
+    strengths?: (string | null);
+    concerns?: (string | null);
+    competitive_landscape?: (string | null);
+    deal_killers?: (string | null);
+    conditions_to_proceed?: (string | null);
 };
 
 export type FeasibilityAssessmentPublic = {
@@ -229,6 +242,8 @@ export type FeasibilityAssessmentPublic = {
     recommendation?: string;
     strengths?: (string | null);
     concerns?: (string | null);
+    competitive_landscape?: (string | null);
+    deal_killers?: (string | null);
     conditions_to_proceed?: (string | null);
     id: string;
     version: number;
@@ -869,6 +884,13 @@ export type FeasibilityAssessmentListAssessmentHistoryData = {
 };
 
 export type FeasibilityAssessmentListAssessmentHistoryResponse = (FeasibilityAssessmentHistory);
+
+export type FeasibilityAssessmentEditAssessmentNotesData = {
+    dealId: string;
+    requestBody: FeasibilityAssessmentNotesUpdate;
+};
+
+export type FeasibilityAssessmentEditAssessmentNotesResponse = (FeasibilityAssessmentPublic);
 
 export type FeasibilityAssessmentReviewAssessmentData = {
     assessmentId: string;

@@ -261,10 +261,15 @@ def create_assessment(
     session.add(new_a)
 
     # Auto-sync legacy deal.feasibility dropdown from recommendation
-    if rec in ("Strong Proceed", "Proceed"):
-        deal.feasibility = "Pass"
-    elif rec == "Reject":
-        deal.feasibility = "Fail"
+    # Valid enum values: TBD | Weak | Medium | Strong | Updated
+    if rec == "Strong Proceed":
+        deal.feasibility = "Strong"
+    elif rec == "Proceed":
+        deal.feasibility = "Strong"
+    elif rec == "Proceed with Conditions":
+        deal.feasibility = "Medium"
+    elif rec in ("Nurture / Reassess", "Reject"):
+        deal.feasibility = "Weak"
     else:
         deal.feasibility = "TBD"
     deal.updated_at = now

@@ -1432,6 +1432,28 @@ export const FeasibilityAssessmentCreateSchema = {
             ],
             title: 'Concerns'
         },
+        competitive_landscape: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Competitive Landscape'
+        },
+        deal_killers: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Killers'
+        },
         conditions_to_proceed: {
             anyOf: [
                 {
@@ -1466,6 +1488,69 @@ export const FeasibilityAssessmentHistorySchema = {
     type: 'object',
     required: ['data', 'count'],
     title: 'FeasibilityAssessmentHistory'
+} as const;
+
+export const FeasibilityAssessmentNotesUpdateSchema = {
+    properties: {
+        strengths: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Strengths'
+        },
+        concerns: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Concerns'
+        },
+        competitive_landscape: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Competitive Landscape'
+        },
+        deal_killers: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Killers'
+        },
+        conditions_to_proceed: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Conditions To Proceed'
+        }
+    },
+    type: 'object',
+    title: 'FeasibilityAssessmentNotesUpdate',
+    description: 'Quick-edit text fields on current assessment, no version bump.'
 } as const;
 
 export const FeasibilityAssessmentPublicSchema = {
@@ -1547,6 +1632,30 @@ export const FeasibilityAssessmentPublicSchema = {
                 }
             ],
             title: 'Concerns'
+        },
+        competitive_landscape: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 4000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Competitive Landscape'
+        },
+        deal_killers: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 4000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Killers'
         },
         conditions_to_proceed: {
             anyOf: [
