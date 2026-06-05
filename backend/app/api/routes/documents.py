@@ -2,7 +2,7 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query, UploadFile, File, Form
-from fastapi.responses import FileResponse, Response
+from fastapi.responses import Response
 from sqlmodel import col, func, select
 
 from app.api.deps import CurrentUser, SessionDep
@@ -10,7 +10,8 @@ from app.models import (
     Deal, Document, DocumentPublic, DocumentsPublic,
     DocPermission, DocType, Message, Project, UserRole,
 )
-from app.storage import delete_file, get_download_url, upload_file, LOCAL_UPLOAD_DIR
+from app.core.config import settings
+from app.storage import delete_file, read_file, upload_file, LOCAL_UPLOAD_DIR
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -34,7 +35,10 @@ def _can_view(doc: Document, user: Any) -> bool:
 
 def _to_public(doc: Document, user: Any) -> DocumentPublic:
     can = _can_view(doc, user)
-    url = get_download_url(doc.storage_path, doc.original_filename) if can else None
+    # Always stream through the backend (same-origin /api path). Works for both
+    # local + MinIO storage, avoids exposing MinIO publicly, and plays nicely
+    # behind an HTTPS reverse proxy (no mixed-content / internal-IP issues).
+    url = f"{settings.API_V1_STR}/documents/serve/{doc.id}" if can else None
     return DocumentPublic(**doc.model_dump(), download_url=url, can_view=can)
 
 
@@ -132,32 +136,30 @@ async def upload_document(
     return _to_public(doc, current_user)
 
 
-# ── GET /documents/serve/{key} — local file serving ──────────────────────────
+# ── GET /documents/serve/{id} — stream file (local + MinIO) ──────────────────
 
-@router.get("/serve/{key}")
-def serve_local_file(key: str, session: SessionDep, current_user: CurrentUser) -> Any:
-    """Serve locally stored files. Checks confidential access."""
-    # Find document by storage_path
-    from sqlmodel import select as sel
-    doc = session.exec(
-        sel(Document).where(Document.storage_path == f"local://{key}")
-    ).first()
+@router.get("/serve/{id}")
+def serve_file(id: uuid.UUID, session: SessionDep, current_user: CurrentUser) -> Any:
+    """Stream a document's bytes through the backend (same-origin).
+    Handles both local + MinIO storage and enforces confidential access.
+    Inline disposition so PDFs/images preview in the browser."""
+    doc = session.get(Document, id)
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
 
-    if doc and doc.is_confidential and not _can_view(doc, current_user):
+    if doc.is_confidential and not _can_view(doc, current_user):
         raise HTTPException(status_code=403, detail="Access denied — confidential document")
 
-    p = LOCAL_UPLOAD_DIR / key
-    if not p.exists():
-        raise HTTPException(status_code=404, detail="File not found")
+    try:
+        content = read_file(doc.storage_path)
+    except Exception:
+        raise HTTPException(status_code=404, detail="File not found in storage")
 
-    # Read and return as bytes so browser can display inline
-    content = p.read_bytes()
-    import mimetypes
-    mime = mimetypes.guess_type(str(p))[0] or "application/octet-stream"
+    mime = doc.content_type or "application/octet-stream"
     return Response(
         content=content,
         media_type=mime,
-        headers={"Content-Disposition": f'inline; filename="{key.split("_", 1)[-1]}"'},
+        headers={"Content-Disposition": f'inline; filename="{doc.original_filename}"'},
     )
 
 

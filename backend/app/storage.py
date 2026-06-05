@@ -86,6 +86,31 @@ def get_download_url(storage_path: str, filename: str) -> str:
     )
 
 
+def read_file(storage_path: str) -> bytes:
+    """Read raw bytes for a stored file (local or MinIO).
+    Used to stream downloads through the backend so MinIO never needs to be
+    exposed publicly (avoids mixed-content + internal-IP issues behind an
+    HTTPS reverse proxy)."""
+    if storage_path.startswith("local://"):
+        key = storage_path.removeprefix("local://")
+        return (LOCAL_UPLOAD_DIR / key).read_bytes()
+
+    import boto3
+    from botocore.client import Config
+
+    parts = storage_path.removeprefix("minio://").split("/", 1)
+    bucket, key = parts[0], parts[1]
+    s3 = boto3.client(
+        "s3",
+        endpoint_url=settings.MINIO_ENDPOINT,
+        aws_access_key_id=settings.MINIO_ROOT_USER,
+        aws_secret_access_key=settings.MINIO_ROOT_PASSWORD,
+        config=Config(signature_version="s3v4"),
+    )
+    obj = s3.get_object(Bucket=bucket, Key=key)
+    return obj["Body"].read()
+
+
 def delete_file(storage_path: str) -> None:
     if storage_path.startswith("local://"):
         key = storage_path.removeprefix("local://")
