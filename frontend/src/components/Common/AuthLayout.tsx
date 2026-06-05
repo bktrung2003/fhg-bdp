@@ -9,18 +9,19 @@ interface AuthLayoutProps {
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
-      {/* Left panel — Fusion brand */}
-      <div className="bg-gradient-to-br from-[#1a1f2e] via-[#1e2436] to-[#141820] relative hidden lg:flex lg:flex-col lg:items-center lg:justify-center gap-6 p-12">
+      {/* Left panel — Fusion brand. Light, warm background so the logo
+          (white bg / grey wordmark / orange bird) reads cleanly. */}
+      <div className="bg-gradient-to-br from-[#fff7f0] via-[#fdf2e9] to-[#f7ede3] relative hidden lg:flex lg:flex-col lg:items-center lg:justify-center gap-6 p-12 border-r border-orange-100/60">
         <img
-          src="/assets/images/fusion-logo-dark.png"
+          src="/assets/images/fusion-logo.png"
           alt="Fusion"
-          className="h-48 w-auto object-contain"
+          className="h-44 w-auto object-contain"
         />
         <div className="text-center">
-          <p className="text-lg font-semibold text-white/80 tracking-tight">
+          <p className="text-lg font-semibold text-[#4a4f5a] tracking-tight">
             Business Development CORE OS
           </p>
-          <p className="text-sm text-white/50 mt-2 max-w-sm leading-relaxed">
+          <p className="text-sm text-[#7a8089] mt-2 max-w-sm leading-relaxed">
             One source of truth for pipeline, owner relationships, deal governance and pre-opening execution.
           </p>
         </div>

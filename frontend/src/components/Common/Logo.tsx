@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils"
 // Paths to the real Fusion logo images in /public/assets/images/
 const LOGO_LIGHT = "/assets/images/fusion-logo.png"
 const LOGO_DARK = "/assets/images/fusion-logo-dark.png"
+// Bird-only mark for collapsed sidebar / small icon contexts.
+const LOGO_ICON = "/assets/images/fusion-icon.png"
 
 interface LogoProps {
   variant?: "full" | "icon" | "responsive"
@@ -20,7 +22,7 @@ export function Logo({ variant = "full", className, asLink = true }: LogoProps) 
   // Icon only — small bird, no text
   const iconOnly = (
     <img
-      src={src}
+      src={LOGO_ICON}
       alt="Fusion"
       className={cn("h-7 w-auto object-contain", className)}
     />
@@ -47,7 +49,7 @@ export function Logo({ variant = "full", className, asLink = true }: LogoProps) 
         )}
       />
       <img
-        src={src}
+        src={LOGO_ICON}
         alt="Fusion"
         className={cn(
           "h-7 w-auto object-contain hidden group-data-[collapsible=icon]:block",
