@@ -84,7 +84,16 @@ function Dashboard() {
   const activeDeals = deals.filter(d => !["Lost", "Opened"].includes(d.stage ?? ""))
   const signedDeals = deals.filter(d => ["HMA Signed", "Pre-opening", "Opened"].includes(d.stage ?? ""))
   const totalKeys = activeDeals.reduce((s, d) => s + (d.keys ?? 0), 0)
-  const pipelineValue = activeDeals.reduce((s, d) => s + (d.pipeline_value ?? 0), 0)
+  // Split pipeline value by deal-type semantics: recurring/annual vs one-time/asset.
+  // Summing them together would be misleading (annual fee × N years ≠ TSA one-time).
+  const annualPipelineTypes = new Set(["HMA", "Franchise", "Manchise"])
+  const annualPipelineValue = activeDeals
+    .filter(d => annualPipelineTypes.has((d as any).deal_type ?? "HMA"))
+    .reduce((s, d) => s + (d.pipeline_value ?? 0), 0)
+  const oneTimePipelineValue = activeDeals
+    .filter(d => !annualPipelineTypes.has((d as any).deal_type ?? "HMA"))
+    .reduce((s, d) => s + (d.pipeline_value ?? 0), 0)
+  const pipelineValue = annualPipelineValue + oneTimePipelineValue  // back-compat for downstream code
   const weightedPipeline = activeDeals.reduce((s, d) => s + (d.pipeline_value ?? 0) * (d.probability ?? 0) / 100, 0)
   const feeForecasted = activeDeals.reduce((s, d) => s + (d.fee_forecast ?? 0), 0)
 
@@ -156,7 +165,13 @@ function Dashboard() {
           onClick={() => navigate({ to: "/deals" })} />
         <Kpi label="Signed / Opening" value={signedDeals.length} sub="HMA + Pre-opening + Opened" icon={TrendingUp} />
         <Kpi label="Rooms in Pipeline" value={fmtK(totalKeys)} sub="active deals" />
-        <Kpi label="Pipeline Value" value={fmtM(pipelineValue)} sub={`Weighted: ${fmtM(weightedPipeline)}`} />
+        <Kpi
+          label="Pipeline Value"
+          value={fmtM(annualPipelineValue)}
+          sub={oneTimePipelineValue > 0
+            ? `Annual · ${fmtM(oneTimePipelineValue)} one-time separately`
+            : `Annual · Weighted ${fmtM(weightedPipeline)}`}
+        />
         <Kpi label="Fee Forecast" value={fmtM(feeForecasted)} sub="annual management fee" />
         <Kpi label="Owners" value={ownerCount} icon={Users}
           onClick={() => navigate({ to: "/owners" })} />

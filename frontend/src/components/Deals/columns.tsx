@@ -4,6 +4,7 @@ import type { DealPublic } from "@/client"
 import { EditDeal } from "./EditDeal"
 import { DeleteDeal } from "./DeleteDeal"
 import { StageChange } from "./StageChange"
+import { getDealTypeConfig, VALUE_TYPE_BADGE } from "./dealTypeConfig"
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -279,11 +280,22 @@ export const dealColumns: ColumnDef<DealPublic>[] = [
   {
     id: "pipeline_value",
     header: "Pipeline Value",
-    cell: ({ row }) => (
-      <span className="text-sm tabular-nums font-medium">
-        {fmtMoney(row.original.pipeline_value)}
-      </span>
-    ),
+    cell: ({ row }) => {
+      const dealType = (row.original as any).deal_type as string | undefined
+      const cfg = getDealTypeConfig(dealType)
+      const badge = VALUE_TYPE_BADGE[cfg.pipelineValueBadge]
+      return (
+        <div className="flex items-center gap-1.5">
+          <span className="text-sm tabular-nums font-medium">{fmtMoney(row.original.pipeline_value)}</span>
+          {row.original.pipeline_value != null && (
+            <span title={cfg.pipelineValueLabel}
+              className={`text-[9px] font-semibold ${badge.bg} ${badge.text} px-1.5 py-0.5 rounded`}>
+              {badge.label}
+            </span>
+          )}
+        </div>
+      )
+    },
   },
   {
     id: "opening_target",

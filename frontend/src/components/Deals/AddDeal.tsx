@@ -27,6 +27,7 @@ import {
 import useCustomToast from "@/hooks/useCustomToast"
 import { MD, useMasterData, useStageProbabilities } from "@/hooks/useMasterData"
 import { AddProject } from "@/components/Projects/AddProject"
+import { getDealTypeConfig } from "./dealTypeConfig"
 
 type FormData = {
   name: string
@@ -319,14 +320,37 @@ export function AddDeal({ defaultProjectId, trigger }: Props) {
                 <Input {...register("probability")} type="number" min={0} max={100} placeholder="50" />
                 <p className="text-[10px] text-muted-foreground">Auto-set from stage. Override to mark as manual.</p>
               </div>
-              <div className="space-y-1.5">
-                <Label>Pipeline Value (USD)</Label>
-                <Input {...register("pipeline_value")} type="number" min={0} placeholder="45000000" />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Annual Fee Forecast (USD)</Label>
-                <Input {...register("fee_forecast")} type="number" min={0} placeholder="1200000" />
-              </div>
+              {(() => {
+                const cfg = getDealTypeConfig(dealType)
+                return (
+                  <>
+                    <div className="space-y-1.5">
+                      <Label className="flex items-center gap-1.5">
+                        {cfg.pipelineValueLabel} (USD)
+                        <span className="text-[9px] font-semibold bg-muted text-muted-foreground px-1.5 py-0.5 rounded uppercase">
+                          {cfg.pipelineValueBadge}
+                        </span>
+                      </Label>
+                      <Input {...register("pipeline_value")} type="number" min={0} placeholder="45000000" />
+                      <p className="text-[10px] text-muted-foreground">{cfg.pipelineValueHint}</p>
+                    </div>
+                    {cfg.feeForecastVisible ? (
+                      <div className="space-y-1.5">
+                        <Label>{cfg.feeForecastLabel} (USD)</Label>
+                        <Input {...register("fee_forecast")} type="number" min={0} placeholder="1200000" />
+                        <p className="text-[10px] text-muted-foreground">{cfg.feeForecastHint}</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-1.5">
+                        <Label className="text-muted-foreground">Fee Forecast</Label>
+                        <div className="rounded-md border border-dashed bg-muted/30 px-3 py-2.5 text-[11px] text-muted-foreground">
+                          ⓘ {cfg.feeForecastHint}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )
+              })()}
             </div>
 
             <div className="space-y-1.5">

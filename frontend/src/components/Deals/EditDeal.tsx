@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select"
 import useCustomToast from "@/hooks/useCustomToast"
 import { MD, useMasterData, useStageProbabilities } from "@/hooks/useMasterData"
+import { getDealTypeConfig } from "./dealTypeConfig"
 
 interface Props { deal: DealPublic }
 
@@ -45,6 +46,7 @@ export function EditDeal({ deal }: Props) {
   })
   const users = usersData?.data ?? []
   const [bdOwnerId, setBdOwnerId] = useState(deal.bd_owner_id ?? "")
+  const [currentDealType, setCurrentDealType] = useState<string>((deal as any).deal_type ?? "HMA")
 
   const { register, handleSubmit, reset, setValue, formState: { isSubmitting } } =
     useForm<DealUpdate>()
@@ -122,7 +124,10 @@ export function EditDeal({ deal }: Props) {
 
             <div className="space-y-1.5">
               <Label>Deal Type</Label>
-              <Select defaultValue={(deal as any).deal_type ?? "HMA"} onValueChange={(v) => setValue("deal_type", v as DealUpdate["deal_type"])}>
+              <Select value={currentDealType} onValueChange={(v) => {
+                setCurrentDealType(v)
+                setValue("deal_type", v as DealUpdate["deal_type"])
+              }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {DEAL_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
@@ -206,14 +211,37 @@ export function EditDeal({ deal }: Props) {
               <Input {...register("probability")} type="number" min={0} max={100} />
               <p className="text-[10px] text-muted-foreground">Changing this marks as manual. Stage changes won't auto-update.</p>
             </div>
-            <div className="space-y-1.5">
-              <Label>Pipeline Value</Label>
-              <Input {...register("pipeline_value")} type="number" min={0} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Fee Forecast</Label>
-              <Input {...register("fee_forecast")} type="number" min={0} />
-            </div>
+            {(() => {
+              const cfg = getDealTypeConfig(currentDealType)
+              return (
+                <>
+                  <div className="space-y-1.5">
+                    <Label className="flex items-center gap-1.5">
+                      {cfg.pipelineValueLabel}
+                      <span className="text-[9px] font-semibold bg-muted text-muted-foreground px-1.5 py-0.5 rounded uppercase">
+                        {cfg.pipelineValueBadge}
+                      </span>
+                    </Label>
+                    <Input {...register("pipeline_value")} type="number" min={0} />
+                    <p className="text-[10px] text-muted-foreground">{cfg.pipelineValueHint}</p>
+                  </div>
+                  {cfg.feeForecastVisible ? (
+                    <div className="space-y-1.5">
+                      <Label>{cfg.feeForecastLabel}</Label>
+                      <Input {...register("fee_forecast")} type="number" min={0} />
+                      <p className="text-[10px] text-muted-foreground">{cfg.feeForecastHint}</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1.5">
+                      <Label className="text-muted-foreground">Fee Forecast</Label>
+                      <div className="rounded-md border border-dashed bg-muted/30 px-2.5 py-2 text-[11px] text-muted-foreground">
+                        ⓘ {cfg.feeForecastHint}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )
+            })()}
           </div>
 
           <div className="space-y-1.5">
