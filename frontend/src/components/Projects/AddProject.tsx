@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select"
 import useCustomToast from "@/hooks/useCustomToast"
 import { MD, useMasterData } from "@/hooks/useMasterData"
+import { QuarterPicker } from "@/components/ui/quarter-picker"
 
 const STATUSES = ["Prospect","Active","On Hold","Operating","Lost","Closed"]
 
@@ -27,7 +28,6 @@ export function AddProject({ defaultOwnerId, trigger }: Props) {
   const COUNTRIES = useMasterData(MD.COUNTRY)
   const REGIONS = useMasterData(MD.REGION)
   const PROJECT_TYPES = useMasterData(MD.PROJECT_TYPE)
-  const OPENING_TARGETS = useMasterData(MD.OPENING_TARGET)
   const SEGMENTS = useMasterData(MD.SEGMENT)
   const CONSTRUCTION = useMasterData(MD.CONSTRUCTION_STATUS)
   const DESIGN = useMasterData(MD.DESIGN_STATUS)
@@ -42,7 +42,7 @@ export function AddProject({ defaultOwnerId, trigger }: Props) {
   const owners = ownersData?.data ?? []
   const [ownerId, setOwnerId] = useState(defaultOwnerId ?? "")
 
-  const { register, handleSubmit, reset, setValue, formState: { errors } } =
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } =
     useForm<any>({ defaultValues: { status_s: "Active" } })
 
   const mut = useMutation({
@@ -131,10 +131,11 @@ export function AddProject({ defaultOwnerId, trigger }: Props) {
               </div>
               <div className="space-y-1.5">
                 <Label>Target Opening</Label>
-                <Select onValueChange={v => setValue("opening_target_s", v)}>
-                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-                  <SelectContent>{OPENING_TARGETS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
-                </Select>
+                <QuarterPicker
+                  value={watch("opening_target_s") as string | undefined}
+                  onChange={(v) => setValue("opening_target_s", v)}
+                />
+                <p className="text-[10px] text-muted-foreground">Industry standard quarter precision (e.g. Q4 2026).</p>
               </div>
             </div>
           </div>

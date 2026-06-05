@@ -5,6 +5,7 @@ import { EditDeal } from "./EditDeal"
 import { DeleteDeal } from "./DeleteDeal"
 import { StageChange } from "./StageChange"
 import { getDealTypeConfig, VALUE_TYPE_BADGE } from "./dealTypeConfig"
+import { quarterTone, quarterLabel } from "@/components/ui/quarter-picker"
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -300,11 +301,15 @@ export const dealColumns: ColumnDef<DealPublic>[] = [
   {
     id: "opening_target",
     header: "Opening",
-    cell: ({ row }) => (
-      <span className="text-sm text-muted-foreground whitespace-nowrap">
-        {row.original.opening_target ?? "—"}
-      </span>
-    ),
+    cell: ({ row }) => {
+      const t = row.original.opening_target
+      if (!t) return <span className="text-muted-foreground text-sm">—</span>
+      return (
+        <span className={`text-xs whitespace-nowrap ${quarterTone(t)}`} title={quarterLabel(t)}>
+          {t}
+        </span>
+      )
+    },
   },
   {
     id: "actions",

@@ -33,7 +33,8 @@ const GROUPS: CategoryGroup[] = [
       { key: "deal_type", label: "Deal Types" },
       { key: "deal_risk", label: "Deal Risk" },
       { key: "feasibility_status", label: "Feasibility Status" },
-      { key: "opening_target", label: "Opening Targets" },
+      // 'opening_target' removed — now uses Quarter Picker UI (auto-rolling years).
+      // Legacy data remains in DB for backward compat.
       { key: "stage_probability", label: "Stage → Probability (Stage:Prob format)" },
     ],
   },
