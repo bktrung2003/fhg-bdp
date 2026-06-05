@@ -61,16 +61,20 @@ def get_download_url(storage_path: str, filename: str) -> str:
         key = storage_path.removeprefix("local://")
         return f"/api/v1/documents/serve/{key}"
 
-    # MinIO presigned URL
+    # MinIO presigned URL.
+    # Presign against the PUBLIC endpoint so the signature matches the host
+    # the browser will actually hit. If MINIO_PUBLIC_ENDPOINT is unset, fall
+    # back to the internal endpoint (dev / same-network only).
     import boto3
     from botocore.client import Config
 
     parts = storage_path.removeprefix("minio://").split("/", 1)
     bucket, key = parts[0], parts[1]
 
+    public_endpoint = settings.MINIO_PUBLIC_ENDPOINT or settings.MINIO_ENDPOINT
     s3 = boto3.client(
         "s3",
-        endpoint_url=settings.MINIO_ENDPOINT,
+        endpoint_url=public_endpoint,
         aws_access_key_id=settings.MINIO_ROOT_USER,
         aws_secret_access_key=settings.MINIO_ROOT_PASSWORD,
         config=Config(signature_version="s3v4"),

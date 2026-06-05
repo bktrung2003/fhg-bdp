@@ -95,7 +95,14 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER_PASSWORD: str
 
     # MinIO / S3 storage
+    # MINIO_ENDPOINT — internal address the backend uses to talk to MinIO
+    # over the docker network (upload/delete). Stays as the service name.
     MINIO_ENDPOINT: str = "http://minio:9000"
+    # MINIO_PUBLIC_ENDPOINT — address the *browser* uses to fetch presigned
+    # download URLs. Must be host-reachable (e.g. http://192.168.1.22:3009).
+    # If blank, falls back to MINIO_ENDPOINT (only works when browser shares
+    # the docker network — i.e. never in production). Set this in prod.
+    MINIO_PUBLIC_ENDPOINT: str = ""
     MINIO_ROOT_USER: str = "fusion_minio"
     MINIO_ROOT_PASSWORD: str = ""
     MINIO_BUCKET_DEALS: str = "fusion-documents"
