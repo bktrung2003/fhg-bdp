@@ -34,6 +34,11 @@ class UserBase(SQLModel):
     is_superuser: bool = False
     full_name: str | None = Field(default=None, max_length=255)
     role: UserRole = Field(default=UserRole.BD_MANAGER, sa_type=String(50))
+    # Title — free text so org structure can evolve without enum changes
+    # (e.g. "VP Hospitality APAC", "Head of Development VN")
+    title: str | None = Field(default=None, max_length=120)
+    # Country scope — for Phase 2 RBAC. Phase 1 stores only, no enforcement.
+    country: str | None = Field(default=None, max_length=80, index=True)
 
 
 # Properties to receive via API on creation
