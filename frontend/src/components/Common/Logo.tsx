@@ -37,14 +37,14 @@ export function Logo({ variant = "full", className, asLink = true }: LogoProps) 
     />
   )
 
-  // Responsive — full when sidebar open, icon when collapsed
+  // Responsive — full logo when sidebar open, bird-only icon when collapsed
   const responsive = (
     <>
       <img
         src={src}
         alt="Fusion BD CORE OS"
         className={cn(
-          "h-9 w-auto object-contain group-data-[collapsible=icon]:hidden",
+          "h-16 w-auto object-contain group-data-[collapsible=icon]:hidden",
           className,
         )}
       />
@@ -52,7 +52,7 @@ export function Logo({ variant = "full", className, asLink = true }: LogoProps) 
         src={LOGO_ICON}
         alt="Fusion"
         className={cn(
-          "h-7 w-auto object-contain hidden group-data-[collapsible=icon]:block",
+          "h-8 w-auto object-contain hidden group-data-[collapsible=icon]:block",
           className,
         )}
       />
