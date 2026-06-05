@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { User, KeyRound, AlertOctagon, Users, Database } from "lucide-react"
+import { User, KeyRound, AlertOctagon, Users, Database, Sparkles } from "lucide-react"
 
 import ChangePassword from "@/components/UserSettings/ChangePassword"
 import DeleteAccount from "@/components/UserSettings/DeleteAccount"
 import UserInformation from "@/components/UserSettings/UserInformation"
 import { MasterDataView } from "@/components/Settings/MasterDataView"
 import { UsersView } from "@/components/Settings/UsersView"
+import { DemoDataView } from "@/components/Settings/DemoDataView"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import useAuth from "@/hooks/useAuth"
 
@@ -25,6 +26,7 @@ const PERSONAL_TABS = [
 const ADMIN_TABS = [
   { value: "users", title: "Users", icon: Users, component: UsersView },
   { value: "master-data", title: "Master Data", icon: Database, component: MasterDataView },
+  { value: "demo-data", title: "Demo Data", icon: Sparkles, component: DemoDataView },
 ]
 
 function SettingsPage() {
@@ -45,7 +47,7 @@ function SettingsPage() {
       </div>
 
       <Tabs defaultValue="my-profile">
-        <TabsList className="grid grid-cols-3 md:grid-cols-5 w-full max-w-3xl gap-1">
+        <TabsList className="grid grid-cols-3 md:grid-cols-6 w-full max-w-4xl gap-1">
           {tabs.map((tab) => (
             <TabsTrigger key={tab.value} value={tab.value} className="gap-1.5">
               <tab.icon className="h-3.5 w-3.5" />

@@ -1,6 +1,11 @@
-"""
-Seed data endpoint — load demo data for COO presentation, delete after.
-Only available in local environment.
+"""Seed/demo data endpoints — load + clear demo data for onboarding / demos.
+
+Available endpoints:
+- POST   /seed/demo/load   — load full demo dataset (superuser only)
+- DELETE /seed/demo        — clear demo records (superuser only)
+- GET    /seed/demo/info   — what's in the demo + current loaded state
+- POST   /seed/load        — legacy JSON-based seed (local env only)
+- DELETE /seed/clear       — nuke ALL business data (local env only)
 """
 import json
 import uuid
@@ -8,10 +13,15 @@ from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 from sqlmodel import select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
+from app.demo_seed import (
+    DEMO_SUMMARY, OWNERS, PROJECTS, DEALS,
+    clear_demo, load_demo,
+)
 from app.models import (
     Activity, Deal, DealAuditLog, Document, FeasibilitySnapshot,
     Message, Milestone, Owner, OwnerContact, OwnerInteraction, Task,
@@ -20,6 +30,83 @@ from app.models import (
 router = APIRouter(prefix="/seed", tags=["seed"])
 
 SEED_TAG = "DEMO_SEED"  # marker to identify seeded records
+
+
+# ── Demo Data (Settings UI) ─────────────────────────────────────────────────
+
+class DemoInfo(BaseModel):
+    summary: dict[str, int]   # what the demo includes
+    loaded: dict[str, int]    # how many demo records currently in DB
+    is_loaded: bool
+
+
+class DemoResult(BaseModel):
+    message: str
+    counts: dict[str, int]
+
+
+def _count_loaded(session: SessionDep) -> dict[str, int]:
+    """Count currently-loaded demo records (matched by name)."""
+    seed_owner_companies = {o["company"] for o in OWNERS}
+    seed_project_names = {p["name"] for p in PROJECTS}
+    seed_deal_names = {d["name"] for d in DEALS}
+    return {
+        "owners":   len(session.exec(select(Owner).where(Owner.company.in_(seed_owner_companies))).all()),    # type: ignore[attr-defined]
+        "projects": len(session.exec(select(Deal).where(Deal.name.in_(seed_deal_names))).all()),               # type: ignore[attr-defined]
+        "deals":    len(session.exec(select(Deal).where(Deal.name.in_(seed_deal_names))).all()),               # type: ignore[attr-defined]
+    }
+
+
+@router.get("/demo/info", response_model=DemoInfo)
+def demo_info(session: SessionDep, current_user: CurrentUser) -> Any:
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=403, detail="Superuser required")
+    seed_owner_companies = {o["company"] for o in OWNERS}
+    seed_project_names = {p["name"] for p in PROJECTS}
+    seed_deal_names = {d["name"] for d in DEALS}
+    loaded_owners = len(session.exec(select(Owner).where(Owner.company.in_(seed_owner_companies))).all())   # type: ignore[attr-defined]
+    loaded_projects = 0  # projects table — count by name match
+    from app.models import Project as _P
+    loaded_projects = len(session.exec(select(_P).where(_P.name.in_(seed_project_names))).all())            # type: ignore[attr-defined]
+    loaded_deals = len(session.exec(select(Deal).where(Deal.name.in_(seed_deal_names))).all())               # type: ignore[attr-defined]
+    loaded = {"owners": loaded_owners, "projects": loaded_projects, "deals": loaded_deals}
+    return DemoInfo(summary=DEMO_SUMMARY, loaded=loaded, is_loaded=loaded_deals > 0)
+
+
+@router.post("/demo/load", response_model=DemoResult)
+def demo_load(session: SessionDep, current_user: CurrentUser) -> Any:
+    """Idempotent load — clears existing demo records first, then re-seeds.
+    Real user data is NOT affected (demo records matched by name)."""
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=403, detail="Superuser required to load demo data")
+    counts = load_demo(session, current_user, verbose=False)
+    session.commit()
+    summary = ", ".join(f"{v} {k}" for k, v in counts.items() if v > 0)
+    return DemoResult(message=f"Loaded: {summary}", counts=counts)
+
+
+@router.delete("/demo", response_model=DemoResult)
+def demo_clear(session: SessionDep, current_user: CurrentUser) -> Any:
+    """Remove demo records (matched by name). Real user data untouched."""
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=403, detail="Superuser required")
+    # Count first
+    seed_owner_companies = {o["company"] for o in OWNERS}
+    seed_deal_names = {d["name"] for d in DEALS}
+    seed_project_names = {p["name"] for p in PROJECTS}
+    from app.models import Project as _P
+    counts_before = {
+        "owners":   len(session.exec(select(Owner).where(Owner.company.in_(seed_owner_companies))).all()),   # type: ignore[attr-defined]
+        "projects": len(session.exec(select(_P).where(_P.name.in_(seed_project_names))).all()),               # type: ignore[attr-defined]
+        "deals":    len(session.exec(select(Deal).where(Deal.name.in_(seed_deal_names))).all()),              # type: ignore[attr-defined]
+    }
+    clear_demo(session)
+    session.commit()
+    summary = ", ".join(f"{v} {k}" for k, v in counts_before.items() if v > 0)
+    return DemoResult(message=f"Cleared: {summary or 'nothing to remove'}", counts=counts_before)
+
+
+# ── Legacy JSON-based seed (local-only) ─────────────────────────────────────
 
 
 @router.post("/load", response_model=Message)

@@ -19,6 +19,9 @@ api_router.include_router(masterdata.router)
 api_router.include_router(projects.router)
 
 
+# Seed router always registered — demo endpoints work in any env (superuser-gated),
+# legacy clear/load endpoints inside have their own local-env guards.
+api_router.include_router(seed.router)
+
 if settings.ENVIRONMENT == "local":
     api_router.include_router(private.router)
-    api_router.include_router(seed.router)
