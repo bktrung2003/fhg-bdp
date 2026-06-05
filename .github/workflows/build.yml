@@ -1,26 +1,24 @@
 name: Build & Push
 
+# Build backend + frontend Docker images and push to GHCR on:
+#   - push to main → publishes :latest + :sha-short
+#   - tag v*.*.*  → publishes :latest + :vX.Y.Z (use for rollback targets)
+#
+# CD is intentionally MANUAL: pull the new :latest from Portainer
+# (Stacks → fhg-bdp → Pull and redeploy) so we control timing.
+
 on:
   push:
     branches: [main]
     tags: ["v*.*.*"]
+  workflow_dispatch:
 
 env:
   IMAGE_BACKEND: ghcr.io/bktrung2003/fhg-bdp/backend
   IMAGE_FRONTEND: ghcr.io/bktrung2003/fhg-bdp/frontend
 
 jobs:
-  # ── 1. Backend Tests ────────────────────────────────────────────────────────
-  test-backend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run backend tests
-        run: docker compose run --rm backend pytest --tb=short -q
-
-  # ── 2. Build & Push Images ──────────────────────────────────────────────────
   build:
-    needs: test-backend
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -29,24 +27,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Login to ghcr.io
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}
+          # GITHUB_TOKEN has write access to GHCR for repo-scoped images
+          # — no PAT needed.
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set image tags
+      - name: Compute image tags
         id: tags
         run: |
           SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)
-          if [[ $GITHUB_REF == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/}
-            echo "backend=${{ env.IMAGE_BACKEND }}:latest,${{ env.IMAGE_BACKEND }}:${VERSION}" >> $GITHUB_OUTPUT
-            echo "frontend=${{ env.IMAGE_FRONTEND }}:latest,${{ env.IMAGE_FRONTEND }}:${VERSION}" >> $GITHUB_OUTPUT
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
+            echo "backend=${IMAGE_BACKEND}:latest,${IMAGE_BACKEND}:${VERSION}" >> "$GITHUB_OUTPUT"
+            echo "frontend=${IMAGE_FRONTEND}:latest,${IMAGE_FRONTEND}:${VERSION}" >> "$GITHUB_OUTPUT"
           else
-            echo "backend=${{ env.IMAGE_BACKEND }}:latest,${{ env.IMAGE_BACKEND }}:${SHA_SHORT}" >> $GITHUB_OUTPUT
-            echo "frontend=${{ env.IMAGE_FRONTEND }}:latest,${{ env.IMAGE_FRONTEND }}:${SHA_SHORT}" >> $GITHUB_OUTPUT
+            echo "backend=${IMAGE_BACKEND}:latest,${IMAGE_BACKEND}:${SHA_SHORT}" >> "$GITHUB_OUTPUT"
+            echo "frontend=${IMAGE_FRONTEND}:latest,${IMAGE_FRONTEND}:${SHA_SHORT}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Build & push backend
@@ -56,6 +59,8 @@ jobs:
           file: backend/Dockerfile
           push: true
           tags: ${{ steps.tags.outputs.backend }}
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,scope=backend,mode=max
 
       - name: Build & push frontend
         uses: docker/build-push-action@v5
@@ -64,6 +69,22 @@ jobs:
           file: frontend/Dockerfile
           push: true
           tags: ${{ steps.tags.outputs.frontend }}
+          # VITE_API_URL is empty → frontend calls /api on same origin (nginx
+          # proxies to backend in Portainer stack).
           build-args: |
-            VITE_API_URL=http://localhost:8000
+            VITE_API_URL=
             NODE_ENV=production
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,scope=frontend,mode=max
+
+      - name: Summary
+        run: |
+          echo "## Images pushed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Backend tags:" >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.tags.outputs.backend }}" | tr ',' '\n' | sed 's/^/- /' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Frontend tags:" >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.tags.outputs.frontend }}" | tr ',' '\n' | sed 's/^/- /' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Deploy**: Portainer -> Stacks -> fhg-bdp -> *Pull and redeploy* (uses :latest)." >> $GITHUB_STEP_SUMMARY

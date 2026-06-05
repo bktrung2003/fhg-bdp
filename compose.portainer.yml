@@ -1,0 +1,153 @@
+# Fusion BD CORE OS — Portainer Stack
+#
+# Deployment target: Ubuntu host with Docker + Portainer (e.g. 192.168.1.116:9000)
+# Tested with Docker Compose v2+.
+#
+# Stack composition:
+#   db        — PostgreSQL 18 with persistent volume
+#   minio     — S3-compatible object store for documents + assets (logos, etc.)
+#   minio-init— one-shot job: creates the 'fusion-documents' bucket on first start
+#   backend   — FastAPI (image pulled from ghcr.io/bktrung2003/fhg-bdp/backend:latest)
+#   frontend  — Nginx serving SPA + reverse-proxying /api → backend
+#
+# Exposed ports (host):
+#   80    — frontend (UI + /api proxy)        ← only port your users need
+#   9001  — MinIO admin console                ← admin only
+#   9000  — MinIO S3 API                       ← optional, for direct uploads
+#
+# Update flow:
+#   GitHub Actions builds + pushes :latest on every main push.
+#   Portainer → Stacks → fhg-bdp → "Pull and redeploy"
+#   uses the new :latest. Database + MinIO volumes survive redeploys.
+
+services:
+
+  db:
+    image: postgres:18
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    volumes:
+      - app-db-data:/var/lib/postgresql/data/pgdata
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+  minio:
+    image: minio/minio:latest
+    restart: always
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - minio-data:/data
+    ports:
+      - "9001:9001"      # MinIO Admin Console (use this in browser)
+      - "9000:9000"      # S3 API endpoint
+
+  # One-shot job: create the 'fusion-documents' bucket on first deploy
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    restart: "no"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET: ${MINIO_BUCKET_DEALS}
+    entrypoint: >
+      sh -c "
+      mc alias set local http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD &&
+      mc mb --ignore-existing local/$$MINIO_BUCKET &&
+      mc anonymous set download local/$$MINIO_BUCKET/public &&
+      echo 'Bucket ready: '$$MINIO_BUCKET
+      "
+
+  prestart:
+    image: ghcr.io/bktrung2003/fhg-bdp/backend:${TAG-latest}
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+    command: bash scripts/prestart.sh
+    environment:
+      ENVIRONMENT: production
+      PROJECT_NAME: ${PROJECT_NAME}
+      SECRET_KEY: ${SECRET_KEY}
+      FIRST_SUPERUSER: ${FIRST_SUPERUSER}
+      FIRST_SUPERUSER_PASSWORD: ${FIRST_SUPERUSER_PASSWORD}
+      BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS}
+      DOMAIN: ${DOMAIN}
+      FRONTEND_HOST: ${FRONTEND_HOST}
+      POSTGRES_SERVER: db
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+  backend:
+    image: ghcr.io/bktrung2003/fhg-bdp/backend:${TAG-latest}
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      prestart:
+        condition: service_completed_successfully
+    environment:
+      ENVIRONMENT: production
+      PROJECT_NAME: ${PROJECT_NAME}
+      SECRET_KEY: ${SECRET_KEY}
+      FIRST_SUPERUSER: ${FIRST_SUPERUSER}
+      FIRST_SUPERUSER_PASSWORD: ${FIRST_SUPERUSER_PASSWORD}
+      BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS}
+      DOMAIN: ${DOMAIN}
+      FRONTEND_HOST: ${FRONTEND_HOST}
+      # Database
+      POSTGRES_SERVER: db
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      # MinIO
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET_DEALS: ${MINIO_BUCKET_DEALS}
+      # Email (optional — leave SMTP_HOST blank to disable)
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_TLS: ${SMTP_TLS}
+      SMTP_SSL: ${SMTP_SSL}
+      EMAILS_FROM_EMAIL: ${EMAILS_FROM_EMAIL}
+      EMAILS_FROM_NAME: ${EMAILS_FROM_NAME}
+      # Optional Sentry
+      SENTRY_DSN: ${SENTRY_DSN}
+
+  frontend:
+    image: ghcr.io/bktrung2003/fhg-bdp/frontend:${TAG-latest}
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"          # Public UI — your team browses to http://<server-ip>/
+
+volumes:
+  app-db-data:
+  minio-data:
