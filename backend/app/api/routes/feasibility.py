@@ -12,7 +12,7 @@ from app.models import (
     Deal, DealAuditLog,
     FeasibilityAssessment, FeasibilityAssessmentCreate,
     FeasibilityAssessmentPublic, FeasibilityAssessmentHistory,
-    FeasibilityAssessmentReview,
+    FeasibilityAssessmentNotesUpdate, FeasibilityAssessmentReview,
     FeasibilitySnapshot, FeasibilitySnapshotCreate,
     FeasibilitySnapshotPublic, Message, User,
     compute_feasibility_recommendation, compute_feasibility_total,
@@ -250,6 +250,8 @@ def create_assessment(
         recommendation=rec,
         strengths=body.strengths,
         concerns=body.concerns,
+        competitive_landscape=body.competitive_landscape,
+        deal_killers=body.deal_killers,
         conditions_to_proceed=body.conditions_to_proceed,
         version=next_version,
         is_current=True,
@@ -281,6 +283,51 @@ def create_assessment(
     session.commit()
     session.refresh(new_a)
     return _enrich(session, new_a)
+
+
+@assessment_router.patch("/notes", response_model=FeasibilityAssessmentPublic)
+def edit_assessment_notes(
+    *, session: SessionDep, current_user: CurrentUser,
+    deal_id: uuid.UUID, body: FeasibilityAssessmentNotesUpdate,
+) -> Any:
+    """Quick-edit the 5 strategic-notes text fields on the CURRENT assessment.
+
+    Does NOT create a new version (scores unchanged). Use this for typo fixes,
+    adding context, updating competitive intel — anything that doesn't change
+    the scoring. Use POST (Reassess) when scores change."""
+    a = session.exec(
+        select(FeasibilityAssessment).where(
+            FeasibilityAssessment.deal_id == deal_id,
+            FeasibilityAssessment.is_current == True,  # noqa: E712
+        )
+    ).first()
+    if not a:
+        raise HTTPException(status_code=404, detail="No current assessment — run Assessment first")
+
+    changed_fields: list[str] = []
+    for field in ("strengths", "concerns", "competitive_landscape", "deal_killers", "conditions_to_proceed"):
+        new_val = getattr(body, field)
+        if new_val is not None and new_val != getattr(a, field):
+            setattr(a, field, new_val if new_val.strip() else None)
+            changed_fields.append(field)
+
+    if not changed_fields:
+        return _enrich(session, a)
+
+    session.add(a)
+    now = datetime.now(timezone.utc)
+    session.add(DealAuditLog(
+        deal_id=deal_id,
+        user_id=current_user.id,
+        field="feasibility_notes",
+        old_value=None,
+        new_value=f"v{a.version} notes edited",
+        note=f"Edited: {', '.join(changed_fields)}",
+        created_at=now,
+    ))
+    session.commit()
+    session.refresh(a)
+    return _enrich(session, a)
 
 
 @assessment_router.post("/{assessment_id}/review", response_model=FeasibilityAssessmentPublic)

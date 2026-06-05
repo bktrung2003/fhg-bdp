@@ -1,12 +1,13 @@
 import { useMemo, useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { ClipboardCheck, Sparkles, History, ShieldCheck, AlertCircle } from "lucide-react"
+import { ClipboardCheck, Sparkles, History, ShieldCheck, AlertCircle, Pencil } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { OpenAPI } from "@/client"
 import useCustomToast from "@/hooks/useCustomToast"
 import { AssessFeasibilityModal } from "./AssessFeasibilityModal"
 import { ReviewFeasibilityModal } from "./ReviewFeasibilityModal"
+import { EditNotesModal } from "./EditNotesModal"
 
 // ── Types (kept local since they may not be in generated client yet) ─────────
 
@@ -23,6 +24,8 @@ export interface FeasibilityAssessmentPublic {
   recommendation: string
   strengths: string | null
   concerns: string | null
+  competitive_landscape: string | null
+  deal_killers: string | null
   conditions_to_proceed: string | null
   version: number
   is_current: boolean
@@ -150,6 +153,7 @@ export function FeasibilityPanel({ dealId, currentUserId }: Props) {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [assessOpen, setAssessOpen] = useState(false)
   const [reviewOpen, setReviewOpen] = useState(false)
+  const [editNotesOpen, setEditNotesOpen] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
 
   const { data: current, isLoading } = useQuery({
@@ -207,6 +211,26 @@ export function FeasibilityPanel({ dealId, currentUserId }: Props) {
     onError: (e: any) => showErrorToast(e?.message ?? "Failed to review."),
   })
 
+  const editNotesMut = useMutation({
+    mutationFn: async (notes: any) => {
+      const token = typeof OpenAPI.TOKEN === "function" ? await OpenAPI.TOKEN({} as any) : OpenAPI.TOKEN
+      const res = await fetch(`${OpenAPI.BASE}/api/v1/deals/${dealId}/feasibility/notes`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(notes),
+      })
+      if (!res.ok) throw new Error(await res.text())
+      return res.json()
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["feasibility-current", dealId] })
+      qc.invalidateQueries({ queryKey: ["deal-audit", dealId] })
+      showSuccessToast("Notes updated (no version bump).")
+      setEditNotesOpen(false)
+    },
+    onError: () => showErrorToast("Failed to update notes."),
+  })
+
   const scores = useMemo(() => current ? DIMENSIONS.map(d => (current as any)[d.key] as number) : [], [current])
   const canReview = !!current && !current.reviewed_by_id && current.assessed_by_id !== currentUserId
 
@@ -257,6 +281,10 @@ export function FeasibilityPanel({ dealId, currentUserId }: Props) {
               <ShieldCheck className="h-3.5 w-3.5 mr-1" />Review &amp; Sign-off
             </Button>
           )}
+          <Button size="sm" variant="outline" onClick={() => setEditNotesOpen(true)}
+            title="Edit text notes only — no new version">
+            <Pencil className="h-3.5 w-3.5 mr-1" />Edit Notes
+          </Button>
           <Button size="sm" onClick={() => setAssessOpen(true)}>
             <Sparkles className="h-3.5 w-3.5 mr-1" />Reassess
           </Button>
@@ -308,11 +336,20 @@ export function FeasibilityPanel({ dealId, currentUserId }: Props) {
         </div>
       </div>
 
-      {/* Strengths / Concerns / Conditions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-5">
-        <NoteBlock title="Strengths" tone="emerald" text={current.strengths} />
-        <NoteBlock title="Concerns"  tone="amber"   text={current.concerns} />
-        <NoteBlock title="Conditions to Proceed" tone="blue" text={current.conditions_to_proceed} />
+      {/* BD Strategic Notes — 5 blocks */}
+      <div className="mt-5">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">
+          BD Strategic Notes
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <NoteBlock title="Strengths" tone="emerald" icon="✓" text={current.strengths} />
+          <NoteBlock title="Concerns"  tone="amber"   icon="⚠" text={current.concerns} />
+          <NoteBlock title="Competitive Landscape" tone="purple" icon="🥊" text={current.competitive_landscape} />
+          <NoteBlock title="Deal Killers / Red Flags" tone="red" icon="🚫" text={current.deal_killers} />
+        </div>
+        <div className="mt-3">
+          <NoteBlock title="Conditions to Proceed" tone="blue" icon="📋" text={current.conditions_to_proceed} />
+        </div>
       </div>
 
       {/* History drawer */}
@@ -349,17 +386,34 @@ export function FeasibilityPanel({ dealId, currentUserId }: Props) {
           isSubmitting={reviewMut.isPending}
         />
       )}
+      {current && (
+        <EditNotesModal
+          open={editNotesOpen}
+          onOpenChange={setEditNotesOpen}
+          initial={current}
+          onSubmit={(notes) => editNotesMut.mutate(notes)}
+          isSubmitting={editNotesMut.isPending}
+        />
+      )}
     </div>
   )
 }
 
-function NoteBlock({ title, tone, text }: { title: string; tone: "emerald" | "amber" | "blue"; text: string | null }) {
+function NoteBlock({
+  title, tone, icon, text,
+}: {
+  title: string
+  tone: "emerald" | "amber" | "blue" | "purple" | "red"
+  icon: string
+  text: string | null
+}) {
   const styles = {
     emerald: "bg-emerald-50 border-emerald-200 text-emerald-900",
     amber:   "bg-amber-50   border-amber-200   text-amber-900",
     blue:    "bg-blue-50    border-blue-200    text-blue-900",
+    purple:  "bg-purple-50  border-purple-200  text-purple-900",
+    red:     "bg-red-50     border-red-200     text-red-900",
   }[tone]
-  const icon = tone === "emerald" ? "✓" : tone === "amber" ? "⚠" : "📋"
   return (
     <div className={`rounded-lg border ${styles} p-3`}>
       <div className="text-[10px] font-bold uppercase tracking-wider mb-1 flex items-center gap-1">

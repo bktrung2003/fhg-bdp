@@ -3859,6 +3859,165 @@ export const ProjectsPublicSchema = {
     title: 'ProjectsPublic'
 } as const;
 
+export const ScorecardResponseSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/ScorecardRow'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        },
+        avg_score: {
+            type: 'number',
+            title: 'Avg Score'
+        },
+        distribution: {
+            additionalProperties: {
+                type: 'integer'
+            },
+            type: 'object',
+            title: 'Distribution'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count', 'avg_score', 'distribution'],
+    title: 'ScorecardResponse'
+} as const;
+
+export const ScorecardRowSchema = {
+    properties: {
+        assessment_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Assessment Id'
+        },
+        deal_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Deal Id'
+        },
+        deal_number: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Deal Number'
+        },
+        deal_name: {
+            type: 'string',
+            title: 'Deal Name'
+        },
+        stage: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Stage'
+        },
+        country: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Country'
+        },
+        bd_owner_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Bd Owner Name'
+        },
+        total_score: {
+            type: 'integer',
+            title: 'Total Score'
+        },
+        recommendation: {
+            type: 'string',
+            title: 'Recommendation'
+        },
+        location_score: {
+            type: 'integer',
+            title: 'Location Score'
+        },
+        market_score: {
+            type: 'integer',
+            title: 'Market Score'
+        },
+        owner_readiness_score: {
+            type: 'integer',
+            title: 'Owner Readiness Score'
+        },
+        brand_fit_score: {
+            type: 'integer',
+            title: 'Brand Fit Score'
+        },
+        financial_score: {
+            type: 'integer',
+            title: 'Financial Score'
+        },
+        technical_score: {
+            type: 'integer',
+            title: 'Technical Score'
+        },
+        assessed_by_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Assessed By Name'
+        },
+        assessed_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Assessed At'
+        },
+        reviewed: {
+            type: 'boolean',
+            title: 'Reviewed'
+        },
+        days_since_assessed: {
+            type: 'integer',
+            title: 'Days Since Assessed'
+        }
+    },
+    type: 'object',
+    required: ['assessment_id', 'deal_id', 'deal_number', 'deal_name', 'stage', 'country', 'bd_owner_name', 'total_score', 'recommendation', 'location_score', 'market_score', 'owner_readiness_score', 'brand_fit_score', 'financial_score', 'technical_score', 'assessed_by_name', 'assessed_at', 'reviewed', 'days_since_assessed'],
+    title: 'ScorecardRow'
+} as const;
+
 export const StageChangeRequestSchema = {
     properties: {
         new_stage: {

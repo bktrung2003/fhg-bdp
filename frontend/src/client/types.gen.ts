@@ -559,6 +559,37 @@ export type ProjectUpdate = {
     description?: (string | null);
 };
 
+export type ScorecardResponse = {
+    data: Array<ScorecardRow>;
+    count: number;
+    avg_score: number;
+    distribution: {
+        [key: string]: (number);
+    };
+};
+
+export type ScorecardRow = {
+    assessment_id: string;
+    deal_id: string;
+    deal_number: (number | null);
+    deal_name: string;
+    stage: (string | null);
+    country: (string | null);
+    bd_owner_name: (string | null);
+    total_score: number;
+    recommendation: string;
+    location_score: number;
+    market_score: number;
+    owner_readiness_score: number;
+    brand_fit_score: number;
+    financial_score: number;
+    technical_score: number;
+    assessed_by_name: (string | null);
+    assessed_at: (string | null);
+    reviewed: boolean;
+    days_since_assessed: number;
+};
+
 export type StageChangeRequest = {
     new_stage: DealStage;
     note: string;
@@ -806,6 +837,13 @@ export type FeasibilitySaveSnapshotData = {
 };
 
 export type FeasibilitySaveSnapshotResponse = (FeasibilitySnapshotPublic);
+
+export type FeasibilityPipelineScorecardData = {
+    recommendation?: (string | null);
+    reviewedOnly?: boolean;
+};
+
+export type FeasibilityPipelineScorecardResponse = (ScorecardResponse);
 
 export type FeasibilityDeleteSnapshotData = {
     id: string;

@@ -131,6 +131,8 @@ export function AssessFeasibilityModal({ open, onOpenChange, onSubmit, isSubmitt
   const [scores, setScores] = useState<Record<string, number>>({})
   const [strengths, setStrengths] = useState("")
   const [concerns, setConcerns] = useState("")
+  const [competitive, setCompetitive] = useState("")
+  const [dealKillers, setDealKillers] = useState("")
   const [conditions, setConditions] = useState("")
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
 
@@ -148,11 +150,15 @@ export function AssessFeasibilityModal({ open, onOpenChange, onSubmit, isSubmitt
         })
         setStrengths(initial.strengths ?? "")
         setConcerns(initial.concerns ?? "")
+        setCompetitive(initial.competitive_landscape ?? "")
+        setDealKillers(initial.deal_killers ?? "")
         setConditions(initial.conditions_to_proceed ?? "")
       } else {
         setScores({})
         setStrengths("")
         setConcerns("")
+        setCompetitive("")
+        setDealKillers("")
         setConditions("")
       }
       // Expand first panel by default
@@ -175,6 +181,8 @@ export function AssessFeasibilityModal({ open, onOpenChange, onSubmit, isSubmitt
       technical_score: scores.technical_score,
       strengths: strengths.trim() || null,
       concerns: concerns.trim() || null,
+      competitive_landscape: competitive.trim() || null,
+      deal_killers: dealKillers.trim() || null,
       conditions_to_proceed: conditions.trim() || null,
     })
   }
@@ -273,35 +281,28 @@ export function AssessFeasibilityModal({ open, onOpenChange, onSubmit, isSubmitt
           })}
         </div>
 
-        {/* Governance text */}
-        <div className="space-y-3 mt-4">
-          <div>
-            <Label className="text-xs flex items-center gap-1">✓ Strengths</Label>
-            <textarea
-              value={strengths} onChange={e => setStrengths(e.target.value)}
-              rows={3} maxLength={4000}
-              className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm"
-              placeholder="What makes this deal attractive? Standout factors..."
-            />
+        {/* Strategic Notes (5 fields) */}
+        <div className="mt-4 space-y-3">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            BD Strategic Notes
           </div>
-          <div>
-            <Label className="text-xs flex items-center gap-1">⚠ Concerns</Label>
-            <textarea
-              value={concerns} onChange={e => setConcerns(e.target.value)}
-              rows={3} maxLength={4000}
-              className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm"
-              placeholder="Risks, red flags, weaknesses..."
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <NotesField icon="✓" tone="emerald" label="Strengths"
+              placeholder="Internal advantages — location, owner quality, brand fit, financials..."
+              value={strengths} onChange={setStrengths} />
+            <NotesField icon="⚠" tone="amber" label="Concerns"
+              placeholder="Internal weaknesses — gaps, risks, mitigation needed..."
+              value={concerns} onChange={setConcerns} />
+            <NotesField icon="🥊" tone="purple" label="Competitive Landscape"
+              placeholder="Who else is bidding? Marriott, IHG, Accor, local brands? Our position vs theirs..."
+              value={competitive} onChange={setCompetitive} />
+            <NotesField icon="🚫" tone="red" label="Deal Killers / Red Flags"
+              placeholder="Specific showstoppers — if these surface, we walk away. Be concrete."
+              value={dealKillers} onChange={setDealKillers} />
           </div>
-          <div>
-            <Label className="text-xs flex items-center gap-1">📋 Conditions to Proceed</Label>
-            <textarea
-              value={conditions} onChange={e => setConditions(e.target.value)}
-              rows={3} maxLength={4000}
-              className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm"
-              placeholder="Required milestones, owner commitments, structural changes before we move ahead..."
-            />
-          </div>
+          <NotesField icon="📋" tone="blue" label="Conditions to Proceed"
+            placeholder="Required milestones / owner commitments before we advance past Feasibility..."
+            value={conditions} onChange={setConditions} />
         </div>
 
         <div className="flex justify-end gap-2 pt-3 border-t">
@@ -313,6 +314,39 @@ export function AssessFeasibilityModal({ open, onOpenChange, onSubmit, isSubmitt
         </div>
       </DialogContent>
     </Dialog>
+  )
+}
+
+// ── Notes Field (color-coded textarea) ───────────────────────────────────────
+
+export function NotesField({
+  icon, tone, label, placeholder, value, onChange, rows = 3,
+}: {
+  icon: string
+  tone: "emerald" | "amber" | "blue" | "purple" | "red"
+  label: string
+  placeholder: string
+  value: string
+  onChange: (v: string) => void
+  rows?: number
+}) {
+  const borderTone = {
+    emerald: "border-l-emerald-400",
+    amber:   "border-l-amber-400",
+    blue:    "border-l-blue-400",
+    purple:  "border-l-purple-400",
+    red:     "border-l-red-400",
+  }[tone]
+  return (
+    <div>
+      <Label className="text-xs flex items-center gap-1.5"><span className="text-sm">{icon}</span>{label}</Label>
+      <textarea
+        value={value} onChange={e => onChange(e.target.value)}
+        rows={rows} maxLength={4000}
+        className={`mt-1 w-full rounded-md border border-l-4 ${borderTone} bg-background px-3 py-2 text-sm`}
+        placeholder={placeholder}
+      />
+    </div>
   )
 }
 

@@ -1025,9 +1025,11 @@ class FeasibilityAssessmentBase(SQLModel):
     # Computed
     total_score: int = Field(default=0, ge=0, le=100)
     recommendation: str = Field(default="", max_length=50)
-    # Governance text
+    # Governance text — pragmatic BD strategic notes (revised from SWOT)
     strengths: str | None = Field(default=None, max_length=4000)
     concerns: str | None = Field(default=None, max_length=4000)
+    competitive_landscape: str | None = Field(default=None, max_length=4000)  # Who else is bidding, our position
+    deal_killers: str | None = Field(default=None, max_length=4000)            # Red flags that would terminate
     conditions_to_proceed: str | None = Field(default=None, max_length=4000)
 
 
@@ -1054,6 +1056,17 @@ class FeasibilityAssessmentCreate(SQLModel):
     technical_score: int = Field(ge=1, le=5)
     strengths: str | None = None
     concerns: str | None = None
+    competitive_landscape: str | None = None
+    deal_killers: str | None = None
+    conditions_to_proceed: str | None = None
+
+
+class FeasibilityAssessmentNotesUpdate(SQLModel):
+    """Quick-edit text fields on current assessment, no version bump."""
+    strengths: str | None = None
+    concerns: str | None = None
+    competitive_landscape: str | None = None
+    deal_killers: str | None = None
     conditions_to_proceed: str | None = None
 
 
