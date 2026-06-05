@@ -11,7 +11,7 @@
 #   frontend  — Nginx serving SPA + reverse-proxying /api → backend
 #
 # Exposed ports (host):
-#   80    — frontend (UI + /api proxy)        ← only port your users need
+#   3008  — frontend (UI + /api proxy)        ← only port your users need
 #   9001  — MinIO admin console                ← admin only
 #   9000  — MinIO S3 API                       ← optional, for direct uploads
 #
@@ -146,7 +146,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "80:80"          # Public UI — your team browses to http://<server-ip>/
+      - "3008:80"        # Public UI — your team browses to http://<server-ip>:3008/
 
 volumes:
   app-db-data:

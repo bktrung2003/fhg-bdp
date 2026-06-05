@@ -70,7 +70,7 @@ First boot takes ~30s while:
 
 ## Step 4 — Verify
 
-Open `http://<server-ip>/`:
+Open `http://<server-ip>:3008/`:
 
 - ✅ Login page renders
 - ✅ Sign in with `FIRST_SUPERUSER` + `FIRST_SUPERUSER_PASSWORD`
@@ -115,13 +115,21 @@ built):
 
 | Port | What | Who needs it |
 |------|------|--------------|
-| 80   | Frontend UI + API (proxied) | All users |
+| 3008 | Frontend UI + API (proxied) | All users |
 | 9001 | MinIO admin console | IT admin only |
 | 9000 | MinIO S3 API | Backend only (optional external) |
 
-If your firewall is restrictive, only expose `80` publicly. `9000` and
+If your firewall is restrictive, only expose `3008` publicly. `9000` and
 `9001` can stay internal to the docker network — backend talks to MinIO
 over the `minio` service name, not a host port.
+
+To change the host port (e.g. you already run something on 3008), edit
+`compose.portainer.yml`:
+```
+ports:
+  - "3008:80"   # change 3008 → desired port, keep :80 (container port)
+```
+and re-deploy the stack.
 
 ---
 
