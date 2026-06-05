@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react"
-import { ChevronDown, ChevronRight } from "lucide-react"
+import { ChevronDown, ChevronRight, BookOpen } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { RecommendationBadge, type FeasibilityAssessmentPublic } from "./FeasibilityPanel"
+import { RUBRIC } from "./rubric"
 
 // ── Criteria definitions (Spec 14.2) ─────────────────────────────────────────
 
@@ -224,25 +225,46 @@ export function AssessFeasibilityModal({ open, onOpenChange, onSubmit, isSubmitt
                 </button>
 
                 {isExpanded && (
-                  <div className="px-4 pb-4 pt-1 border-t">
-                    <p className="text-[11px] text-muted-foreground mb-2">Criteria to consider:</p>
-                    <ul className="text-xs grid grid-cols-2 gap-x-3 gap-y-0.5 mb-3 text-muted-foreground">
-                      {panel.criteria.map(c => <li key={c}>• {c}</li>)}
-                    </ul>
-                    <Label className="text-xs">Score</Label>
-                    <div className="flex gap-1.5 mt-1">
-                      {[1, 2, 3, 4, 5].map(v => (
-                        <button key={v} type="button"
-                          onClick={() => setScores(s => ({ ...s, [panel.key]: v }))}
-                          className={`flex-1 py-2 rounded text-xs font-semibold transition-all ${
-                            value === v
-                              ? `${SCORE_COLORS[v]} text-white ring-2 ring-offset-1 ring-current`
-                              : "bg-muted/50 hover:bg-muted text-muted-foreground"
-                          }`}>
-                          <div>{v}</div>
-                          <div className="text-[9px] font-medium opacity-90">{SCORE_LABELS[v]}</div>
-                        </button>
-                      ))}
+                  <div className="px-4 pb-4 pt-1 border-t space-y-3">
+                    {/* Criteria to consider */}
+                    <div>
+                      <p className="text-[11px] text-muted-foreground mb-1.5">Criteria to consider:</p>
+                      <ul className="text-xs grid grid-cols-2 gap-x-3 gap-y-0.5 text-muted-foreground">
+                        {panel.criteria.map(c => <li key={c}>• {c}</li>)}
+                      </ul>
+                    </div>
+
+                    {/* Scoring Guide / Rubric */}
+                    <RubricGuide dimensionKey={panel.key} currentScore={value} />
+
+                    {/* Score buttons */}
+                    <div>
+                      <Label className="text-xs">Score</Label>
+                      <div className="flex gap-1.5 mt-1">
+                        {[1, 2, 3, 4, 5].map(v => (
+                          <button key={v} type="button"
+                            onClick={() => setScores(s => ({ ...s, [panel.key]: v }))}
+                            className={`flex-1 py-2 rounded text-xs font-semibold transition-all ${
+                              value === v
+                                ? `${SCORE_COLORS[v]} text-white ring-2 ring-offset-1 ring-current`
+                                : "bg-muted/50 hover:bg-muted text-muted-foreground"
+                            }`}>
+                            <div>{v}</div>
+                            <div className="text-[9px] font-medium opacity-90">{SCORE_LABELS[v]}</div>
+                          </button>
+                        ))}
+                      </div>
+                      {/* Show rubric for selected score */}
+                      {value > 0 && RUBRIC[panel.key] && (
+                        <div className={`mt-2 rounded-md ${SCORE_COLORS[value].replace("bg-", "border-").replace("500", "200")} border-l-4 bg-muted/30 px-3 py-2`}>
+                          <p className="text-xs font-semibold">
+                            {value}/5 · {RUBRIC[panel.key].find(r => r.score === value)?.headline}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                            {RUBRIC[panel.key].find(r => r.score === value)?.detail}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -291,5 +313,47 @@ export function AssessFeasibilityModal({ open, onOpenChange, onSubmit, isSubmitt
         </div>
       </DialogContent>
     </Dialog>
+  )
+}
+
+// ── Rubric Guide (collapsible) ───────────────────────────────────────────────
+
+function RubricGuide({ dimensionKey, currentScore }: { dimensionKey: string; currentScore: number }) {
+  const [open, setOpen] = useState(false)
+  const levels = RUBRIC[dimensionKey]
+  if (!levels) return null
+
+  return (
+    <div className="rounded-md border border-blue-200 bg-blue-50/40">
+      <button type="button" onClick={() => setOpen(o => !o)}
+        className="w-full px-3 py-2 flex items-center gap-2 text-left">
+        <BookOpen className="h-3.5 w-3.5 text-blue-700" />
+        <span className="text-[11px] font-semibold text-blue-900 uppercase tracking-wider">
+          Scoring Guide — what each level means
+        </span>
+        <span className="ml-auto text-[10px] text-blue-700">{open ? "Hide" : "Show"}</span>
+      </button>
+      {open && (
+        <div className="px-3 pb-3 space-y-1.5">
+          {[5, 4, 3, 2, 1].map(score => {
+            const lvl = levels.find(l => l.score === score)
+            if (!lvl) return null
+            const isCurrent = currentScore === score
+            return (
+              <div key={score} className={`rounded p-2 text-[11px] ${isCurrent ? "bg-white border-2 border-blue-400" : "bg-white/60 border border-blue-100"}`}>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded text-white ${SCORE_COLORS[score]}`}>{score}/5</span>
+                  <span className="font-semibold">{lvl.headline}</span>
+                </div>
+                <p className="text-muted-foreground leading-relaxed">{lvl.detail}</p>
+              </div>
+            )
+          })}
+          <p className="text-[10px] text-blue-700 italic pt-1">
+            💡 Pick the level whose criteria the deal most closely matches. If between two levels, pick the lower one (conservative principle).
+          </p>
+        </div>
+      )}
+    </div>
   )
 }

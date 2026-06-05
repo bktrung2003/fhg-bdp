@@ -132,6 +132,9 @@ export type DealPublic = {
     project_name?: (string | null);
     project_number?: (number | null);
     owner_id?: (string | null);
+    feasibility_score?: (number | null);
+    feasibility_recommendation?: (string | null);
+    feasibility_reviewed?: boolean;
 };
 
 export type DealRisk = 'Green' | 'Amber' | 'Red';
@@ -195,6 +198,52 @@ export type DocumentPublic = {
 export type DocumentsPublic = {
     data: Array<DocumentPublic>;
     count: number;
+};
+
+export type FeasibilityAssessmentCreate = {
+    location_score: number;
+    market_score: number;
+    owner_readiness_score: number;
+    brand_fit_score: number;
+    financial_score: number;
+    technical_score: number;
+    strengths?: (string | null);
+    concerns?: (string | null);
+    conditions_to_proceed?: (string | null);
+};
+
+export type FeasibilityAssessmentHistory = {
+    data: Array<FeasibilityAssessmentPublic>;
+    count: number;
+};
+
+export type FeasibilityAssessmentPublic = {
+    deal_id: string;
+    location_score: number;
+    market_score: number;
+    owner_readiness_score: number;
+    brand_fit_score: number;
+    financial_score: number;
+    technical_score: number;
+    total_score?: number;
+    recommendation?: string;
+    strengths?: (string | null);
+    concerns?: (string | null);
+    conditions_to_proceed?: (string | null);
+    id: string;
+    version: number;
+    is_current: boolean;
+    assessed_by_id: string;
+    assessed_by_name?: (string | null);
+    assessed_at: (string | null);
+    reviewed_by_id: (string | null);
+    reviewed_by_name?: (string | null);
+    reviewed_at: (string | null);
+    review_note: (string | null);
+};
+
+export type FeasibilityAssessmentReview = {
+    review_note?: (string | null);
 };
 
 export type FeasibilitySnapshotCreate = {
@@ -763,6 +812,33 @@ export type FeasibilityDeleteSnapshotData = {
 };
 
 export type FeasibilityDeleteSnapshotResponse = (Message);
+
+export type FeasibilityAssessmentGetCurrentAssessmentData = {
+    dealId: string;
+};
+
+export type FeasibilityAssessmentGetCurrentAssessmentResponse = ((FeasibilityAssessmentPublic | null));
+
+export type FeasibilityAssessmentCreateAssessmentData = {
+    dealId: string;
+    requestBody: FeasibilityAssessmentCreate;
+};
+
+export type FeasibilityAssessmentCreateAssessmentResponse = (FeasibilityAssessmentPublic);
+
+export type FeasibilityAssessmentListAssessmentHistoryData = {
+    dealId: string;
+};
+
+export type FeasibilityAssessmentListAssessmentHistoryResponse = (FeasibilityAssessmentHistory);
+
+export type FeasibilityAssessmentReviewAssessmentData = {
+    assessmentId: string;
+    dealId: string;
+    requestBody: FeasibilityAssessmentReview;
+};
+
+export type FeasibilityAssessmentReviewAssessmentResponse = (FeasibilityAssessmentPublic);
 
 export type ItemsReadItemsData = {
     limit?: number;

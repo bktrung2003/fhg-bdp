@@ -891,6 +891,33 @@ export const DealPublicSchema = {
                 }
             ],
             title: 'Owner Id'
+        },
+        feasibility_score: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Feasibility Score'
+        },
+        feasibility_recommendation: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Feasibility Recommendation'
+        },
+        feasibility_reviewed: {
+            type: 'boolean',
+            title: 'Feasibility Reviewed',
+            default: false
         }
     },
     type: 'object',
@@ -1343,6 +1370,305 @@ export const DocumentsPublicSchema = {
     type: 'object',
     required: ['data', 'count'],
     title: 'DocumentsPublic'
+} as const;
+
+export const FeasibilityAssessmentCreateSchema = {
+    properties: {
+        location_score: {
+            type: 'integer',
+            maximum: 5,
+            minimum: 1,
+            title: 'Location Score'
+        },
+        market_score: {
+            type: 'integer',
+            maximum: 5,
+            minimum: 1,
+            title: 'Market Score'
+        },
+        owner_readiness_score: {
+            type: 'integer',
+            maximum: 5,
+            minimum: 1,
+            title: 'Owner Readiness Score'
+        },
+        brand_fit_score: {
+            type: 'integer',
+            maximum: 5,
+            minimum: 1,
+            title: 'Brand Fit Score'
+        },
+        financial_score: {
+            type: 'integer',
+            maximum: 5,
+            minimum: 1,
+            title: 'Financial Score'
+        },
+        technical_score: {
+            type: 'integer',
+            maximum: 5,
+            minimum: 1,
+            title: 'Technical Score'
+        },
+        strengths: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Strengths'
+        },
+        concerns: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Concerns'
+        },
+        conditions_to_proceed: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Conditions To Proceed'
+        }
+    },
+    type: 'object',
+    required: ['location_score', 'market_score', 'owner_readiness_score', 'brand_fit_score', 'financial_score', 'technical_score'],
+    title: 'FeasibilityAssessmentCreate'
+} as const;
+
+export const FeasibilityAssessmentHistorySchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/FeasibilityAssessmentPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'FeasibilityAssessmentHistory'
+} as const;
+
+export const FeasibilityAssessmentPublicSchema = {
+    properties: {
+        deal_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Deal Id'
+        },
+        location_score: {
+            type: 'integer',
+            maximum: 5,
+            minimum: 1,
+            title: 'Location Score'
+        },
+        market_score: {
+            type: 'integer',
+            maximum: 5,
+            minimum: 1,
+            title: 'Market Score'
+        },
+        owner_readiness_score: {
+            type: 'integer',
+            maximum: 5,
+            minimum: 1,
+            title: 'Owner Readiness Score'
+        },
+        brand_fit_score: {
+            type: 'integer',
+            maximum: 5,
+            minimum: 1,
+            title: 'Brand Fit Score'
+        },
+        financial_score: {
+            type: 'integer',
+            maximum: 5,
+            minimum: 1,
+            title: 'Financial Score'
+        },
+        technical_score: {
+            type: 'integer',
+            maximum: 5,
+            minimum: 1,
+            title: 'Technical Score'
+        },
+        total_score: {
+            type: 'integer',
+            maximum: 100,
+            minimum: 0,
+            title: 'Total Score',
+            default: 0
+        },
+        recommendation: {
+            type: 'string',
+            maxLength: 50,
+            title: 'Recommendation',
+            default: ''
+        },
+        strengths: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 4000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Strengths'
+        },
+        concerns: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 4000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Concerns'
+        },
+        conditions_to_proceed: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 4000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Conditions To Proceed'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        version: {
+            type: 'integer',
+            title: 'Version'
+        },
+        is_current: {
+            type: 'boolean',
+            title: 'Is Current'
+        },
+        assessed_by_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Assessed By Id'
+        },
+        assessed_by_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Assessed By Name'
+        },
+        assessed_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Assessed At'
+        },
+        reviewed_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Reviewed By Id'
+        },
+        reviewed_by_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Reviewed By Name'
+        },
+        reviewed_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Reviewed At'
+        },
+        review_note: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Review Note'
+        }
+    },
+    type: 'object',
+    required: ['deal_id', 'location_score', 'market_score', 'owner_readiness_score', 'brand_fit_score', 'financial_score', 'technical_score', 'id', 'version', 'is_current', 'assessed_by_id', 'assessed_at', 'reviewed_by_id', 'reviewed_at', 'review_note'],
+    title: 'FeasibilityAssessmentPublic'
+} as const;
+
+export const FeasibilityAssessmentReviewSchema = {
+    properties: {
+        review_note: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Review Note'
+        }
+    },
+    type: 'object',
+    title: 'FeasibilityAssessmentReview'
 } as const;
 
 export const FeasibilitySnapshotCreateSchema = {

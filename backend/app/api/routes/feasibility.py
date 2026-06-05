@@ -6,6 +6,8 @@ from fastapi import APIRouter, HTTPException, Query
 from sqlmodel import col, select
 
 from app.api.deps import CurrentUser, SessionDep
+from sqlmodel import SQLModel
+
 from app.models import (
     Deal, DealAuditLog,
     FeasibilityAssessment, FeasibilityAssessmentCreate,
@@ -15,6 +17,37 @@ from app.models import (
     FeasibilitySnapshotPublic, Message, User,
     compute_feasibility_recommendation, compute_feasibility_total,
 )
+
+
+# ── Scorecard schema ─────────────────────────────────────────────────────────
+
+class ScorecardRow(SQLModel):
+    assessment_id: uuid.UUID
+    deal_id: uuid.UUID
+    deal_number: int | None
+    deal_name: str
+    stage: str | None
+    country: str | None
+    bd_owner_name: str | None
+    total_score: int
+    recommendation: str
+    location_score: int
+    market_score: int
+    owner_readiness_score: int
+    brand_fit_score: int
+    financial_score: int
+    technical_score: int
+    assessed_by_name: str | None
+    assessed_at: datetime | None
+    reviewed: bool
+    days_since_assessed: int
+
+
+class ScorecardResponse(SQLModel):
+    data: list[ScorecardRow]
+    count: int
+    avg_score: float
+    distribution: dict[str, int]  # {recommendation: count}
 
 router = APIRouter(prefix="/feasibility", tags=["feasibility"])
 
@@ -45,6 +78,75 @@ def save_snapshot(
     session.commit()
     session.refresh(snap)
     return snap
+
+
+@router.get("/scorecard", response_model=ScorecardResponse)
+def pipeline_scorecard(
+    *, session: SessionDep, current_user: CurrentUser,
+    recommendation: str | None = Query(default=None),
+    reviewed_only: bool = Query(default=False),
+) -> Any:
+    """Pipeline-wide feasibility scorecard.
+
+    Returns all CURRENT (is_current=True) assessments joined with deal and
+    assessor info. Used by /feasibility 'Pipeline Scorecard' tab to give
+    COO a single matrix view of all assessed deals."""
+    stmt = select(FeasibilityAssessment).where(
+        FeasibilityAssessment.is_current == True  # noqa: E712
+    )
+    if recommendation:
+        stmt = stmt.where(FeasibilityAssessment.recommendation == recommendation)
+    if reviewed_only:
+        stmt = stmt.where(FeasibilityAssessment.reviewed_by_id.is_not(None))  # type: ignore
+    stmt = stmt.order_by(col(FeasibilityAssessment.total_score).desc())
+
+    rows = session.exec(stmt).all()
+    now = datetime.now(timezone.utc)
+
+    data: list[ScorecardRow] = []
+    distribution: dict[str, int] = {}
+    total_sum = 0
+
+    for a in rows:
+        deal = session.get(Deal, a.deal_id)
+        if not deal:
+            continue
+        assessor = session.get(User, a.assessed_by_id)
+        bd = session.get(User, deal.bd_owner_id) if deal.bd_owner_id else None
+        delta_days = 0
+        if a.assessed_at:
+            delta = now - a.assessed_at.replace(tzinfo=timezone.utc)
+            delta_days = delta.days
+
+        row = ScorecardRow(
+            assessment_id=a.id,
+            deal_id=a.deal_id,
+            deal_number=deal.deal_number,
+            deal_name=deal.name,
+            stage=deal.stage,
+            country=deal.country,
+            bd_owner_name=(bd.full_name or bd.email) if bd else None,
+            total_score=a.total_score,
+            recommendation=a.recommendation,
+            location_score=a.location_score,
+            market_score=a.market_score,
+            owner_readiness_score=a.owner_readiness_score,
+            brand_fit_score=a.brand_fit_score,
+            financial_score=a.financial_score,
+            technical_score=a.technical_score,
+            assessed_by_name=(assessor.full_name or assessor.email) if assessor else None,
+            assessed_at=a.assessed_at,
+            reviewed=a.reviewed_by_id is not None,
+            days_since_assessed=delta_days,
+        )
+        data.append(row)
+        total_sum += a.total_score
+        distribution[a.recommendation] = distribution.get(a.recommendation, 0) + 1
+
+    avg = round(total_sum / len(data), 1) if data else 0.0
+    return ScorecardResponse(
+        data=data, count=len(data), avg_score=avg, distribution=distribution,
+    )
 
 
 @router.delete("/snapshots/{id}", response_model=Message)

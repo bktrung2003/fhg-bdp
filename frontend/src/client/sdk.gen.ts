@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ActivitiesListActivitiesData, ActivitiesListActivitiesResponse, ActivitiesCreateActivityData, ActivitiesCreateActivityResponse, ActivitiesDeleteActivityData, ActivitiesDeleteActivityResponse, DealsListDealsData, DealsListDealsResponse, DealsCreateDealData, DealsCreateDealResponse, DealsGetDealData, DealsGetDealResponse, DealsUpdateDealData, DealsUpdateDealResponse, DealsDeleteDealData, DealsDeleteDealResponse, DealsChangeStageData, DealsChangeStageResponse, DealsGetDealAuditData, DealsGetDealAuditResponse, DocumentsListDocumentsData, DocumentsListDocumentsResponse, DocumentsUploadDocumentData, DocumentsUploadDocumentResponse, DocumentsServeLocalFileData, DocumentsServeLocalFileResponse, DocumentsToggleConfidentialData, DocumentsToggleConfidentialResponse, DocumentsDeleteDocumentData, DocumentsDeleteDocumentResponse, FeasibilityListSnapshotsData, FeasibilityListSnapshotsResponse, FeasibilitySaveSnapshotData, FeasibilitySaveSnapshotResponse, FeasibilityDeleteSnapshotData, FeasibilityDeleteSnapshotResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MasterDataListAllResponse, MasterDataCreateEntryData, MasterDataCreateEntryResponse, MasterDataListByCategoryData, MasterDataListByCategoryResponse, MasterDataUpdateEntryData, MasterDataUpdateEntryResponse, MasterDataDeleteEntryData, MasterDataDeleteEntryResponse, MilestonesListMilestonesData, MilestonesListMilestonesResponse, MilestonesCreateMilestoneData, MilestonesCreateMilestoneResponse, MilestonesUpdateMilestoneData, MilestonesUpdateMilestoneResponse, MilestonesDeleteMilestoneData, MilestonesDeleteMilestoneResponse, OwnersListOwnersData, OwnersListOwnersResponse, OwnersCreateOwnerData, OwnersCreateOwnerResponse, OwnersGetOwnerData, OwnersGetOwnerResponse, OwnersUpdateOwnerData, OwnersUpdateOwnerResponse, OwnersDeleteOwnerData, OwnersDeleteOwnerResponse, OwnersListContactsData, OwnersListContactsResponse, OwnersAddContactData, OwnersAddContactResponse, OwnersListInteractionsData, OwnersListInteractionsResponse, OwnersAddInteractionData, OwnersAddInteractionResponse, OwnersListOwnerProjectsData, OwnersListOwnerProjectsResponse, OwnersListOwnerDealsData, OwnersListOwnerDealsResponse, OwnersDeleteContactData, OwnersDeleteContactResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProjectsListProjectsData, ProjectsListProjectsResponse, ProjectsCreateProjectData, ProjectsCreateProjectResponse, ProjectsGetProjectData, ProjectsGetProjectResponse, ProjectsUpdateProjectData, ProjectsUpdateProjectResponse, ProjectsDeleteProjectData, ProjectsDeleteProjectResponse, ProjectsListProjectDealsData, ProjectsListProjectDealsResponse, ProjectsListProjectDocumentsData, ProjectsListProjectDocumentsResponse, ProjectsListProjectMilestonesData, ProjectsListProjectMilestonesResponse, SeedLoadSeedDataData, SeedLoadSeedDataResponse, SeedClearAllDataResponse, TasksListTasksData, TasksListTasksResponse, TasksCreateTaskData, TasksCreateTaskResponse, TasksBulkUpdateTasksData, TasksBulkUpdateTasksResponse, TasksBulkDeleteTasksData, TasksBulkDeleteTasksResponse, TasksUpdateTaskData, TasksUpdateTaskResponse, TasksDeleteTaskData, TasksDeleteTaskResponse, UsersListTeamResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { ActivitiesListActivitiesData, ActivitiesListActivitiesResponse, ActivitiesCreateActivityData, ActivitiesCreateActivityResponse, ActivitiesDeleteActivityData, ActivitiesDeleteActivityResponse, DealsListDealsData, DealsListDealsResponse, DealsCreateDealData, DealsCreateDealResponse, DealsGetDealData, DealsGetDealResponse, DealsUpdateDealData, DealsUpdateDealResponse, DealsDeleteDealData, DealsDeleteDealResponse, DealsChangeStageData, DealsChangeStageResponse, DealsGetDealAuditData, DealsGetDealAuditResponse, DocumentsListDocumentsData, DocumentsListDocumentsResponse, DocumentsUploadDocumentData, DocumentsUploadDocumentResponse, DocumentsServeLocalFileData, DocumentsServeLocalFileResponse, DocumentsToggleConfidentialData, DocumentsToggleConfidentialResponse, DocumentsDeleteDocumentData, DocumentsDeleteDocumentResponse, FeasibilityListSnapshotsData, FeasibilityListSnapshotsResponse, FeasibilitySaveSnapshotData, FeasibilitySaveSnapshotResponse, FeasibilityDeleteSnapshotData, FeasibilityDeleteSnapshotResponse, FeasibilityAssessmentGetCurrentAssessmentData, FeasibilityAssessmentGetCurrentAssessmentResponse, FeasibilityAssessmentCreateAssessmentData, FeasibilityAssessmentCreateAssessmentResponse, FeasibilityAssessmentListAssessmentHistoryData, FeasibilityAssessmentListAssessmentHistoryResponse, FeasibilityAssessmentReviewAssessmentData, FeasibilityAssessmentReviewAssessmentResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MasterDataListAllResponse, MasterDataCreateEntryData, MasterDataCreateEntryResponse, MasterDataListByCategoryData, MasterDataListByCategoryResponse, MasterDataUpdateEntryData, MasterDataUpdateEntryResponse, MasterDataDeleteEntryData, MasterDataDeleteEntryResponse, MilestonesListMilestonesData, MilestonesListMilestonesResponse, MilestonesCreateMilestoneData, MilestonesCreateMilestoneResponse, MilestonesUpdateMilestoneData, MilestonesUpdateMilestoneResponse, MilestonesDeleteMilestoneData, MilestonesDeleteMilestoneResponse, OwnersListOwnersData, OwnersListOwnersResponse, OwnersCreateOwnerData, OwnersCreateOwnerResponse, OwnersGetOwnerData, OwnersGetOwnerResponse, OwnersUpdateOwnerData, OwnersUpdateOwnerResponse, OwnersDeleteOwnerData, OwnersDeleteOwnerResponse, OwnersListContactsData, OwnersListContactsResponse, OwnersAddContactData, OwnersAddContactResponse, OwnersListInteractionsData, OwnersListInteractionsResponse, OwnersAddInteractionData, OwnersAddInteractionResponse, OwnersListOwnerProjectsData, OwnersListOwnerProjectsResponse, OwnersListOwnerDealsData, OwnersListOwnerDealsResponse, OwnersDeleteContactData, OwnersDeleteContactResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProjectsListProjectsData, ProjectsListProjectsResponse, ProjectsCreateProjectData, ProjectsCreateProjectResponse, ProjectsGetProjectData, ProjectsGetProjectResponse, ProjectsUpdateProjectData, ProjectsUpdateProjectResponse, ProjectsDeleteProjectData, ProjectsDeleteProjectResponse, ProjectsListProjectDealsData, ProjectsListProjectDealsResponse, ProjectsListProjectDocumentsData, ProjectsListProjectDocumentsResponse, ProjectsListProjectMilestonesData, ProjectsListProjectMilestonesResponse, SeedLoadSeedDataData, SeedLoadSeedDataResponse, SeedClearAllDataResponse, TasksListTasksData, TasksListTasksResponse, TasksCreateTaskData, TasksCreateTaskResponse, TasksBulkUpdateTasksData, TasksBulkUpdateTasksResponse, TasksBulkDeleteTasksData, TasksBulkDeleteTasksResponse, TasksUpdateTaskData, TasksUpdateTaskResponse, TasksDeleteTaskData, TasksDeleteTaskResponse, UsersListTeamResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class ActivitiesService {
     /**
@@ -418,6 +418,99 @@ export class FeasibilityService {
             path: {
                 id: data.id
             },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class FeasibilityAssessmentService {
+    /**
+     * Get Current Assessment
+     * Latest (is_current=True) assessment for a deal, or None.
+     * @param data The data for the request.
+     * @param data.dealId
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static getCurrentAssessment(data: FeasibilityAssessmentGetCurrentAssessmentData): CancelablePromise<FeasibilityAssessmentGetCurrentAssessmentResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/deals/{deal_id}/feasibility',
+            path: {
+                deal_id: data.dealId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Assessment
+     * Create a new assessment version. Marks previous current=False.
+     * @param data The data for the request.
+     * @param data.dealId
+     * @param data.requestBody
+     * @returns FeasibilityAssessmentPublic Successful Response
+     * @throws ApiError
+     */
+    public static createAssessment(data: FeasibilityAssessmentCreateAssessmentData): CancelablePromise<FeasibilityAssessmentCreateAssessmentResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/deals/{deal_id}/feasibility',
+            path: {
+                deal_id: data.dealId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * List Assessment History
+     * @param data The data for the request.
+     * @param data.dealId
+     * @returns FeasibilityAssessmentHistory Successful Response
+     * @throws ApiError
+     */
+    public static listAssessmentHistory(data: FeasibilityAssessmentListAssessmentHistoryData): CancelablePromise<FeasibilityAssessmentListAssessmentHistoryResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/deals/{deal_id}/feasibility/history',
+            path: {
+                deal_id: data.dealId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Review Assessment
+     * Reviewer sign-off — typically COO or BD Director.
+     * @param data The data for the request.
+     * @param data.dealId
+     * @param data.assessmentId
+     * @param data.requestBody
+     * @returns FeasibilityAssessmentPublic Successful Response
+     * @throws ApiError
+     */
+    public static reviewAssessment(data: FeasibilityAssessmentReviewAssessmentData): CancelablePromise<FeasibilityAssessmentReviewAssessmentResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/deals/{deal_id}/feasibility/{assessment_id}/review',
+            path: {
+                deal_id: data.dealId,
+                assessment_id: data.assessmentId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: 'Validation Error'
             }
