@@ -126,6 +126,43 @@ export function StageChange({ deal, size = "icon" }: Props) {
           </span>
         </div>
 
+        {/* Feasibility stage gate — warn if moving past Feasibility without a strong score */}
+        {(() => {
+          const movingPast = deal.stage === "Feasibility" && ["Proposal","Negotiation","LOI Signed","HMA Signed"].includes(newStage)
+          if (!movingPast) return null
+          const fScore = (deal as any).feasibility_score as number | null
+          const fRec = (deal as any).feasibility_recommendation as string | null
+          const reviewed = (deal as any).feasibility_reviewed as boolean
+          if (fScore == null) {
+            return (
+              <div className="rounded-md bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700">
+                <p className="font-semibold">⚠ Governance: No feasibility assessment recorded.</p>
+                <p className="mt-0.5">Recommended to run an assessment before advancing past Feasibility. You can still override.</p>
+              </div>
+            )
+          }
+          if (fScore < 50) {
+            return (
+              <div className="rounded-md bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-800">
+                <p className="font-semibold">⚠ Low feasibility score: {fScore}/100 — {fRec}</p>
+                <p className="mt-0.5">Industry guidance: scores below 50 typically should not advance. Consider Nurture or Lost.</p>
+              </div>
+            )
+          }
+          if (!reviewed) {
+            return (
+              <div className="rounded-md bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-800">
+                <p>Feasibility {fScore}/100 ({fRec}) — <b>not yet reviewed (2-eyes)</b>. Consider getting sign-off first.</p>
+              </div>
+            )
+          }
+          return (
+            <div className="rounded-md bg-emerald-50 border border-emerald-200 px-3 py-2 text-xs text-emerald-800">
+              ✓ Feasibility {fScore}/100 ({fRec}) · reviewed
+            </div>
+          )
+        })()}
+
         {/* Suggested probability info */}
         {(() => {
           const suggestedProb = probabilityForStage(newStage)

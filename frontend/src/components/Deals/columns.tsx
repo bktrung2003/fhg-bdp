@@ -206,6 +206,33 @@ export const dealColumns: ColumnDef<DealPublic>[] = [
     },
   },
   {
+    id: "feasibility_score",
+    header: "Feasibility",
+    cell: ({ row }) => {
+      const s = (row.original as any).feasibility_score as number | null
+      const rec = (row.original as any).feasibility_recommendation as string | null
+      const reviewed = (row.original as any).feasibility_reviewed as boolean
+      if (s == null) return <span className="text-muted-foreground text-xs">Not assessed</span>
+      const cls =
+        s >= 80 ? "bg-emerald-100 text-emerald-700" :
+        s >= 65 ? "bg-green-100 text-green-700" :
+        s >= 50 ? "bg-amber-100 text-amber-700" :
+        s >= 35 ? "bg-yellow-100 text-yellow-800" :
+        "bg-red-100 text-red-600"
+      return (
+        <div className="flex flex-col gap-0.5">
+          <div className="flex items-center gap-1">
+            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${cls} whitespace-nowrap`} title={rec ?? undefined}>
+              {s}/100
+            </span>
+            {reviewed && <span title="Reviewed (2-eyes)" className="text-emerald-600 text-xs">✓</span>}
+          </div>
+          {rec && <span className="text-[9px] text-muted-foreground truncate max-w-[110px]">{rec}</span>}
+        </div>
+      )
+    },
+  },
+  {
     id: "country",
     header: "Country",
     cell: ({ row }) => (

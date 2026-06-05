@@ -307,6 +307,10 @@ class DealPublic(DealBase):
     project_name: str | None = None
     project_number: int | None = None
     owner_id: uuid.UUID | None = None   # from project.owner_id for navigation
+    # Enriched from FeasibilityAssessment (latest)
+    feasibility_score: int | None = None             # 0-100
+    feasibility_recommendation: str | None = None    # "Proceed" etc
+    feasibility_reviewed: bool = False               # has been signed off
 
 
 class DealsPublic(SQLModel):
@@ -974,4 +978,102 @@ class ProjectPublic(ProjectBase):
 
 class ProjectsPublic(SQLModel):
     data: list[ProjectPublic]
+    count: int
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FEASIBILITY ASSESSMENT (6-dimension scorecard — distinct from financial snapshots)
+# ─────────────────────────────────────────────────────────────────────────────
+
+class FeasibilityRecommendation(str, Enum):
+    STRONG_PROCEED = "Strong Proceed"
+    PROCEED = "Proceed"
+    CONDITIONS = "Proceed with Conditions"
+    NURTURE = "Nurture / Reassess"
+    REJECT = "Reject"
+
+
+def compute_feasibility_recommendation(total: int) -> str:
+    if total >= 80:
+        return FeasibilityRecommendation.STRONG_PROCEED.value
+    if total >= 65:
+        return FeasibilityRecommendation.PROCEED.value
+    if total >= 50:
+        return FeasibilityRecommendation.CONDITIONS.value
+    if total >= 35:
+        return FeasibilityRecommendation.NURTURE.value
+    return FeasibilityRecommendation.REJECT.value
+
+
+def compute_feasibility_total(scores: list[int]) -> int:
+    """Average × 20 → 0-100 scale. Missing scores treated as 0."""
+    if not scores:
+        return 0
+    avg = sum(scores) / len(scores)
+    return round(avg * 20)
+
+
+class FeasibilityAssessmentBase(SQLModel):
+    deal_id: uuid.UUID = Field(foreign_key="deal.id", ondelete="CASCADE", index=True)
+    # 6 dimension scores (1-5)
+    location_score: int = Field(ge=1, le=5)
+    market_score: int = Field(ge=1, le=5)
+    owner_readiness_score: int = Field(ge=1, le=5)
+    brand_fit_score: int = Field(ge=1, le=5)
+    financial_score: int = Field(ge=1, le=5)
+    technical_score: int = Field(ge=1, le=5)
+    # Computed
+    total_score: int = Field(default=0, ge=0, le=100)
+    recommendation: str = Field(default="", max_length=50)
+    # Governance text
+    strengths: str | None = Field(default=None, max_length=4000)
+    concerns: str | None = Field(default=None, max_length=4000)
+    conditions_to_proceed: str | None = Field(default=None, max_length=4000)
+
+
+class FeasibilityAssessment(FeasibilityAssessmentBase, table=True):
+    __tablename__ = "feasibility_assessment"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    version: int = Field(default=1)
+    is_current: bool = Field(default=True, index=True)  # only one current per deal
+    assessed_by_id: uuid.UUID = Field(foreign_key="user.id", ondelete="CASCADE")
+    assessed_at: datetime | None = Field(
+        default_factory=get_datetime_utc, sa_type=DateTime(timezone=True)
+    )
+    reviewed_by_id: uuid.UUID | None = Field(default=None, foreign_key="user.id")
+    reviewed_at: datetime | None = Field(default=None, sa_type=DateTime(timezone=True))
+    review_note: str | None = Field(default=None, max_length=2000)
+
+
+class FeasibilityAssessmentCreate(SQLModel):
+    location_score: int = Field(ge=1, le=5)
+    market_score: int = Field(ge=1, le=5)
+    owner_readiness_score: int = Field(ge=1, le=5)
+    brand_fit_score: int = Field(ge=1, le=5)
+    financial_score: int = Field(ge=1, le=5)
+    technical_score: int = Field(ge=1, le=5)
+    strengths: str | None = None
+    concerns: str | None = None
+    conditions_to_proceed: str | None = None
+
+
+class FeasibilityAssessmentReview(SQLModel):
+    review_note: str | None = None
+
+
+class FeasibilityAssessmentPublic(FeasibilityAssessmentBase):
+    id: uuid.UUID
+    version: int
+    is_current: bool
+    assessed_by_id: uuid.UUID
+    assessed_by_name: str | None = None
+    assessed_at: datetime | None
+    reviewed_by_id: uuid.UUID | None
+    reviewed_by_name: str | None = None
+    reviewed_at: datetime | None
+    review_note: str | None
+
+
+class FeasibilityAssessmentHistory(SQLModel):
+    data: list[FeasibilityAssessmentPublic]
     count: int

@@ -13,6 +13,8 @@ import {
 import { Button } from "@/components/ui/button"
 import { EditDeal } from "@/components/Deals/EditDeal"
 import { StageChange } from "@/components/Deals/StageChange"
+import { FeasibilityPanel } from "@/components/Feasibility/FeasibilityPanel"
+import useAuth from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout/deals_/$dealId")({
   component: DealWorkspace,
@@ -53,6 +55,7 @@ function Mini({ label, value, sub }: { label: string; value: string; sub?: strin
 
 function DealWorkspace() {
   const { dealId } = Route.useParams()
+  const { user } = useAuth()
 
   const { data: deal, isLoading } = useQuery({
     queryKey: ["deal", dealId],
@@ -156,6 +159,9 @@ function DealWorkspace() {
           <span className="font-semibold">Next Action: </span>{deal.next_action}
         </div>
       )}
+
+      {/* Feasibility Assessment — 6-dimension scorecard */}
+      {user && <FeasibilityPanel dealId={dealId} currentUserId={user.id} />}
 
       {/* 2-column: Tasks, Documents (Pre-opening moved to Project Workspace) */}
       <div className="grid grid-cols-2 gap-4">

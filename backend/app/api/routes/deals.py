@@ -78,6 +78,21 @@ def _to_public(deal: Deal, session: SessionDep | None = None) -> DealPublic:
         if owner:
             owner_id = owner.id
 
+    # Enrich with latest feasibility assessment summary (cheap query via index)
+    feasibility_score = None
+    feasibility_recommendation = None
+    feasibility_reviewed = False
+    if session is not None:
+        from app.models import FeasibilityAssessment as _FA
+        from sqlmodel import select as _sel
+        fa = session.exec(
+            _sel(_FA).where(_FA.deal_id == deal.id, _FA.is_current == True)  # noqa: E712
+        ).first()
+        if fa:
+            feasibility_score = fa.total_score
+            feasibility_recommendation = fa.recommendation
+            feasibility_reviewed = fa.reviewed_by_id is not None
+
     return DealPublic(
         **deal.model_dump(),
         days_in_stage=days,
@@ -85,6 +100,9 @@ def _to_public(deal: Deal, session: SessionDep | None = None) -> DealPublic:
         project_name=project_name,
         project_number=project_number,
         owner_id=owner_id,
+        feasibility_score=feasibility_score,
+        feasibility_recommendation=feasibility_recommendation,
+        feasibility_reviewed=feasibility_reviewed,
     )
 
 
