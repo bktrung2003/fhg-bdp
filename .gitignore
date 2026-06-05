@@ -5,3 +5,25 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Secrets — copy .env.example → .env and fill in real values locally.
+# Never commit .env (contains SECRET_KEY, passwords, etc).
+.env
+!.env.example
+!.env.portainer.example
+
+# Local uploads (use MinIO in production)
+backend/uploads/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Bun/Node
+.DS_Store
+*.log
+dist/
