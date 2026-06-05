@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Calculator, Save, Trash2, BarChart3, Printer, ChevronDown, ChevronRight } from "lucide-react"
+import { Calculator, Save, Trash2, BarChart3, Printer, ChevronDown, ChevronRight, HelpCircle } from "lucide-react"
 
 import { FeasibilityService, type FeasibilitySnapshotPublic } from "@/client"
 import { Button } from "@/components/ui/button"
@@ -15,6 +15,7 @@ import {
   DEFAULT_INPUTS, calculate, computeTornado, fmtM, fmtPct, fmtUSD,
   BENCHMARKS, SCENARIO_LABELS,
 } from "./financialModel"
+import { FinancialModelHelp } from "./FinancialModelHelp"
 
 interface Props {
   dealId: string
@@ -41,6 +42,7 @@ export function FinancialModelSection({ dealId, dealName, dealKeys }: Props) {
   const [customLabel, setCustomLabel] = useState("")
   const [collapsedInputs, setCollapsedInputs] = useState(false)
   const [showTornado, setShowTornado] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
 
   // Keep rooms in sync if deal.keys changes later (e.g. user updates Deal record
   // in another tab and we re-render). Only override when current rooms still
@@ -223,6 +225,10 @@ ${styles}
           <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{parsedSnapshots.length} scenario(s) saved</span>
         </div>
         <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={() => setHelpOpen(true)}
+            title="How the model works — formulas, benchmarks, glossary">
+            <HelpCircle className="h-3.5 w-3.5 mr-1" />Help
+          </Button>
           <Button size="sm" variant="outline" onClick={() => setShowTornado(o => !o)}>
             <BarChart3 className="h-3.5 w-3.5 mr-1" />Sensitivity
           </Button>
@@ -324,6 +330,9 @@ ${styles}
           <TornadoChart data={tornado} />
         </div>
       )}
+
+      {/* Help modal — self-service reference for Legal/Finance/COO */}
+      <FinancialModelHelp open={helpOpen} onOpenChange={setHelpOpen} />
     </div>
   )
 }
