@@ -23,4 +23,7 @@ FROM nginx:1
 COPY --from=build-stage /app/frontend/dist/ /usr/share/nginx/html
 
 COPY ./frontend/nginx.conf /etc/nginx/conf.d/default.conf
-COPY ./frontend/nginx-backend-not-found.conf /etc/nginx/extra-conf.d/backend-not-found.conf
+# NOTE: nginx-backend-not-found.conf intentionally NOT copied — it defines
+# `location /api|/docs|/redoc { return 404; }` which collides with the proxy
+# blocks in nginx.conf (duplicate location → nginx crash loop). This container
+# proxies those paths to the backend directly.
