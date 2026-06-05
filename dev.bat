@@ -21,6 +21,7 @@ echo   ------------------------------------------------
 echo   [S] Setup         (chay lan dau tien)
 echo   [M] Migrate DB    (alembic upgrade head)
 echo   [G] Generate client (sau khi doi API)
+echo   [D] Demo Seed     (load rich demo data for COO presentation)
 echo   ------------------------------------------------
 echo   [O] Mo browser
 echo   [Q] Thoat
@@ -33,6 +34,7 @@ if /i "%choice%"=="3" goto START_FRONTEND
 if /i "%choice%"=="S" goto SETUP
 if /i "%choice%"=="M" goto MIGRATE
 if /i "%choice%"=="G" goto GEN_CLIENT
+if /i "%choice%"=="D" goto DEMO_SEED
 if /i "%choice%"=="O" goto OPEN
 if /i "%choice%"=="Q" goto END
 
@@ -240,6 +242,16 @@ if %errorlevel% equ 0 (
     echo  LOI - Xem loi phia tren.
 )
 cd /D "%ROOT%"
+echo.
+pause
+goto MENU
+
+
+:DEMO_SEED
+echo.
+echo  Loading demo seed data (owners, projects, deals, assessments, snapshots, tasks, activities, milestones)...
+cd /d "%BACKEND%"
+uv run python scripts/seed_demo.py
 echo.
 pause
 goto MENU

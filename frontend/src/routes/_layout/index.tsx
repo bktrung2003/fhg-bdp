@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { AlertCircle, Building2, FileText, Rocket, TrendingUp, Users } from "lucide-react"
+import { AlertCircle, Building2, FileText, Rocket, TrendingUp, Users, Flame, Clock, Calculator } from "lucide-react"
 
 import {
-  DealsService, OwnersService, TasksService, MilestonesService,
-  type DealPublic, type TaskPublic, type MilestonePublic,
+  DealsService, OwnersService, TasksService, MilestonesService, ActivitiesService,
+  type DealPublic, type TaskPublic, type MilestonePublic, type ActivityPublic,
 } from "@/client"
 import useAuth from "@/hooks/useAuth"
 import { Button } from "@/components/ui/button"
@@ -74,6 +74,11 @@ function Dashboard() {
     queryKey: ["dashboard-milestones"],
     queryFn: () => MilestonesService.listMilestones({ limit: 500 }),
   })
+  const { data: activitiesData } = useQuery({
+    queryKey: ["dashboard-activities"],
+    queryFn: () => ActivitiesService.listActivities({ limit: 15 }),
+  })
+  const activities: ActivityPublic[] = activitiesData?.data ?? []
 
   const deals: DealPublic[] = dealsData?.data ?? []
   const tasks: TaskPublic[] = tasksData?.data ?? []
@@ -387,38 +392,41 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* ── Pipeline by Stage — full width bar ── */}
+      {/* ── Pipeline Funnel — visual conversion drop-off ── */}
       <div className="rounded-xl border bg-card p-5">
-        <h3 className="font-semibold text-sm mb-4">Pipeline by Stage</h3>
-        <div className="flex flex-col gap-2.5">
-          {Object.entries(stageCounts)
-            .sort(([a], [b]) => {
-              const order = ["Lead","NDA / Qualified","Feasibility","Proposal","Negotiation","LOI Signed","HMA Signed","Pre-opening"]
-              return order.indexOf(a) - order.indexOf(b)
-            })
-            .map(([stage, count]) => {
-              const stageDeals = activeDeals.filter(d => d.stage === stage)
-              const stageKeys = stageDeals.reduce((s, d) => s + (d.keys ?? 0), 0)
-              const stageValue = stageDeals.reduce((s, d) => s + (d.pipeline_value ?? 0), 0)
-              return (
-                <div key={stage} className="flex items-center gap-3">
-                  <div className="w-[120px] flex-shrink-0">
-                    <Badge label={stage} map={STAGE_COLOR} />
-                  </div>
-                  <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-primary rounded-full transition-all"
-                      style={{ width: `${Math.min(100, (count / Math.max(1, activeDeals.length)) * 100)}%` }}
-                    />
-                  </div>
-                  <div className="flex items-center gap-4 text-xs tabular-nums w-[200px] flex-shrink-0 justify-end">
-                    <span className="font-semibold">{count} deal{count !== 1 ? "s" : ""}</span>
-                    <span className="text-muted-foreground">{stageKeys.toLocaleString()} keys</span>
-                    <span className="font-medium text-primary">{fmtM(stageValue)}</span>
-                  </div>
-                </div>
-              )
-            })}
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="font-semibold text-sm">Pipeline Funnel</h3>
+            <p className="text-[11px] text-muted-foreground">Conversion shape — wider top = more leads, narrower bottom = closer to signed</p>
+          </div>
+        </div>
+        <PipelineFunnel activeDeals={activeDeals} onClickStage={() => navigate({ to: "/deals" })} />
+      </div>
+
+      {/* ── 2-column: Hot Deals + Recent Activity ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Hot Deals widget — high-score + high-prob, ranked */}
+        <div className="rounded-xl border bg-card p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-sm flex items-center gap-2">
+              <Flame className="h-4 w-4 text-orange-500" />
+              Hot Deals
+            </h3>
+            <span className="text-[10px] text-muted-foreground">Top-scored assessments × probability</span>
+          </div>
+          <HotDealsWidget deals={activeDeals} onOpen={(id) => navigate({ to: "/deals/$dealId" as any, params: { dealId: id } })} />
+        </div>
+
+        {/* Recent Activity Feed */}
+        <div className="rounded-xl border bg-card p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-sm flex items-center gap-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              Recent Activity
+            </h3>
+            <span className="text-[10px] text-muted-foreground">Last {Math.min(activities.length, 10)} interactions</span>
+          </div>
+          <ActivityFeed activities={activities.slice(0, 10)} onOpen={(id) => navigate({ to: "/deals/$dealId" as any, params: { dealId: id } })} />
         </div>
       </div>
 
@@ -441,6 +449,175 @@ function Dashboard() {
           </Button>
         ))}
       </div>
+    </div>
+  )
+}
+
+// ── Pipeline Funnel (SVG trapezoid stack) ────────────────────────────────────
+
+const FUNNEL_STAGES = ["Lead","NDA / Qualified","Feasibility","Proposal","Negotiation","LOI Signed","HMA Signed","Pre-opening"]
+
+function PipelineFunnel({ activeDeals, onClickStage }: { activeDeals: DealPublic[]; onClickStage: (stage: string) => void }) {
+  const counts: Record<string, { count: number; keys: number; value: number }> = {}
+  for (const s of FUNNEL_STAGES) counts[s] = { count: 0, keys: 0, value: 0 }
+  for (const d of activeDeals) {
+    const s = d.stage ?? ""
+    if (counts[s]) {
+      counts[s].count += 1
+      counts[s].keys += d.keys ?? 0
+      counts[s].value += d.pipeline_value ?? 0
+    }
+  }
+
+  const maxCount = Math.max(...FUNNEL_STAGES.map(s => counts[s].count), 1)
+  const FUNNEL_COLOR: Record<string, string> = {
+    "Lead": "#9ca3af",
+    "NDA / Qualified": "#60a5fa",
+    "Feasibility": "#38bdf8",
+    "Proposal": "#a78bfa",
+    "Negotiation": "#fb923c",
+    "LOI Signed": "#eab308",
+    "HMA Signed": "#10b981",
+    "Pre-opening": "#14b8a6",
+  }
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      {FUNNEL_STAGES.map((stage, idx) => {
+        const data = counts[stage]
+        const pct = (data.count / maxCount) * 100
+        const minPct = 12   // always show at least a slim sliver
+        const widthPct = Math.max(minPct, pct)
+        const next = idx < FUNNEL_STAGES.length - 1 ? counts[FUNNEL_STAGES[idx + 1]].count : null
+        const conversion = data.count > 0 && next != null ? Math.round((next / data.count) * 100) : null
+        return (
+          <div key={stage}>
+            <button onClick={() => onClickStage(stage)}
+              className="w-full flex items-center gap-3 group">
+              <div className="w-[130px] flex-shrink-0">
+                <Badge label={stage} map={STAGE_COLOR} />
+              </div>
+              <div className="flex-1 flex items-center">
+                <div className="h-7 rounded-md transition-all group-hover:opacity-80"
+                  style={{ width: `${widthPct}%`, backgroundColor: FUNNEL_COLOR[stage] }}>
+                  <div className="h-full flex items-center justify-between px-3 text-[10.5px] font-semibold text-white">
+                    <span>{data.count} deal{data.count !== 1 ? "s" : ""}</span>
+                    <span className="opacity-80">{data.keys.toLocaleString()} keys · {fmtM(data.value)}</span>
+                  </div>
+                </div>
+                {conversion != null && data.count > 0 && (
+                  <span className={`ml-2 text-[9px] font-bold tabular-nums ${
+                    conversion >= 60 ? "text-emerald-600" :
+                    conversion >= 30 ? "text-amber-600" :
+                    "text-red-600"
+                  }`} title="Conversion to next stage">
+                    ↓ {conversion}%
+                  </span>
+                )}
+              </div>
+            </button>
+          </div>
+        )
+      })}
+      <p className="text-[10px] text-muted-foreground italic mt-2">
+        💡 ↓% = conversion to next stage (Green ≥60% · Amber 30-60% · Red &lt;30%). Click any bar to view deals.
+      </p>
+    </div>
+  )
+}
+
+// ── Hot Deals Widget ─────────────────────────────────────────────────────────
+
+function HotDealsWidget({ deals, onOpen }: { deals: DealPublic[]; onOpen: (dealId: string) => void }) {
+  // Hot = high feasibility score × probability, weighted toward score
+  const hot = deals
+    .filter(d => (d as any).feasibility_score != null && (d.probability ?? 0) >= 20)
+    .map(d => {
+      const score = (d as any).feasibility_score as number
+      const prob = d.probability ?? 0
+      const heat = score * 0.6 + prob * 0.4
+      return { deal: d, heat, score, prob }
+    })
+    .sort((a, b) => b.heat - a.heat)
+    .slice(0, 5)
+
+  if (hot.length === 0) {
+    return (
+      <div className="text-xs text-muted-foreground py-6 text-center">
+        No deals with feasibility assessments yet. Run an assessment to see Hot Deals here.
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      {hot.map(({ deal, heat, score, prob }) => {
+        const scoreColor = score >= 80 ? "bg-emerald-100 text-emerald-700"
+                         : score >= 65 ? "bg-green-100 text-green-700"
+                         : score >= 50 ? "bg-amber-100 text-amber-700"
+                         :               "bg-red-100 text-red-700"
+        return (
+          <button key={deal.id} onClick={() => onOpen(deal.id)}
+            className="w-full flex items-center gap-3 rounded-lg border bg-card hover:bg-muted/40 px-3 py-2 text-left transition-colors">
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold truncate">{deal.name}</p>
+              <p className="text-[10px] text-muted-foreground truncate">
+                {deal.stage} · {deal.country} · {(deal as any).feasibility_recommendation ?? "—"}
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${scoreColor}`} title="Feasibility score">
+                {score}/100
+              </span>
+              <span className="text-[10px] font-bold text-muted-foreground tabular-nums" title="Probability">
+                {prob}%
+              </span>
+              <Flame className={`h-3.5 w-3.5 ${heat >= 70 ? "text-red-500" : heat >= 50 ? "text-orange-500" : "text-amber-400"}`} />
+            </div>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+// ── Activity Feed ────────────────────────────────────────────────────────────
+
+const ACTIVITY_ICON: Record<string, { icon: string; tone: string }> = {
+  Meeting:    { icon: "🤝", tone: "bg-blue-100 text-blue-700" },
+  Call:       { icon: "📞", tone: "bg-emerald-100 text-emerald-700" },
+  Email:      { icon: "✉️", tone: "bg-violet-100 text-violet-700" },
+  "Site Visit": { icon: "📍", tone: "bg-orange-100 text-orange-700" },
+  Document:   { icon: "📄", tone: "bg-amber-100 text-amber-700" },
+  Note:       { icon: "📝", tone: "bg-gray-100 text-gray-700" },
+}
+
+function ActivityFeed({ activities, onOpen }: { activities: ActivityPublic[]; onOpen: (dealId: string) => void }) {
+  if (activities.length === 0) {
+    return <div className="text-xs text-muted-foreground py-6 text-center">No activities logged yet.</div>
+  }
+  return (
+    <div className="flex flex-col gap-1.5 max-h-[320px] overflow-y-auto">
+      {activities.map(a => {
+        const meta = ACTIVITY_ICON[a.activity_type ?? "Note"] ?? ACTIVITY_ICON.Note
+        const dealId = (a as any).deal_id as string | undefined
+        return (
+          <button key={a.id}
+            onClick={() => dealId && onOpen(dealId)}
+            className="w-full flex items-start gap-2 rounded-md border-l-2 border-muted hover:border-primary hover:bg-muted/30 px-2.5 py-1.5 text-left transition-all">
+            <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded flex-shrink-0 ${meta.tone}`}>
+              {meta.icon} {a.activity_type}
+            </span>
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-medium truncate">{(a as any).deal_name ?? "—"}</p>
+              {a.note && <p className="text-[10.5px] text-muted-foreground line-clamp-2 leading-snug">{a.note}</p>}
+            </div>
+            <span className="text-[9px] text-muted-foreground whitespace-nowrap flex-shrink-0">
+              {a.date}
+            </span>
+          </button>
+        )
+      })}
     </div>
   )
 }
