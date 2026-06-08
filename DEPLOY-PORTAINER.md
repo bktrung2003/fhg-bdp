@@ -87,16 +87,33 @@ MinIO admin console: `http://<server-ip>:9001`
 
 ---
 
-## Step 5 — Subsequent deploys
+## Step 5 — Subsequent deploys (one click)
+
+Watchtower (in the stack) turns the 3 manual Portainer steps into one
+trigger. You still decide *when* — it does not auto-poll.
 
 After you push code to `main`:
 
-1. GitHub Actions builds + pushes new `:latest` (~2 min)
-2. Portainer → **Stacks** → **fhg-bdp** → **Pull and redeploy**
-3. Tick **Re-pull image** — wait ~30s for backend to restart with migrations
+1. Wait for the GitHub Actions **Build & Push** to go green (~3 min).
+2. Double-click **`deploy.bat`** (edit `SERVER` / `PORT` / `TOKEN` once to
+   match your `.env`). It calls Watchtower's update endpoint.
+3. Watchtower pulls the new `:latest`, recreates backend + frontend
+   (+ notify-cron), and **deletes the old images**. ~30–60s.
+
+No more Stack edit / re-pull / manual image cleanup.
+
+Equivalent manual trigger (any machine):
+```bash
+curl -H "Authorization: Bearer <WATCHTOWER_TOKEN>" \
+  http://<server-ip>:<WATCHTOWER_PORT>/v1/update
+```
 
 Database, MinIO objects, and uploaded files **survive** redeploys
-(stored in named volumes `app-db-data`, `minio-data`).
+(named volumes `app-db-data`, `minio-data`).
+
+> Watchtower only touches containers labelled
+> `com.centurylinklabs.watchtower.enable=true` — i.e. only this stack,
+> never your other ~20 apps.
 
 ---
 

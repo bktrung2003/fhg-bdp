@@ -103,6 +103,9 @@ services:
   backend:
     image: ghcr.io/bktrung2003/fhg-bdp/backend:${TAG-latest}
     restart: always
+    labels:
+      # Only containers with this label are managed by Watchtower.
+      com.centurylinklabs.watchtower.enable: "true"
     depends_on:
       db:
         condition: service_healthy
@@ -150,6 +153,8 @@ services:
   frontend:
     image: ghcr.io/bktrung2003/fhg-bdp/frontend:${TAG-latest}
     restart: always
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
     depends_on:
       - backend
     ports:
@@ -160,6 +165,8 @@ services:
   notify-cron:
     image: ghcr.io/bktrung2003/fhg-bdp/backend:${TAG-latest}
     restart: always
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
     depends_on:
       db:
         condition: service_healthy
@@ -181,6 +188,27 @@ services:
         sleep 86400;
         python scripts/notify_overdue.py || true;
       done"
+
+  # Watchtower — manual-trigger deploy helper (NOT auto-polling).
+  # You stay in control of WHEN: after GitHub Actions is green, hit the
+  # update endpoint (deploy.bat) and Watchtower pulls the new :latest,
+  # recreates the labelled containers, and prunes the old images — all the
+  # manual Portainer steps in one shot. It only touches containers with the
+  # com.centurylinklabs.watchtower.enable=true label (this stack only).
+  watchtower:
+    image: containrrr/watchtower:latest
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WATCHTOWER_HTTP_API_UPDATE: "true"        # only act on HTTP trigger (no polling)
+      WATCHTOWER_HTTP_API_TOKEN: ${WATCHTOWER_TOKEN}
+      WATCHTOWER_CLEANUP: "true"                 # remove old images after update
+      WATCHTOWER_LABEL_ENABLE: "true"            # only manage labelled containers
+      WATCHTOWER_INCLUDE_RESTARTING: "true"
+      WATCHTOWER_NO_STARTUP_MESSAGE: "true"
+    ports:
+      - "${WATCHTOWER_PORT:-8088}:8080"          # update endpoint: /v1/update
 
 volumes:
   app-db-data:

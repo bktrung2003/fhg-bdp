@@ -1,0 +1,34 @@
+@echo off
+REM ============================================================================
+REM  Fusion BDP — one-click production deploy
+REM
+REM  Use AFTER:
+REM    1. You tested locally and it's good
+REM    2. You pushed to GitHub and the "Build & Push" Action is GREEN
+REM
+REM  This hits Watchtower's update endpoint on the server. Watchtower then:
+REM    - pulls the new :latest images
+REM    - recreates backend + frontend (+ notify-cron)
+REM    - deletes the old images
+REM
+REM  Edit the two values below to match your server + token, then just
+REM  double-click this file whenever you want to ship.
+REM ============================================================================
+
+set SERVER=192.168.1.22
+set PORT=8088
+set TOKEN=changeme-long-random-string
+
+echo.
+echo  Triggering deploy on %SERVER%:%PORT% ...
+echo.
+
+curl -s -o - -w "\n  HTTP %%{http_code}\n" ^
+  -H "Authorization: Bearer %TOKEN%" ^
+  "http://%SERVER%:%PORT%/v1/update"
+
+echo.
+echo  Done. Watchtower is pulling + recreating + cleaning up.
+echo  Give it ~30-60s, then refresh the app.
+echo.
+pause
