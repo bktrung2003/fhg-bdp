@@ -23,7 +23,7 @@ echo.
 echo  Triggering deploy on %SERVER%:%PORT% ...
 echo.
 
-curl -s -o - -w "\n  HTTP %%{http_code}\n" ^
+curl -s -X POST -o - -w "\n  HTTP %%{http_code}\n" ^
   -H "Authorization: Bearer %TOKEN%" ^
   "http://%SERVER%:%PORT%/v1/update"
 
