@@ -291,7 +291,41 @@ function OwnersPage() {
           </div>
         </div>
       ) : (
-        <div className="rounded-lg border bg-card overflow-x-auto">
+        <div className="rounded-lg border bg-card">
+          {/* Mobile cards */}
+          <div className="md:hidden flex flex-col gap-2 p-2">
+            {paginated.map((o) => (
+              <button
+                key={o.id}
+                type="button"
+                onClick={() => navigate({ to: "/owners/$ownerId" as any, params: { ownerId: o.id } })}
+                className="w-full text-left rounded-lg border bg-card p-3 active:bg-muted/40 transition-colors"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="h-9 w-9 rounded-md bg-primary/10 text-primary flex items-center justify-center font-bold text-xs flex-shrink-0">
+                    {o.company.slice(0, 2).toUpperCase()}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-sm truncate">{o.company}</p>
+                    <p className="text-[11px] text-muted-foreground">{o.country} · {o.owner_type}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 flex-wrap mt-2">
+                  <Badge label={o.priority} colorMap={PRIORITY_COLOR} />
+                  <Badge label={o.relationship} colorMap={REL_COLOR} />
+                  <Badge label={o.catchup_status} colorMap={CATCHUP_COLOR} />
+                </div>
+                <div className="flex items-center gap-4 mt-2 text-xs">
+                  <span><span className="text-muted-foreground">Projects </span><b className="tabular-nums">{(o as any).project_count ?? 0}</b></span>
+                  <span><span className="text-muted-foreground">Deals </span><b className="tabular-nums">{o.deal_count}</b></span>
+                  {o.last_interaction && <span className="text-muted-foreground">Met {o.last_interaction}</span>}
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
           <table className="w-full min-w-[1100px] text-sm">
             <thead>
               <tr className="border-b bg-muted/30">
@@ -366,6 +400,7 @@ function OwnersPage() {
               ))}
             </tbody>
           </table>
+          </div>
           <PaginationControls
             page={page} totalPages={totalPages} pageSize={pageSize} total={total}
             onPageChange={setPage} onPageSizeChange={setPageSize}

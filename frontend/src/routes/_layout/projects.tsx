@@ -99,7 +99,39 @@ function ProjectsPage() {
           <p className="text-sm text-muted-foreground">No projects yet. Create your first project.</p>
         </div>
       ) : (
-        <div className="rounded-lg border bg-card overflow-x-auto">
+        <div className="rounded-lg border bg-card">
+          {/* Mobile cards */}
+          <div className="md:hidden flex flex-col gap-2 p-2">
+            {paginated.map((p: ProjectPublic) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => navigate({ to: "/projects/$projectId" as any, params: { projectId: p.id } })}
+                className="w-full text-left rounded-lg border bg-card p-3 active:bg-muted/40 transition-colors"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-sm truncate">{p.name}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      {[p.city, p.country].filter(Boolean).join(", ") || "—"}
+                      {p.owner_name ? ` · ${p.owner_name}` : ""}
+                    </p>
+                  </div>
+                  <span className={`shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLOR[p.status ?? ""] ?? "bg-gray-100 text-gray-600"}`}>
+                    {p.status}
+                  </span>
+                </div>
+                <div className="flex items-center gap-4 mt-2 text-xs">
+                  <span><span className="text-muted-foreground">Keys </span><b className="tabular-nums">{p.keys ?? "—"}</b></span>
+                  <span><span className="text-muted-foreground">Deals </span><b className="tabular-nums">{p.deal_count}</b></span>
+                  <span><span className="text-muted-foreground">Pipeline </span><b className="tabular-nums text-primary">{fmtM(p.active_pipeline_value)}</b></span>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
           <table className="w-full min-w-[1000px] text-sm">
             <thead>
               <tr className="border-b bg-muted/30">
@@ -155,6 +187,7 @@ function ProjectsPage() {
               ))}
             </tbody>
           </table>
+          </div>
           <PaginationControls
             page={page} totalPages={totalPages} pageSize={pageSize} total={total}
             onPageChange={setPage} onPageSizeChange={setPageSize}
