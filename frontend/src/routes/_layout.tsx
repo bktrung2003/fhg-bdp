@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
 
 import { Footer } from "@/components/Common/Footer"
 import { Logo } from "@/components/Common/Logo"
+import { InstallPrompt } from "@/components/Common/InstallPrompt"
 import AppSidebar from "@/components/Sidebar/AppSidebar"
 import { BottomNav } from "@/components/Sidebar/BottomNav"
 import {
@@ -44,6 +45,7 @@ function Layout() {
         </main>
         <Footer />
         <BottomNav />
+        <InstallPrompt />
       </SidebarInset>
     </SidebarProvider>
   )
