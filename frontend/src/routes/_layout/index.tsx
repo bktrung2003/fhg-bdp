@@ -494,7 +494,7 @@ function PipelineFunnel({ activeDeals, onClickStage }: { activeDeals: DealPublic
           <div key={stage}>
             <button onClick={() => onClickStage(stage)}
               className="w-full flex items-center gap-3 group">
-              <div className="w-[130px] flex-shrink-0">
+              <div className="w-[90px] sm:w-[130px] flex-shrink-0">
                 <Badge label={stage} map={STAGE_COLOR} />
               </div>
               <div className="flex-1 flex items-center">
@@ -502,7 +502,8 @@ function PipelineFunnel({ activeDeals, onClickStage }: { activeDeals: DealPublic
                   style={{ width: `${widthPct}%`, backgroundColor: FUNNEL_COLOR[stage] }}>
                   <div className="h-full flex items-center justify-between px-3 text-[10.5px] font-semibold text-white">
                     <span>{data.count} deal{data.count !== 1 ? "s" : ""}</span>
-                    <span className="opacity-80">{data.keys.toLocaleString()} keys · {fmtM(data.value)}</span>
+                    {/* Secondary metric hidden on the narrowest screens */}
+                    <span className="opacity-80 hidden sm:inline">{data.keys.toLocaleString()} keys · {fmtM(data.value)}</span>
                   </div>
                 </div>
                 {conversion != null && data.count > 0 && (
