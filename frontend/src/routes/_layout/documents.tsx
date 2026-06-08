@@ -19,20 +19,14 @@ import { MD, useMasterData } from "@/hooks/useMasterData"
 import { usePagination, PaginationControls } from "@/components/Common/Pagination"
 
 // ── Preview helper — fetch with auth then open blob ───────────────────────────
-async function previewDocument(url: string, filename: string) {
-  const { OpenAPI } = await import("@/client")
-  const token = typeof OpenAPI.TOKEN === "function" ? await OpenAPI.TOKEN() : OpenAPI.TOKEN
-
-  const res = await fetch(url, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  })
-  if (!res.ok) { alert("Cannot open file — access denied or file not found."); return }
-
-  const blob = await res.blob()
-  const blobUrl = URL.createObjectURL(blob)
-  window.open(blobUrl, "_blank")
-  // Revoke after 30s
-  setTimeout(() => URL.revokeObjectURL(blobUrl), 30_000)
+function previewDocument(url: string, _filename: string) {
+  // Open a real URL (not a blob) in a new tab, synchronously in the click
+  // handler so mobile / iOS-PWA popup blockers don't kill it. Auth travels as
+  // a ?token= query param since a plain navigation can't send an Authorization
+  // header. Token read synchronously from localStorage.
+  const token = localStorage.getItem("access_token") || ""
+  const sep = url.includes("?") ? "&" : "?"
+  window.open(`${url}${sep}token=${encodeURIComponent(token)}`, "_blank", "noopener")
 }
 
 export const Route = createFileRoute("/_layout/documents")({
@@ -642,7 +636,53 @@ function DocumentsPage() {
           </div>
         </div>
       ) : viewMode === "list" ? (
-        <div className="rounded-lg border bg-card overflow-x-auto">
+        <div className="rounded-lg border bg-card">
+          {/* Mobile cards */}
+          <div className="md:hidden flex flex-col gap-2 p-2">
+            {paginated.map((d) => (
+              <div key={d.id} className="rounded-lg border bg-card p-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-sm truncate">{d.name}</p>
+                    <p className="text-[11px] text-muted-foreground truncate">{d.original_filename}</p>
+                  </div>
+                  {d.can_view && d.download_url ? (
+                    <Button
+                      variant="outline" size="sm" className="h-8 shrink-0"
+                      onClick={() => previewDocument(d.download_url!, d.original_filename)}
+                    >
+                      <Eye className="h-3.5 w-3.5 mr-1" />View
+                    </Button>
+                  ) : (
+                    <span className="text-[10px] text-amber-600 flex items-center gap-1 shrink-0">
+                      <EyeOff className="h-3.5 w-3.5" />Confidential
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1.5 flex-wrap mt-2">
+                  {d.doc_type && (
+                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${TYPE_COLOR[d.doc_type] ?? "bg-gray-100 text-gray-600"}`}>
+                      {d.doc_type}
+                    </span>
+                  )}
+                  {d.permission && (
+                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${PERM_COLOR[d.permission] ?? "bg-gray-100 text-gray-600"}`}>
+                      {d.permission}
+                    </span>
+                  )}
+                  <span className="text-[10px] text-muted-foreground">{fmtSize(d.file_size)}</span>
+                  {d.uploaded_at && (
+                    <span className="text-[10px] text-muted-foreground">
+                      {new Date(d.uploaded_at).toLocaleDateString("en-GB")}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
           <table className="w-full min-w-[900px] text-sm">
             <thead>
               <tr className="border-b bg-muted/30">
@@ -657,6 +697,7 @@ function DocumentsPage() {
               {paginated.map(d => <DocRow key={d.id} doc={d} />)}
             </tbody>
           </table>
+          </div>
           <PaginationControls
             page={page} totalPages={totalPages} pageSize={pageSize} total={total}
             onPageChange={setPage} onPageSizeChange={setPageSize}

@@ -1,7 +1,7 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Query, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, Query, Request, UploadFile, File, Form
 from fastapi.responses import Response
 from sqlmodel import col, func, select
 
@@ -138,16 +138,48 @@ async def upload_document(
 
 # ── GET /documents/serve/{id} — stream file (local + MinIO) ──────────────────
 
+def _user_from_token(session: SessionDep, token: str) -> Any:
+    """Resolve a user from a raw JWT string (for query-param auth on direct
+    file links — mobile browsers can't attach an Authorization header when
+    opening a URL in a new tab)."""
+    import jwt
+    from app.core import security
+    from app.models import TokenPayload, User
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[security.ALGORITHM])
+        sub = TokenPayload(**payload).sub
+    except Exception:
+        return None
+    return session.get(User, sub)
+
+
 @router.get("/serve/{id}")
-def serve_file(id: uuid.UUID, session: SessionDep, current_user: CurrentUser) -> Any:
+def serve_file(
+    id: uuid.UUID,
+    session: SessionDep,
+    request: Request,
+    token: str | None = None,
+) -> Any:
     """Stream a document's bytes through the backend (same-origin).
-    Handles both local + MinIO storage and enforces confidential access.
-    Inline disposition so PDFs/images preview in the browser."""
+    Auth accepted via Authorization header OR ?token= query param so that
+    a plain link (window.open) works on mobile / iOS PWA. Handles local +
+    MinIO storage and enforces confidential access. Inline disposition so
+    PDFs/images preview in the browser."""
+    # Resolve the user from header bearer or query token.
+    user = None
+    auth = request.headers.get("Authorization", "")
+    if auth.lower().startswith("bearer "):
+        user = _user_from_token(session, auth[7:])
+    if user is None and token:
+        user = _user_from_token(session, token)
+    if user is None or not getattr(user, "is_active", False):
+        raise HTTPException(status_code=403, detail="Could not validate credentials")
+
     doc = session.get(Document, id)
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
 
-    if doc.is_confidential and not _can_view(doc, current_user):
+    if doc.is_confidential and not _can_view(doc, user):
         raise HTTPException(status_code=403, detail="Access denied — confidential document")
 
     try:

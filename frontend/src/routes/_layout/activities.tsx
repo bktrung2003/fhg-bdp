@@ -465,6 +465,60 @@ function TaskRow({ task, selected, onToggleSelect }: { task: TaskPublic; selecte
   )
 }
 
+// ── Task Card (mobile) ────────────────────────────────────────────────────────
+
+function TaskCard({ task, selected, onToggleSelect }: { task: TaskPublic; selected?: boolean; onToggleSelect?: () => void }) {
+  const qc = useQueryClient()
+  const { showSuccessToast } = useCustomToast()
+  const markDone = useMutation({
+    mutationFn: () => TasksService.updateTask({ id: task.id, requestBody: { status: "Done" } }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["tasks"] }); showSuccessToast("Done.") },
+  })
+  const del = useMutation({
+    mutationFn: () => TasksService.deleteTask({ id: task.id }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["tasks"] }); showSuccessToast("Deleted.") },
+  })
+  const owner = (task as any).task_owner_name || task.task_owner
+
+  return (
+    <div className={`rounded-lg border bg-card p-3 ${selected ? "ring-1 ring-primary bg-primary/5" : ""}`}>
+      <div className="flex items-start gap-2">
+        {onToggleSelect !== undefined && (
+          <Checkbox checked={selected} onCheckedChange={onToggleSelect} className="mt-0.5" aria-label={`Select task: ${task.title}`} />
+        )}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start gap-1.5">
+            {task.is_overdue && <AlertCircle className="h-3.5 w-3.5 text-red-500 mt-0.5 shrink-0" />}
+            <p className={`text-sm font-medium ${task.status === "Done" ? "line-through text-muted-foreground" : ""}`}>{task.title}</p>
+          </div>
+          {task.deal_name && <p className="text-[11px] text-muted-foreground mt-0.5">{task.deal_name}</p>}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-1.5 flex-wrap mt-2 pl-0.5">
+        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${PRIORITY_COLOR[task.priority ?? ""] ?? ""}`}>{task.priority}</span>
+        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLOR[task.status ?? ""] ?? ""}`}>{task.status}</span>
+        {task.due_date && (
+          <span className={`text-[10px] font-medium ${task.is_overdue ? "text-red-600 font-semibold" : "text-muted-foreground"}`}>Due {task.due_date}</span>
+        )}
+        {owner && <span className="text-[10px] text-muted-foreground">· {owner}</span>}
+      </div>
+
+      <div className="flex items-center justify-end gap-1 mt-2 border-t pt-2">
+        {task.status !== "Done" && (
+          <Button variant="ghost" size="sm" className="h-7 px-2 text-green-600" onClick={() => markDone.mutate()}>
+            <CheckSquare className="h-3.5 w-3.5 mr-1" />Done
+          </Button>
+        )}
+        <EditTask task={task} />
+        <Button variant="ghost" size="sm" className="h-7 px-2 text-red-400" onClick={() => del.mutate()}>
+          <Trash2 className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+    </div>
+  )
+}
+
 // ── Activity Row ──────────────────────────────────────────────────────────────
 
 function ActivityItem({ activity }: { activity: ActivityPublic }) {
@@ -1008,7 +1062,19 @@ function ActivitiesPage() {
                     <TaskGroupHeader group={group} count={groupTasks.length}
                       defaultOpen={!isCollapsed} onToggle={() => toggleGroup(group)} />
                     {!isCollapsed && (
-                      <div className="rounded-b-lg border border-t-0 bg-card overflow-x-auto">
+                      <div className="rounded-b-lg border border-t-0 bg-card">
+                        {/* Mobile cards */}
+                        <div className="md:hidden flex flex-col gap-2 p-2">
+                          {groupTasks.map(t => (
+                            <TaskCard
+                              key={t.id} task={t}
+                              selected={selectedTaskIds.has(t.id)}
+                              onToggleSelect={() => toggleSelect(t.id)}
+                            />
+                          ))}
+                        </div>
+                        {/* Desktop table */}
+                        <div className="hidden md:block overflow-x-auto">
                         <table className="w-full text-sm">
                           <thead>
                             <tr className="border-b bg-muted/20">
@@ -1034,6 +1100,7 @@ function ActivitiesPage() {
                             ))}
                           </tbody>
                         </table>
+                        </div>
                       </div>
                     )}
                   </div>
