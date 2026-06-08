@@ -1,4 +1,4 @@
-import { BarChart3, Briefcase, Building2, CheckSquare, FileText, Home, Rocket, Settings, UserCheck } from "lucide-react"
+import { BarChart3, Briefcase, Building2, CheckSquare, FileText, Home, HelpCircle, Rocket, Settings, UserCheck } from "lucide-react"
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
 import { Logo } from "@/components/Common/Logo"
@@ -27,7 +27,11 @@ export function AppSidebar() {
   const { user: currentUser } = useAuth()
 
   // Single Settings entry — contains Profile + Password + (Admin Users + Master Data) for superusers
-  const items: Item[] = [...baseItems, { icon: Settings, title: "Settings", path: "/settings" }]
+  const items: Item[] = [
+    ...baseItems,
+    { icon: HelpCircle, title: "Help", path: "/help" },
+    { icon: Settings, title: "Settings", path: "/settings" },
+  ]
 
   return (
     <Sidebar collapsible="icon">
