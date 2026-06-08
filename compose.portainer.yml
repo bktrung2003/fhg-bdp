@@ -196,7 +196,11 @@ services:
   # manual Portainer steps in one shot. It only touches containers with the
   # com.centurylinklabs.watchtower.enable=true label (this stack only).
   watchtower:
-    image: containrrr/watchtower:latest
+    # Maintained fork — the original containrrr/watchtower is unmaintained
+    # since ~2023 and ships a Docker API client (v1.25) that modern Docker
+    # Engine rejects ("client version 1.25 is too old. Minimum 1.44").
+    # nickfedor/watchtower is a drop-in replacement (same env/labels/API).
+    image: nickfedor/watchtower:latest
     restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
