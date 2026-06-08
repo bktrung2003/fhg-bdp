@@ -1095,3 +1095,23 @@ class FeasibilityAssessmentPublic(FeasibilityAssessmentBase):
 class FeasibilityAssessmentHistory(SQLModel):
     data: list[FeasibilityAssessmentPublic]
     count: int
+
+
+# ── Web Push Subscriptions ────────────────────────────────────────────────────
+
+class PushSubscription(SQLModel, table=True):
+    """A browser Web Push subscription tied to a user + device.
+    One user may have several (phone, laptop). Matched/deduped by endpoint."""
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="user.id", index=True)
+    endpoint: str = Field(max_length=1000, unique=True, index=True)
+    p256dh: str = Field(max_length=255)   # client public key
+    auth: str = Field(max_length=255)     # client auth secret
+    user_agent: str | None = Field(default=None, max_length=300)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class PushSubscriptionCreate(SQLModel):
+    endpoint: str
+    keys: dict[str, str]            # { "p256dh": "...", "auth": "..." }
+    user_agent: str | None = None

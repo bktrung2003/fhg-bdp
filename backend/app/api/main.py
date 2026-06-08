@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.routes import deals, documents, feasibility, items, login, masterdata, milestones, owners, private, projects, seed, tasks, users, utils
+from app.api.routes import deals, documents, feasibility, items, login, masterdata, milestones, owners, private, projects, push, seed, tasks, users, utils
 from app.core.config import settings
 
 api_router = APIRouter()
@@ -17,6 +17,7 @@ api_router.include_router(feasibility.assessment_router)
 api_router.include_router(milestones.router)
 api_router.include_router(masterdata.router)
 api_router.include_router(projects.router)
+api_router.include_router(push.router)
 
 
 # Seed router always registered — demo endpoints work in any env (superuser-gated),

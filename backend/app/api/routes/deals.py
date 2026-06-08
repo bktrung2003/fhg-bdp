@@ -23,8 +23,10 @@ from app.models import (
     Owner,
     Project,
     StageChangeRequest,
+    User,
     UserRole,
 )
+from app.push import send_push_to_user
 
 
 def _get_default_probability(session: SessionDep, stage: str) -> int | None:
@@ -346,6 +348,26 @@ def change_stage(
         )
     session.commit()
     session.refresh(deal)
+
+    # Notify executives (superusers) of the stage change — best-effort push.
+    try:
+        execs = session.exec(
+            select(User).where(User.is_superuser == True, User.is_active == True)  # noqa: E712
+        ).all()
+        for u in execs:
+            if u.id == current_user.id:
+                continue  # don't notify the person who made the change
+            send_push_to_user(
+                session,
+                u.id,
+                title=f"Deal moved → {new_stage_str}",
+                body=f"{deal.name}: {old_stage if isinstance(old_stage, str) else old_stage.value} → {new_stage_str}",
+                url=f"/deals/{deal.id}",
+                tag=f"deal-stage-{deal.id}",
+            )
+    except Exception:
+        pass  # never let push break the request
+
     return _to_public(deal, session)
 
 

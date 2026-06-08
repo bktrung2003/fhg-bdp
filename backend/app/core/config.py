@@ -107,6 +107,17 @@ class Settings(BaseSettings):
     MINIO_ROOT_PASSWORD: str = ""
     MINIO_BUCKET_DEALS: str = "fusion-documents"
 
+    # Web Push (VAPID). Generate a keypair once per deployment; keep the
+    # private key secret. When VAPID_PUBLIC_KEY is blank, push is disabled
+    # (the app still works, the Notifications toggle just won't appear).
+    VAPID_PUBLIC_KEY: str = ""
+    VAPID_PRIVATE_KEY: str = ""
+    VAPID_SUBJECT: str = "mailto:admin@fusionhotelgroup.com"
+
+    @property
+    def push_enabled(self) -> bool:
+        return bool(self.VAPID_PUBLIC_KEY and self.VAPID_PRIVATE_KEY)
+
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":
             message = (

@@ -21,15 +21,12 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: "autoUpdate",
-      workbox: {
-        // Never serve cached API/doc responses — always hit network for data.
-        navigateFallbackDenylist: [/^\/api/, /^\/docs/, /^\/openapi.json/],
-        runtimeCaching: [
-          {
-            urlPattern: ({ url }) => url.pathname.startsWith("/api"),
-            handler: "NetworkOnly",
-          },
-        ],
+      // injectManifest → custom service worker (src/sw.ts) so we can handle
+      // Web Push + notificationclick events (generateSW can't do that).
+      strategies: "injectManifest",
+      srcDir: "src",
+      filename: "sw.ts",
+      injectManifest: {
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
       },
       includeAssets: [

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { User, KeyRound, AlertOctagon, Users, Database, Sparkles } from "lucide-react"
+import { User, KeyRound, AlertOctagon, Users, Database, Sparkles, Bell } from "lucide-react"
 
 import ChangePassword from "@/components/UserSettings/ChangePassword"
 import DeleteAccount from "@/components/UserSettings/DeleteAccount"
@@ -7,6 +7,7 @@ import UserInformation from "@/components/UserSettings/UserInformation"
 import { MasterDataView } from "@/components/Settings/MasterDataView"
 import { UsersView } from "@/components/Settings/UsersView"
 import { DemoDataView } from "@/components/Settings/DemoDataView"
+import { NotificationsView } from "@/components/Settings/NotificationsView"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import useAuth from "@/hooks/useAuth"
 
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/_layout/settings")({
 
 const PERSONAL_TABS = [
   { value: "my-profile", title: "My Profile", icon: User, component: UserInformation },
+  { value: "notifications", title: "Notifications", icon: Bell, component: NotificationsView },
   { value: "password", title: "Password", icon: KeyRound, component: ChangePassword },
   { value: "danger-zone", title: "Danger Zone", icon: AlertOctagon, component: DeleteAccount },
 ]
@@ -47,7 +49,7 @@ function SettingsPage() {
       </div>
 
       <Tabs defaultValue="my-profile">
-        <TabsList className="grid grid-cols-3 md:grid-cols-6 w-full max-w-4xl gap-1">
+        <TabsList className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 w-full max-w-5xl gap-1">
           {tabs.map((tab) => (
             <TabsTrigger key={tab.value} value={tab.value} className="gap-1.5">
               <tab.icon className="h-3.5 w-3.5" />
