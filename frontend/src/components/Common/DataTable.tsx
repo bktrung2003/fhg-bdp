@@ -39,6 +39,9 @@ interface DataTableProps<TData, TValue> {
   /** Externally controlled column visibility (use with ColumnPicker) */
   columnVisibility?: VisibilityState
   onColumnVisibilityChange?: (next: VisibilityState) => void
+  /** Optional mobile card renderer. When provided, screens < md render a
+   *  stack of cards instead of the (wide) table. Pagination still applies. */
+  mobileCard?: (row: TData) => React.ReactNode
 }
 
 export function DataTable<TData, TValue>({
@@ -47,6 +50,7 @@ export function DataTable<TData, TValue>({
   stickyRightColumns = [],
   columnVisibility,
   onColumnVisibilityChange,
+  mobileCard,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
@@ -97,33 +101,51 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="flex flex-col">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="hover:bg-transparent">
-              {headerGroup.headers.map(headerCell)}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
+      {/* Mobile card view (only when a renderer is supplied) */}
+      {mobileCard && (
+        <div className="md:hidden flex flex-col gap-2 p-2">
           {table.getRowModel().rows.length ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} className="group">
-                {row.getVisibleCells().map(bodyCell)}
-              </TableRow>
+              <div key={row.id}>{mobileCard(row.original as TData)}</div>
             ))
           ) : (
-            <TableRow className="hover:bg-transparent">
-              <TableCell
-                colSpan={table.getVisibleLeafColumns().length}
-                className="h-32 text-center text-muted-foreground"
-              >
-                No results found.
-              </TableCell>
-            </TableRow>
+            <div className="h-24 flex items-center justify-center text-sm text-muted-foreground">
+              No results found.
+            </div>
           )}
-        </TableBody>
-      </Table>
+        </div>
+      )}
+
+      {/* Table view — hidden on mobile when a card renderer exists */}
+      <div className={mobileCard ? "hidden md:block" : ""}>
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} className="hover:bg-transparent">
+                {headerGroup.headers.map(headerCell)}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id} className="group">
+                  {row.getVisibleCells().map(bodyCell)}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow className="hover:bg-transparent">
+                <TableCell
+                  colSpan={table.getVisibleLeafColumns().length}
+                  className="h-32 text-center text-muted-foreground"
+                >
+                  No results found.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       {data.length > 0 && table.getPageCount() >= 1 && (
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 border-t bg-muted/20">

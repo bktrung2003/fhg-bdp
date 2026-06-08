@@ -7,6 +7,7 @@ import { DealsService, type DealPublic, type DealRisk, type DealStage } from "@/
 import { AddDeal } from "@/components/Deals/AddDeal"
 import { dealColumns } from "@/components/Deals/columns"
 import { DealKanban } from "@/components/Deals/DealKanban"
+import { DealMobileCard } from "@/components/Deals/DealMobileCard"
 import { DataTable } from "@/components/Common/DataTable"
 import { ColumnPicker, useColumnVisibility, type ColumnSpec } from "@/components/Common/ColumnPicker"
 import { Button } from "@/components/ui/button"
@@ -201,6 +202,7 @@ function DealsPage() {
             stickyRightColumns={["actions"]}
             columnVisibility={visibility}
             onColumnVisibilityChange={setVisibility}
+            mobileCard={(deal) => <DealMobileCard deal={deal} />}
           />
         </div>
       )}
