@@ -132,9 +132,19 @@ function ProjectWorkspace() {
         ))}
       </div>
 
+      {/* Asset details divider (reference info — pushed below the actionable sections) */}
+      {(project.location_detail || project.google_maps_url || project.region ||
+        project.segment || project.room_mix || project.facilities ||
+        project.construction_status || project.design_status || project.legal_status ||
+        project.funding_status || project.description) && (
+        <p className="order-[38] text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mt-2">
+          Asset details
+        </p>
+      )}
+
       {/* Location card */}
       {(project.location_detail || project.google_maps_url || project.region) && (
-        <div className="rounded-lg border bg-card p-4">
+        <div className="order-40 rounded-lg border bg-card p-4">
           <h3 className="font-semibold text-sm mb-3">Location</h3>
           <div className="grid grid-cols-2 gap-3 text-sm">
             {project.region && (
@@ -164,7 +174,7 @@ function ProjectWorkspace() {
 
       {/* Property details */}
       {(project.segment || project.room_mix || project.facilities) && (
-        <div className="rounded-lg border bg-card p-4">
+        <div className="order-41 rounded-lg border bg-card p-4">
           <h3 className="font-semibold text-sm mb-3">Property Details</h3>
           <div className="grid grid-cols-2 gap-3 text-sm">
             {project.segment && (
@@ -191,7 +201,7 @@ function ProjectWorkspace() {
 
       {/* Status pillars */}
       {(project.construction_status || project.design_status || project.legal_status || project.funding_status) && (
-        <div className="rounded-lg border bg-card p-4">
+        <div className="order-42 rounded-lg border bg-card p-4">
           <h3 className="font-semibold text-sm mb-3">Development Status</h3>
           <div className="grid grid-cols-4 gap-3">
             {[
@@ -211,13 +221,13 @@ function ProjectWorkspace() {
 
       {/* Description */}
       {project.description && (
-        <div className="rounded-lg border bg-muted/30 px-4 py-3 text-sm">
+        <div className="order-43 rounded-lg border bg-muted/30 px-4 py-3 text-sm">
           <span className="font-semibold">Notes: </span>{project.description}
         </div>
       )}
 
       {/* Pre-opening Gates (asset-level governance) */}
-      <div className="rounded-lg border bg-card">
+      <div className="order-30 rounded-lg border bg-card">
         <div className="p-4 border-b flex items-center justify-between">
           <div>
             <h2 className="font-semibold text-sm flex items-center gap-2">
@@ -295,7 +305,7 @@ function ProjectWorkspace() {
       </div>
 
       {/* Deals under this project */}
-      <div className="rounded-lg border bg-card">
+      <div className="order-10 rounded-lg border bg-card">
         <div className="p-4 border-b flex items-center justify-between">
           <div>
             <h2 className="font-semibold text-sm">Deals on this Project</h2>
@@ -359,7 +369,7 @@ function ProjectWorkspace() {
       </div>
 
       {/* Documents linked to project + its deals */}
-      <div className="rounded-lg border bg-card">
+      <div className="order-20 rounded-lg border bg-card">
         <div className="p-4 border-b flex items-center justify-between">
           <div>
             <h2 className="font-semibold text-sm flex items-center gap-2">
