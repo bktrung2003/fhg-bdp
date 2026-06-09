@@ -2,7 +2,7 @@
 // Bump CURRENT_VERSION and add an entry here on each meaningful release.
 // Powers the version badge + the /whats-new page.
 
-export const CURRENT_VERSION = "1.0.0"
+export const CURRENT_VERSION = "1.1.0"
 
 export interface Release {
   version: string
@@ -12,6 +12,19 @@ export interface Release {
 }
 
 export const RELEASES: Release[] = [
+  {
+    version: "1.1.0",
+    date: "2026-06-09",
+    title: "Reports + polish",
+    highlights: [
+      "Reports — auto-generated Pipeline Report (KPIs, stage/type/country breakdown, full deal list) with one-click Print / Save as PDF",
+      "Owner logos — upload a company logo, shown across owner views",
+      "Owner contacts — full edit + phone field; delete interactions",
+      "Owner & Project pages handle scale — search, filters, sort, grouped deals",
+      "Project detail re-ordered — deals first, asset details last",
+      "Mobile polish across owner / deal / project detail pages",
+    ],
+  },
   {
     version: "1.0.0",
     date: "2026-06-09",

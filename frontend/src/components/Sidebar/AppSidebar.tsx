@@ -1,4 +1,4 @@
-import { BarChart3, Briefcase, Building2, CheckSquare, FileText, Home, HelpCircle, Rocket, Settings, UserCheck } from "lucide-react"
+import { BarChart3, Briefcase, Building2, CheckSquare, FileText, FileBarChart, Home, HelpCircle, Rocket, Settings, UserCheck } from "lucide-react"
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
 import { Logo } from "@/components/Common/Logo"
@@ -21,6 +21,7 @@ const baseItems: Item[] = [
   { icon: FileText, title: "Documents", path: "/documents" },
   { icon: BarChart3, title: "Feasibility", path: "/feasibility" },
   { icon: Rocket, title: "Pre-opening", path: "/preopening" },
+  { icon: FileBarChart, title: "Reports", path: "/reports" },
 ]
 
 export function AppSidebar() {

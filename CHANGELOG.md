@@ -6,6 +6,27 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/) and
 (`/whats-new`) is generated from `frontend/src/releases.ts` — keep the two in
 sync when cutting a release.
 
+## [1.1.0] — 2026-06-09
+
+### Added
+- **Reports** (`/reports`) — auto-generated from live data. **Pipeline Report**:
+  KPI summary (active/total deals, active + weighted pipeline), breakdown by
+  stage / deal type / country, and the full deal-by-deal list. One-click
+  **Print / Save as PDF** (A4, branded, board-ready).
+- **Owner logos** — upload/replace/remove a company logo; shown on the owner
+  header, list and mobile cards (graceful initials fallback).
+
+### Changed
+- Owner contacts: full edit + phone field. Interactions can be deleted.
+- Owner & Project pages scale: search, multi-filter, sort; owner Deals tab
+  grouped by project.
+- Project detail re-ordered — Deals first, asset details last.
+- Mobile polish across owner / deal / project detail.
+
+### Fixed
+- Backend runs migrations on startup (Watchtower-safe deploys).
+- React #310 on owner detail (hook order).
+
 ## [1.0.0] — 2026-06-09
 
 First release — COO demo baseline.
