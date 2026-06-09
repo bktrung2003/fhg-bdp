@@ -275,8 +275,8 @@ function OwnerWorkspace() {
           </div>
         </div>
 
-        {/* Mini stats */}
-        <div className="grid grid-cols-4 gap-3 mt-5">
+        {/* Mini stats — 2x2 on mobile, 4-up on larger screens */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mt-5">
           {[
             { icon: Building2, label: "Projects", value: String(projectCount), sub: "Hotel assets" },
             { icon: Briefcase, label: "Deals", value: String(owner.deal_count), sub: "Active + closed" },
