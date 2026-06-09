@@ -9,10 +9,14 @@ sync when cutting a release.
 ## [1.1.0] — 2026-06-09
 
 ### Added
-- **Reports** (`/reports`) — auto-generated from live data. **Pipeline Report**:
-  KPI summary (active/total deals, active + weighted pipeline), breakdown by
-  stage / deal type / country, and the full deal-by-deal list. One-click
-  **Print / Save as PDF** (A4, branded, board-ready).
+- **Reports** (`/reports`) — auto-generated from live data, one-click
+  **Print / Save as PDF** (A4, branded, board-ready):
+  - **Pipeline Report** — KPIs, breakdown by stage / type / country, full deal list.
+  - **Owner Relationship Report** — owners by priority & relationship, catch-up
+    status, projects/deals per owner.
+  - **Feasibility Scorecard Report** — assessed deals ranked by score, by
+    recommendation, 6-dimension breakdown.
+  - **Activity Summary Report** — activities by type, most active deals, recent log.
 - **Owner logos** — upload/replace/remove a company logo; shown on the owner
   header, list and mobile cards (graceful initials fallback).
 

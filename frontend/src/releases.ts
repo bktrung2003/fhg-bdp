@@ -17,7 +17,7 @@ export const RELEASES: Release[] = [
     date: "2026-06-09",
     title: "Reports + polish",
     highlights: [
-      "Reports — auto-generated Pipeline Report (KPIs, stage/type/country breakdown, full deal list) with one-click Print / Save as PDF",
+      "Reports — auto-generated, one-click Print / Save as PDF: Pipeline, Owner Relationship, Feasibility Scorecard, Activity Summary",
       "Owner logos — upload a company logo, shown across owner views",
       "Owner contacts — full edit + phone field; delete interactions",
       "Owner & Project pages handle scale — search, filters, sort, grouped deals",

@@ -1,9 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
-import { FileBarChart, Printer, Building2, TrendingUp, Layers, Globe } from "lucide-react"
+import { FileBarChart, Printer, Building2, TrendingUp, Layers, Globe, UserCheck, Star, Activity } from "lucide-react"
 
-import { DealsService, type DealPublic } from "@/client"
+import {
+  DealsService, OwnersService, FeasibilityService, ActivitiesService,
+  type DealPublic,
+} from "@/client"
 import { Button } from "@/components/ui/button"
 import useAuth from "@/hooks/useAuth"
 
@@ -129,6 +132,136 @@ function printPipelineReport(deals: DealPublic[], by: ReturnType<typeof aggregat
 }
 function esc(s: string) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!)) }
 
+// Shared A4 print shell — header + styles + footer. body = inner HTML.
+function printShell(title: string, body: string, who: string) {
+  const w = window.open("", "_blank", "width=1000,height=1300")
+  if (!w) { alert("Popup blocked — please allow popups and try again."); return }
+  const now = new Date().toLocaleString("en-GB", { dateStyle: "long", timeStyle: "short" })
+  const O = "#E8913A", INK = "#2A2E37", MUTE = "#8A8F98", LINE = "#E4E0D8"
+  w.document.write(`<!doctype html><html><head><meta charset=utf-8><title>${esc(title)}</title>
+  <style>
+    @page { size: A4 portrait; margin: 12mm; }
+    * { box-sizing: border-box; }
+    body { font-family: Calibri, Arial, sans-serif; color: ${INK}; margin: 0; font-size: 11px; }
+    .hd { display:flex; justify-content:space-between; align-items:flex-start; border-bottom: 3px solid ${O}; padding-bottom: 8px; margin-bottom: 14px; }
+    .hd h1 { margin:0; font-family: Georgia, serif; font-size: 20px; }
+    .hd .sub { color:${MUTE}; font-size: 10px; margin-top: 2px; }
+    .hd .meta { text-align:right; color:${MUTE}; font-size: 10px; }
+    h2 { font-family: Georgia, serif; font-size: 13px; margin: 16px 0 6px; color:${INK}; }
+    .kpis { display:flex; gap:8px; margin-bottom: 6px; }
+    .kpi { flex:1; border:1px solid ${LINE}; border-radius:6px; padding:8px 10px; }
+    .kpi .l { color:${MUTE}; font-size:9px; text-transform:uppercase; letter-spacing:.04em; }
+    .kpi .v { font-size:18px; font-weight:bold; margin-top:2px; }
+    table { width:100%; border-collapse:collapse; }
+    th { text-align:left; font-size:9px; text-transform:uppercase; letter-spacing:.03em; color:${MUTE}; border-bottom:1.5px solid ${LINE}; padding:5px 6px; }
+    td { padding:5px 6px; border-bottom:1px solid #F0EDE7; vertical-align:top; }
+    td.n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    td.muted { color:${MUTE}; font-size:10px; }
+    .chip { background:#F4EFE9; border-radius:10px; padding:1px 7px; font-size:9px; }
+    .two { display:flex; gap:16px; } .two > div { flex:1; }
+    tfoot td { font-weight:bold; border-top:1.5px solid ${LINE}; }
+    .ft { margin-top:16px; color:${MUTE}; font-size:9px; border-top:1px solid ${LINE}; padding-top:6px; }
+  </style></head><body>
+  <div class=hd>
+    <div><h1>${esc(title)}</h1><div class=sub>Fusion BD CORE OS · Business Development</div></div>
+    <div class=meta>Generated ${now}<br>by ${esc(who)}</div>
+  </div>
+  ${body}
+  <div class=ft>Confidential — Fusion Hotel Group.</div>
+  </body></html>`)
+  w.document.close()
+  setTimeout(() => { w.focus(); w.print() }, 350)
+}
+
+// ── Owner Relationship Report ────────────────────────────────────────────────
+function printOwnerReport(owners: any[], who: string) {
+  const grp = (key: (o: any) => string) => {
+    const m: Record<string, number> = {}
+    owners.forEach(o => { const k = key(o) || "—"; m[k] = (m[k] ?? 0) + 1 })
+    return Object.entries(m).sort((a, b) => b[1] - a[1])
+  }
+  const prio = grp(o => o.priority), rel = grp(o => o.relationship)
+  const sorted = [...owners].sort((a, b) => (b.deal_count ?? 0) - (a.deal_count ?? 0))
+  const rows = sorted.map(o => `<tr>
+    <td>${esc(o.company)}</td><td>${esc(o.country ?? "—")}</td>
+    <td><span class=chip>${esc(o.priority ?? "—")}</span></td>
+    <td>${esc(o.relationship ?? "—")}</td><td>${esc(o.catchup_status ?? "—")}</td>
+    <td class=n>${o.project_count ?? 0}</td><td class=n>${o.deal_count ?? 0}</td>
+    <td class=muted>${esc(o.last_interaction ?? "—")}</td></tr>`).join("")
+  const body = `
+  <div class=kpis>
+    <div class=kpi><div class=l>Owners</div><div class=v>${owners.length}</div></div>
+    <div class=kpi><div class=l>Strategic / High</div><div class=v>${owners.filter(o => ["Strategic","High"].includes(o.priority)).length}</div></div>
+    <div class=kpi><div class=l>Strong relationships</div><div class=v>${owners.filter(o => o.relationship === "Strong" || o.relationship === "Strategic Partner").length}</div></div>
+    <div class=kpi><div class=l>Overdue catch-up</div><div class=v>${owners.filter(o => o.catchup_status === "Overdue").length}</div></div>
+  </div>
+  <div class=two>
+    <div><h2>By priority</h2><table><thead><tr><th>Priority</th><th style="text-align:right">Owners</th></tr></thead><tbody>${prio.map(([k,v])=>`<tr><td>${esc(k)}</td><td class=n>${v}</td></tr>`).join("")}</tbody></table></div>
+    <div><h2>By relationship</h2><table><thead><tr><th>Relationship</th><th style="text-align:right">Owners</th></tr></thead><tbody>${rel.map(([k,v])=>`<tr><td>${esc(k)}</td><td class=n>${v}</td></tr>`).join("")}</tbody></table></div>
+  </div>
+  <h2>All owners (${owners.length})</h2>
+  <table><thead><tr><th>Owner</th><th>Country</th><th>Priority</th><th>Relationship</th><th>Catch-up</th><th style="text-align:right">Projects</th><th style="text-align:right">Deals</th><th>Last met</th></tr></thead>
+  <tbody>${rows}</tbody></table>`
+  printShell("Owner Relationship Report", body, who)
+}
+
+// ── Feasibility Scorecard Report ─────────────────────────────────────────────
+function printFeasibilityReport(rows: any[], avg: number, who: string) {
+  const sorted = [...rows].sort((a, b) => (b.total_score ?? 0) - (a.total_score ?? 0))
+  const recGrp: Record<string, number> = {}
+  rows.forEach(r => { recGrp[r.recommendation] = (recGrp[r.recommendation] ?? 0) + 1 })
+  const recRows = Object.entries(recGrp).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<tr><td>${esc(k)}</td><td class=n>${v}</td></tr>`).join("")
+  const dealRows = sorted.map(r => `<tr>
+    <td>${esc(r.deal_name)}</td><td>${esc(r.country ?? "—")}</td><td><span class=chip>${esc(r.stage ?? "—")}</span></td>
+    <td class=n><b>${r.total_score}</b>/100</td><td>${esc(r.recommendation)}</td>
+    <td class=n>${r.location_score}</td><td class=n>${r.market_score}</td><td class=n>${r.owner_readiness_score}</td>
+    <td class=n>${r.brand_fit_score}</td><td class=n>${r.financial_score}</td><td class=n>${r.technical_score}</td></tr>`).join("")
+  const body = `
+  <div class=kpis>
+    <div class=kpi><div class=l>Assessed deals</div><div class=v>${rows.length}</div></div>
+    <div class=kpi><div class=l>Average score</div><div class=v>${avg.toFixed(0)}/100</div></div>
+    <div class=kpi><div class=l>Strong Proceed</div><div class=v>${rows.filter(r => r.recommendation === "Strong Proceed").length}</div></div>
+    <div class=kpi><div class=l>Reject / Hold</div><div class=v>${rows.filter(r => ["Reject","Hold"].includes(r.recommendation)).length}</div></div>
+  </div>
+  <h2>By recommendation</h2>
+  <table style="max-width:340px"><thead><tr><th>Recommendation</th><th style="text-align:right">Deals</th></tr></thead><tbody>${recRows}</tbody></table>
+  <h2>Scorecard — all assessed deals (${rows.length})</h2>
+  <table><thead><tr><th>Deal</th><th>Country</th><th>Stage</th><th style="text-align:right">Score</th><th>Recommendation</th>
+  <th style="text-align:right">Loc</th><th style="text-align:right">Mkt</th><th style="text-align:right">Own</th><th style="text-align:right">Brnd</th><th style="text-align:right">Fin</th><th style="text-align:right">Tech</th></tr></thead>
+  <tbody>${dealRows}</tbody></table>
+  <p style="color:#8A8F98;font-size:9px;margin-top:6px">Dimensions: Loc=Location · Mkt=Market · Own=Owner readiness · Brnd=Brand fit · Fin=Financial · Tech=Technical (each /5).</p>`
+  printShell("Feasibility Scorecard Report", body, who)
+}
+
+// ── Activity Summary Report ──────────────────────────────────────────────────
+function printActivityReport(acts: any[], who: string) {
+  const grp = (key: (a: any) => string) => {
+    const m: Record<string, number> = {}
+    acts.forEach(a => { const k = key(a) || "—"; m[k] = (m[k] ?? 0) + 1 })
+    return Object.entries(m).sort((a, b) => b[1] - a[1])
+  }
+  const byType = grp(a => a.activity_type ?? a.interaction_type)
+  const byDeal = grp(a => a.deal_name).slice(0, 15)
+  const recent = [...acts].sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 40)
+  const recentRows = recent.map(a => `<tr>
+    <td class=muted style="white-space:nowrap">${esc(a.date ?? "—")}</td>
+    <td><span class=chip>${esc(a.activity_type ?? a.interaction_type ?? "—")}</span></td>
+    <td>${esc(a.deal_name ?? "—")}</td><td class=muted>${esc(a.note ?? "")}</td></tr>`).join("")
+  const body = `
+  <div class=kpis>
+    <div class=kpi><div class=l>Activities logged</div><div class=v>${acts.length}</div></div>
+    <div class=kpi><div class=l>Activity types</div><div class=v>${byType.length}</div></div>
+    <div class=kpi><div class=l>Deals touched</div><div class=v>${grp(a => a.deal_name).length}</div></div>
+  </div>
+  <div class=two>
+    <div><h2>By type</h2><table><thead><tr><th>Type</th><th style="text-align:right">Count</th></tr></thead><tbody>${byType.map(([k,v])=>`<tr><td>${esc(k)}</td><td class=n>${v}</td></tr>`).join("")}</tbody></table></div>
+    <div><h2>Most active deals</h2><table><thead><tr><th>Deal</th><th style="text-align:right">Activities</th></tr></thead><tbody>${byDeal.map(([k,v])=>`<tr><td>${esc(k)}</td><td class=n>${v}</td></tr>`).join("")}</tbody></table></div>
+  </div>
+  <h2>Recent activity (latest ${recent.length})</h2>
+  <table><thead><tr><th>Date</th><th>Type</th><th>Deal</th><th>Note</th></tr></thead><tbody>${recentRows}</tbody></table>`
+  printShell("Activity Summary Report", body, who)
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 function ReportsPage() {
   const { user } = useAuth()
@@ -136,7 +269,24 @@ function ReportsPage() {
     queryKey: ["reports-deals"],
     queryFn: () => DealsService.listDeals({ limit: 500 }),
   })
+  const { data: ownersData } = useQuery({
+    queryKey: ["reports-owners"],
+    queryFn: () => OwnersService.listOwners({ limit: 500 }),
+  })
+  const { data: scorecard } = useQuery({
+    queryKey: ["reports-scorecard"],
+    queryFn: () => FeasibilityService.pipelineScorecard({}),
+  })
+  const { data: actData } = useQuery({
+    queryKey: ["reports-activities"],
+    queryFn: () => ActivitiesService.listActivities({ limit: 500 }),
+  })
+
   const deals = (data?.data ?? []) as DealPublic[]
+  const owners = (ownersData?.data ?? []) as any[]
+  const scoreRows = ((scorecard as any)?.data ?? []) as any[]
+  const scoreAvg = ((scorecard as any)?.avg_score ?? 0) as number
+  const activities = (actData?.data ?? []) as any[]
   const by = useMemo(() => aggregate(deals), [deals])
   const who = user?.full_name || user?.email || "—"
 
@@ -216,11 +366,48 @@ function ReportsPage() {
         </div>
       </div>
 
-      {/* Coming soon */}
-      <div className="rounded-xl border border-dashed bg-muted/20 p-4">
-        <p className="text-sm font-semibold text-muted-foreground">More reports (coming soon)</p>
-        <p className="text-xs text-muted-foreground mt-1">Owner relationship report · Feasibility scorecard report · Activity summary. Tell us which to prioritise.</p>
+      {/* More reports */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <ReportCard
+          icon={UserCheck} title="Owner Relationship Report"
+          desc="Owners by priority & relationship, catch-up status, projects/deals per owner."
+          stat={`${owners.length} owners`}
+          disabled={owners.length === 0}
+          onPrint={() => printOwnerReport(owners, who)}
+        />
+        <ReportCard
+          icon={Star} title="Feasibility Scorecard Report"
+          desc="All assessed deals ranked by score, recommendation bands, 6-dimension breakdown."
+          stat={`${scoreRows.length} assessed · avg ${scoreAvg ? scoreAvg.toFixed(0) : 0}/100`}
+          disabled={scoreRows.length === 0}
+          onPrint={() => printFeasibilityReport(scoreRows, scoreAvg, who)}
+        />
+        <ReportCard
+          icon={Activity} title="Activity Summary Report"
+          desc="Interactions by type, most active deals, recent activity log."
+          stat={`${activities.length} activities`}
+          disabled={activities.length === 0}
+          onPrint={() => printActivityReport(activities, who)}
+        />
       </div>
+    </div>
+  )
+}
+
+function ReportCard({ icon: Icon, title, desc, stat, disabled, onPrint }: {
+  icon: any; title: string; desc: string; stat: string; disabled?: boolean; onPrint: () => void
+}) {
+  return (
+    <div className="rounded-xl border bg-card p-4 flex flex-col">
+      <div className="flex items-center gap-2 mb-1">
+        <div className="rounded-md bg-primary/10 p-1.5"><Icon className="h-4 w-4 text-primary" /></div>
+        <h3 className="font-semibold text-sm leading-tight">{title}</h3>
+      </div>
+      <p className="text-xs text-muted-foreground mt-1 flex-1">{desc}</p>
+      <p className="text-[11px] font-medium text-muted-foreground mt-2">{stat}</p>
+      <Button variant="outline" size="sm" className="mt-3 w-full" onClick={onPrint} disabled={disabled}>
+        <Printer className="h-3.5 w-3.5 mr-1.5" />Print / Save PDF
+      </Button>
     </div>
   )
 }
