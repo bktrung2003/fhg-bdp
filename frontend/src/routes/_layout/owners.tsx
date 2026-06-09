@@ -9,6 +9,7 @@ import { useMemo, useState } from "react"
 import { OwnersService, type OwnerPublic } from "@/client"
 import { AddOwner } from "@/components/Owners/AddOwner"
 import { EditOwner } from "@/components/Owners/EditOwner"
+import { OwnerAvatar } from "@/components/Owners/OwnerAvatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -302,9 +303,7 @@ function OwnersPage() {
                 className="w-full text-left rounded-lg border bg-card p-3 active:bg-muted/40 transition-colors"
               >
                 <div className="flex items-center gap-2.5">
-                  <div className="h-9 w-9 rounded-md bg-primary/10 text-primary flex items-center justify-center font-bold text-xs flex-shrink-0">
-                    {o.company.slice(0, 2).toUpperCase()}
-                  </div>
+                  <OwnerAvatar ownerId={o.id} company={o.company} logoPath={(o as any).logo_path} className="h-9 w-9 rounded-md text-xs" />
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-sm truncate">{o.company}</p>
                     <p className="text-[11px] text-muted-foreground">{o.country} · {o.owner_type}</p>
@@ -350,9 +349,7 @@ function OwnersPage() {
                 >
                   <td className="py-3 pr-3 pl-3">
                     <div className="flex items-center gap-2.5">
-                      <div className="h-9 w-9 rounded-md bg-primary/10 text-primary flex items-center justify-center font-bold text-xs flex-shrink-0">
-                        {o.company.slice(0, 2).toUpperCase()}
-                      </div>
+                      <OwnerAvatar ownerId={o.id} company={o.company} logoPath={(o as any).logo_path} className="h-9 w-9 rounded-md text-xs" />
                       <div className="min-w-0">
                         <p className="font-semibold text-sm">{o.company}</p>
                         {o.assets && <p className="text-[11px] text-muted-foreground truncate max-w-[200px]">{o.assets}</p>}

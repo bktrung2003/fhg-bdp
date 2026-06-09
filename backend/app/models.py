@@ -415,6 +415,7 @@ class OwnerBase(_EnumAsStr):
     assets: str | None = Field(default=None, max_length=500)
     financial_health: str | None = Field(default=None, max_length=20)  # Strong/Moderate/Unknown
     strategic_value: str | None = Field(default=None, max_length=1000)
+    logo_path: str | None = Field(default=None, max_length=500)  # storage key for owner logo
 
 
 class OwnerCreate(OwnerBase):
@@ -432,6 +433,7 @@ class OwnerUpdate(SQLModel):
     assets: str | None = Field(default=None, max_length=500)
     financial_health: str | None = Field(default=None, max_length=20)
     strategic_value: str | None = Field(default=None, max_length=1000)
+    logo_path: str | None = Field(default=None, max_length=500)
 
 
 class Owner(OwnerBase, table=True):

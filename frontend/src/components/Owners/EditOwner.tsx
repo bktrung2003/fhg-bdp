@@ -1,9 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
-import { Pencil } from "lucide-react"
-import { useEffect, useState } from "react"
+import { Pencil, Upload, Trash2 } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
 
-import { OwnersService, type OwnerPublic, type OwnerUpdate } from "@/client"
+import { OpenAPI, OwnersService, type OwnerPublic, type OwnerUpdate } from "@/client"
+import { OwnerAvatar } from "@/components/Owners/OwnerAvatar"
 import { Button } from "@/components/ui/button"
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
@@ -54,6 +55,47 @@ export function EditOwner({ owner, trigger }: Props) {
 
   const onSubmit = (d: OwnerUpdate) => mutation.mutate(d)
 
+  // ── Logo upload ──
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+  const [logoVer, setLogoVer] = useState(0) // bump to refresh preview after change
+  const hasLogo = !!(owner as any).logo_path
+
+  async function authToken() {
+    return typeof OpenAPI.TOKEN === "function" ? await (OpenAPI.TOKEN as any)({}) : OpenAPI.TOKEN
+  }
+  const refreshOwner = () => {
+    qc.invalidateQueries({ queryKey: ["owners"] })
+    qc.invalidateQueries({ queryKey: ["owner", owner.id] })
+    setLogoVer(v => v + 1)
+  }
+  async function uploadLogo(file: File) {
+    setUploading(true)
+    try {
+      const fd = new FormData(); fd.append("file", file)
+      const res = await fetch(`${OpenAPI.BASE}/api/v1/owners/${owner.id}/logo`, {
+        method: "POST", headers: { Authorization: `Bearer ${await authToken()}` }, body: fd,
+      })
+      if (!res.ok) throw new Error(await res.text())
+      ;(owner as any).logo_path = "uploaded"  // optimistic so preview shows
+      showSuccessToast("Logo updated.")
+      refreshOwner()
+    } catch (e: any) {
+      showSuccessToast(e?.message ?? "Upload failed")
+    } finally { setUploading(false) }
+  }
+  async function removeLogo() {
+    setUploading(true)
+    try {
+      await fetch(`${OpenAPI.BASE}/api/v1/owners/${owner.id}/logo`, {
+        method: "DELETE", headers: { Authorization: `Bearer ${await authToken()}` },
+      })
+      ;(owner as any).logo_path = null
+      showSuccessToast("Logo removed.")
+      refreshOwner()
+    } finally { setUploading(false) }
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -65,6 +107,37 @@ export function EditOwner({ owner, trigger }: Props) {
       </DialogTrigger>
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>Edit — {owner.company}</DialogTitle></DialogHeader>
+
+        {/* Logo */}
+        <div className="flex items-center gap-4 rounded-lg border bg-muted/30 p-3">
+          <OwnerAvatar
+            key={logoVer}
+            ownerId={owner.id}
+            company={owner.company}
+            logoPath={(owner as any).logo_path}
+            className="h-14 w-14 rounded-lg text-lg"
+          />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium">Company logo</p>
+            <p className="text-[11px] text-muted-foreground">PNG, JPG, WEBP or SVG · max 3MB</p>
+          </div>
+          <input
+            ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml"
+            className="hidden"
+            onChange={e => { const f = e.target.files?.[0]; if (f) uploadLogo(f); e.currentTarget.value = "" }}
+          />
+          <div className="flex items-center gap-1.5">
+            <Button type="button" variant="outline" size="sm" disabled={uploading} onClick={() => fileRef.current?.click()}>
+              <Upload className="h-3.5 w-3.5 mr-1" />{uploading ? "..." : hasLogo ? "Replace" : "Upload"}
+            </Button>
+            {hasLogo && (
+              <Button type="button" variant="ghost" size="sm" className="text-red-400 hover:text-red-600" disabled={uploading} onClick={removeLogo}>
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            )}
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2 space-y-1.5">
