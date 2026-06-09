@@ -292,56 +292,37 @@ function ReportsPage() {
 
   const [showPreview, setShowPreview] = useState(false)
 
-  // Reports grouped by category — scales to many reports without clutter.
-  const categories = [
+  // Flat list of reports (with a category tag) — one uniform grid that fills
+  // nicely now and still scales to many reports later.
+  const reports = [
     {
-      title: "Pipeline & Deals",
-      reports: [
-        {
-          icon: TrendingUp, title: "Pipeline Report",
-          desc: "Executive summary — KPIs, breakdown by stage/type/country, full deal list.",
-          stat: `${by.active.length} active · ${fmtM(by.totalWeighted)} weighted`,
-          disabled: deals.length === 0,
-          onPrint: () => printPipelineReport(deals, by, who),
-          onPreview: () => setShowPreview(s => !s),
-        },
-      ],
+      category: "Pipeline & Deals", icon: TrendingUp, title: "Pipeline Report",
+      desc: "Executive summary — KPIs, breakdown by stage/type/country, full deal list.",
+      stat: `${by.active.length} active · ${fmtM(by.totalWeighted)} weighted`,
+      disabled: deals.length === 0,
+      onPrint: () => printPipelineReport(deals, by, who),
+      onPreview: () => setShowPreview(s => !s),
     },
     {
-      title: "Relationships",
-      reports: [
-        {
-          icon: UserCheck, title: "Owner Relationship Report",
-          desc: "Owners by priority & relationship, catch-up status, projects/deals per owner.",
-          stat: `${owners.length} owners`,
-          disabled: owners.length === 0,
-          onPrint: () => printOwnerReport(owners, who),
-        },
-      ],
+      category: "Relationships", icon: UserCheck, title: "Owner Relationship Report",
+      desc: "Owners by priority & relationship, catch-up status, projects/deals per owner.",
+      stat: `${owners.length} owners`,
+      disabled: owners.length === 0,
+      onPrint: () => printOwnerReport(owners, who),
     },
     {
-      title: "Governance",
-      reports: [
-        {
-          icon: Star, title: "Feasibility Scorecard Report",
-          desc: "Assessed deals ranked by score, recommendation bands, 6-dimension breakdown.",
-          stat: `${scoreRows.length} assessed · avg ${scoreAvg ? scoreAvg.toFixed(0) : 0}/100`,
-          disabled: scoreRows.length === 0,
-          onPrint: () => printFeasibilityReport(scoreRows, scoreAvg, who),
-        },
-      ],
+      category: "Governance", icon: Star, title: "Feasibility Scorecard Report",
+      desc: "Assessed deals ranked by score, recommendation bands, 6-dimension breakdown.",
+      stat: `${scoreRows.length} assessed · avg ${scoreAvg ? scoreAvg.toFixed(0) : 0}/100`,
+      disabled: scoreRows.length === 0,
+      onPrint: () => printFeasibilityReport(scoreRows, scoreAvg, who),
     },
     {
-      title: "Activity",
-      reports: [
-        {
-          icon: Activity, title: "Activity Summary Report",
-          desc: "Interactions by type, most active deals, recent activity log.",
-          stat: `${activities.length} activities`,
-          disabled: activities.length === 0,
-          onPrint: () => printActivityReport(activities, who),
-        },
-      ],
+      category: "Activity", icon: Activity, title: "Activity Summary Report",
+      desc: "Interactions by type, most active deals, recent activity log.",
+      stat: `${activities.length} activities`,
+      disabled: activities.length === 0,
+      onPrint: () => printActivityReport(activities, who),
     },
   ]
 
@@ -356,14 +337,9 @@ function ReportsPage() {
         </p>
       </div>
 
-      {categories.map(cat => (
-        <div key={cat.title}>
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">{cat.title}</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {cat.reports.map(r => <ReportCard key={r.title} {...r} />)}
-          </div>
-        </div>
-      ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {reports.map(r => <ReportCard key={r.title} {...r} />)}
+      </div>
 
       {/* Pipeline preview (toggled from the Pipeline card) */}
       {showPreview && (
@@ -419,16 +395,21 @@ function ReportsPage() {
   )
 }
 
-function ReportCard({ icon: Icon, title, desc, stat, disabled, onPrint, onPreview }: {
-  icon: any; title: string; desc: string; stat: string; disabled?: boolean; onPrint: () => void; onPreview?: () => void
+function ReportCard({ category, icon: Icon, title, desc, stat, disabled, onPrint, onPreview }: {
+  category?: string; icon: any; title: string; desc: string; stat: string; disabled?: boolean; onPrint: () => void; onPreview?: () => void
 }) {
   return (
     <div className="rounded-xl border bg-card p-4 flex flex-col">
-      <div className="flex items-center gap-2 mb-1">
-        <div className="rounded-md bg-primary/10 p-1.5"><Icon className="h-4 w-4 text-primary" /></div>
-        <h3 className="font-semibold text-sm leading-tight">{title}</h3>
+      <div className="flex items-start gap-3">
+        <div className="rounded-lg bg-primary/10 p-2 shrink-0"><Icon className="h-5 w-5 text-primary" /></div>
+        <div className="min-w-0">
+          {category && (
+            <p className="text-[9px] font-bold uppercase tracking-wider text-primary/70">{category}</p>
+          )}
+          <h3 className="font-semibold text-sm leading-tight">{title}</h3>
+        </div>
       </div>
-      <p className="text-xs text-muted-foreground mt-1 flex-1">{desc}</p>
+      <p className="text-xs text-muted-foreground mt-2 flex-1">{desc}</p>
       <p className="text-[11px] font-medium text-muted-foreground mt-2">{stat}</p>
       <div className="flex gap-2 mt-3">
         <Button variant="outline" size="sm" className="flex-1" onClick={onPrint} disabled={disabled}>
