@@ -11,6 +11,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { isLoggedIn } from "@/hooks/useAuth"
+import { useIdleTimeout } from "@/hooks/useIdleTimeout"
 
 export const Route = createFileRoute("/_layout")({
   component: Layout,
@@ -24,6 +25,7 @@ export const Route = createFileRoute("/_layout")({
 })
 
 function Layout() {
+  useIdleTimeout()
   return (
     <SidebarProvider>
       <AppSidebar />

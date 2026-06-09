@@ -6,6 +6,17 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/) and
 (`/whats-new`) is generated from `frontend/src/releases.ts` — keep the two in
 sync when cutting a release.
 
+## [1.2.0] — 2026-06-09
+
+### Added
+- **Two-factor authentication (2FA)** — opt-in TOTP per user (Settings →
+  Security). Scan a QR with Google/Microsoft Authenticator, verify a code to
+  enable. Sign-in then requires a 6-digit code. Backend: `pyotp`,
+  `user.totp_secret`/`totp_enabled`, `/2fa/setup|enable|disable`, login flow
+  returns `TOTP_REQUIRED` then accepts a `code`.
+- **Auto sign-out when idle** — per-device timeout (Off / 5 / 15 / 30 / 60 min)
+  in Settings → Security; activity-reset timer clears the session on timeout.
+
 ## [1.1.0] — 2026-06-09
 
 ### Added

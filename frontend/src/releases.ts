@@ -2,7 +2,7 @@
 // Bump CURRENT_VERSION and add an entry here on each meaningful release.
 // Powers the version badge + the /whats-new page.
 
-export const CURRENT_VERSION = "1.1.0"
+export const CURRENT_VERSION = "1.2.0"
 
 export interface Release {
   version: string
@@ -12,6 +12,16 @@ export interface Release {
 }
 
 export const RELEASES: Release[] = [
+  {
+    version: "1.2.0",
+    date: "2026-06-09",
+    title: "Security — 2FA & auto sign-out",
+    highlights: [
+      "Two-factor authentication (2FA) — opt-in TOTP with Google / Microsoft Authenticator (Settings → Security)",
+      "Auto sign-out when idle — choose 5 / 15 / 30 / 60 min per device (Settings → Security)",
+      "Sign-in adds a 6-digit code step for accounts with 2FA enabled",
+    ],
+  },
   {
     version: "1.1.0",
     date: "2026-06-09",

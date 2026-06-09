@@ -72,6 +72,9 @@ class UpdatePassword(SQLModel):
 class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
+    # 2FA (TOTP) — opt-in. Secret kept server-side only (never in UserPublic).
+    totp_secret: str | None = Field(default=None, max_length=64)
+    totp_enabled: bool = Field(default=False)
     created_at: datetime | None = Field(
         default_factory=get_datetime_utc,
         sa_type=DateTime(timezone=True),  # type: ignore
@@ -83,6 +86,7 @@ class User(UserBase, table=True):
 class UserPublic(UserBase):
     id: uuid.UUID
     created_at: datetime | None = None
+    totp_enabled: bool = False
 
 
 class UsersPublic(SQLModel):

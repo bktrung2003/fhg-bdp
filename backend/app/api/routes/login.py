@@ -1,7 +1,7 @@
 from datetime import timedelta
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Form, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -22,10 +22,14 @@ router = APIRouter(tags=["login"])
 
 @router.post("/login/access-token")
 def login_access_token(
-    session: SessionDep, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+    session: SessionDep,
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    code: Annotated[str | None, Form()] = None,
 ) -> Token:
     """
-    OAuth2 compatible token login, get an access token for future requests
+    OAuth2 compatible token login. If the user has 2FA enabled, a valid TOTP
+    `code` is required; otherwise a 401 "TOTP_REQUIRED" is returned so the
+    client can prompt for the 6-digit code.
     """
     user = crud.authenticate(
         session=session, email=form_data.username, password=form_data.password
@@ -34,6 +38,14 @@ def login_access_token(
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
+
+    if user.totp_enabled and user.totp_secret:
+        if not code:
+            raise HTTPException(status_code=401, detail="TOTP_REQUIRED")
+        import pyotp
+        if not pyotp.TOTP(user.totp_secret).verify(code.strip(), valid_window=1):
+            raise HTTPException(status_code=401, detail="Invalid authentication code")
+
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return Token(
         access_token=security.create_access_token(

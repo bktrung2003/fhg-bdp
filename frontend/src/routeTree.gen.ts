@@ -15,10 +15,13 @@ import { Route as RecoverPasswordRouteImport } from './routes/recover-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
+import { Route as LayoutWhatsNewRouteImport } from './routes/_layout/whats-new'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
+import { Route as LayoutReportsRouteImport } from './routes/_layout/reports'
 import { Route as LayoutProjectsRouteImport } from './routes/_layout/projects'
 import { Route as LayoutPreopeningRouteImport } from './routes/_layout/preopening'
 import { Route as LayoutOwnersRouteImport } from './routes/_layout/owners'
+import { Route as LayoutHelpRouteImport } from './routes/_layout/help'
 import { Route as LayoutFeasibilityRouteImport } from './routes/_layout/feasibility'
 import { Route as LayoutDocumentsRouteImport } from './routes/_layout/documents'
 import { Route as LayoutDealsRouteImport } from './routes/_layout/deals'
@@ -56,9 +59,19 @@ const LayoutIndexRoute = LayoutIndexRouteImport.update({
   path: '/',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutWhatsNewRoute = LayoutWhatsNewRouteImport.update({
+  id: '/whats-new',
+  path: '/whats-new',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutReportsRoute = LayoutReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutProjectsRoute = LayoutProjectsRouteImport.update({
@@ -74,6 +87,11 @@ const LayoutPreopeningRoute = LayoutPreopeningRouteImport.update({
 const LayoutOwnersRoute = LayoutOwnersRouteImport.update({
   id: '/owners',
   path: '/owners',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutHelpRoute = LayoutHelpRouteImport.update({
+  id: '/help',
+  path: '/help',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutFeasibilityRoute = LayoutFeasibilityRouteImport.update({
@@ -122,10 +140,13 @@ export interface FileRoutesByFullPath {
   '/deals': typeof LayoutDealsRoute
   '/documents': typeof LayoutDocumentsRoute
   '/feasibility': typeof LayoutFeasibilityRoute
+  '/help': typeof LayoutHelpRoute
   '/owners': typeof LayoutOwnersRoute
   '/preopening': typeof LayoutPreopeningRoute
   '/projects': typeof LayoutProjectsRoute
+  '/reports': typeof LayoutReportsRoute
   '/settings': typeof LayoutSettingsRoute
+  '/whats-new': typeof LayoutWhatsNewRoute
   '/deals/$dealId': typeof LayoutDealsDealIdRoute
   '/owners/$ownerId': typeof LayoutOwnersOwnerIdRoute
   '/projects/$projectId': typeof LayoutProjectsProjectIdRoute
@@ -139,10 +160,13 @@ export interface FileRoutesByTo {
   '/deals': typeof LayoutDealsRoute
   '/documents': typeof LayoutDocumentsRoute
   '/feasibility': typeof LayoutFeasibilityRoute
+  '/help': typeof LayoutHelpRoute
   '/owners': typeof LayoutOwnersRoute
   '/preopening': typeof LayoutPreopeningRoute
   '/projects': typeof LayoutProjectsRoute
+  '/reports': typeof LayoutReportsRoute
   '/settings': typeof LayoutSettingsRoute
+  '/whats-new': typeof LayoutWhatsNewRoute
   '/': typeof LayoutIndexRoute
   '/deals/$dealId': typeof LayoutDealsDealIdRoute
   '/owners/$ownerId': typeof LayoutOwnersOwnerIdRoute
@@ -159,10 +183,13 @@ export interface FileRoutesById {
   '/_layout/deals': typeof LayoutDealsRoute
   '/_layout/documents': typeof LayoutDocumentsRoute
   '/_layout/feasibility': typeof LayoutFeasibilityRoute
+  '/_layout/help': typeof LayoutHelpRoute
   '/_layout/owners': typeof LayoutOwnersRoute
   '/_layout/preopening': typeof LayoutPreopeningRoute
   '/_layout/projects': typeof LayoutProjectsRoute
+  '/_layout/reports': typeof LayoutReportsRoute
   '/_layout/settings': typeof LayoutSettingsRoute
+  '/_layout/whats-new': typeof LayoutWhatsNewRoute
   '/_layout/': typeof LayoutIndexRoute
   '/_layout/deals_/$dealId': typeof LayoutDealsDealIdRoute
   '/_layout/owners_/$ownerId': typeof LayoutOwnersOwnerIdRoute
@@ -180,10 +207,13 @@ export interface FileRouteTypes {
     | '/deals'
     | '/documents'
     | '/feasibility'
+    | '/help'
     | '/owners'
     | '/preopening'
     | '/projects'
+    | '/reports'
     | '/settings'
+    | '/whats-new'
     | '/deals/$dealId'
     | '/owners/$ownerId'
     | '/projects/$projectId'
@@ -197,10 +227,13 @@ export interface FileRouteTypes {
     | '/deals'
     | '/documents'
     | '/feasibility'
+    | '/help'
     | '/owners'
     | '/preopening'
     | '/projects'
+    | '/reports'
     | '/settings'
+    | '/whats-new'
     | '/'
     | '/deals/$dealId'
     | '/owners/$ownerId'
@@ -216,10 +249,13 @@ export interface FileRouteTypes {
     | '/_layout/deals'
     | '/_layout/documents'
     | '/_layout/feasibility'
+    | '/_layout/help'
     | '/_layout/owners'
     | '/_layout/preopening'
     | '/_layout/projects'
+    | '/_layout/reports'
     | '/_layout/settings'
+    | '/_layout/whats-new'
     | '/_layout/'
     | '/_layout/deals_/$dealId'
     | '/_layout/owners_/$ownerId'
@@ -278,11 +314,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/whats-new': {
+      id: '/_layout/whats-new'
+      path: '/whats-new'
+      fullPath: '/whats-new'
+      preLoaderRoute: typeof LayoutWhatsNewRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/settings': {
       id: '/_layout/settings'
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof LayoutSettingsRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/reports': {
+      id: '/_layout/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof LayoutReportsRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/projects': {
@@ -304,6 +354,13 @@ declare module '@tanstack/react-router' {
       path: '/owners'
       fullPath: '/owners'
       preLoaderRoute: typeof LayoutOwnersRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/help': {
+      id: '/_layout/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof LayoutHelpRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/feasibility': {
@@ -363,10 +420,13 @@ interface LayoutRouteChildren {
   LayoutDealsRoute: typeof LayoutDealsRoute
   LayoutDocumentsRoute: typeof LayoutDocumentsRoute
   LayoutFeasibilityRoute: typeof LayoutFeasibilityRoute
+  LayoutHelpRoute: typeof LayoutHelpRoute
   LayoutOwnersRoute: typeof LayoutOwnersRoute
   LayoutPreopeningRoute: typeof LayoutPreopeningRoute
   LayoutProjectsRoute: typeof LayoutProjectsRoute
+  LayoutReportsRoute: typeof LayoutReportsRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
+  LayoutWhatsNewRoute: typeof LayoutWhatsNewRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
   LayoutDealsDealIdRoute: typeof LayoutDealsDealIdRoute
   LayoutOwnersOwnerIdRoute: typeof LayoutOwnersOwnerIdRoute
@@ -378,10 +438,13 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutDealsRoute: LayoutDealsRoute,
   LayoutDocumentsRoute: LayoutDocumentsRoute,
   LayoutFeasibilityRoute: LayoutFeasibilityRoute,
+  LayoutHelpRoute: LayoutHelpRoute,
   LayoutOwnersRoute: LayoutOwnersRoute,
   LayoutPreopeningRoute: LayoutPreopeningRoute,
   LayoutProjectsRoute: LayoutProjectsRoute,
+  LayoutReportsRoute: LayoutReportsRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
+  LayoutWhatsNewRoute: LayoutWhatsNewRoute,
   LayoutIndexRoute: LayoutIndexRoute,
   LayoutDealsDealIdRoute: LayoutDealsDealIdRoute,
   LayoutOwnersOwnerIdRoute: LayoutOwnersOwnerIdRoute,
