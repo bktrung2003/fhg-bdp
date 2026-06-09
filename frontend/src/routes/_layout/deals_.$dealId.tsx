@@ -145,7 +145,7 @@ function DealWorkspace() {
       </div>
 
       {/* KPI row */}
-      <div className="grid grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <Mini label="Stage" value={deal.stage ?? "—"} />
         <Mini label="Days in Stage" value={`${deal.days_in_stage ?? 0}d`} />
         <Mini label="Keys" value={deal.keys != null ? String(deal.keys) : "—"} />
@@ -172,7 +172,7 @@ function DealWorkspace() {
       />
 
       {/* 2-column: Tasks, Documents (Pre-opening moved to Project Workspace) */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Tasks */}
         <div className="rounded-lg border bg-card p-4">
           <div className="flex items-center gap-2 mb-3">
@@ -230,7 +230,7 @@ function DealWorkspace() {
       </div>
 
       {/* 2-column: Activity Timeline + Audit Log */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Activity Timeline */}
         <div className="rounded-lg border bg-card p-4">
           <div className="flex items-center gap-2 mb-3">
