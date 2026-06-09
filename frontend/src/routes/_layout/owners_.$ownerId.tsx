@@ -155,22 +155,11 @@ function OwnerWorkspace() {
     enabled: !!owner,
   })
 
-  if (isLoading) {
-    return <div className="flex items-center justify-center h-48 text-muted-foreground">Loading owner...</div>
-  }
-
-  if (!owner) {
-    return (
-      <div className="flex flex-col items-center gap-3 py-12">
-        <p className="text-muted-foreground">Owner not found.</p>
-        <Link to="/owners"><Button variant="outline" size="sm"><ArrowLeft className="h-4 w-4 mr-1" />Back to Owners</Button></Link>
-      </div>
-    )
-  }
-
+  // NOTE: all hooks (useState/useMemo) must run on EVERY render — keep them
+  // above the early returns below, or React throws error #310 (hook order).
   const projectsList = (projects ?? []) as ProjectPublic[]
   const dealsList = (ownerDeals ?? []) as any[]
-  const projectCount = (owner as any).project_count ?? projectsList.length
+  const projectCount = (owner as any)?.project_count ?? projectsList.length
   const contactCount = contacts?.length ?? 0
   const interactionCount = interactions?.length ?? 0
 
@@ -234,6 +223,18 @@ function OwnerWorkspace() {
     const n = new Set(s); n.has(k) ? n.delete(k) : n.add(k); return n
   })
   const fmtM = (v?: number | null) => v ? `$${(v / 1_000_000).toFixed(1)}M` : "—"
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-48 text-muted-foreground">Loading owner...</div>
+  }
+  if (!owner) {
+    return (
+      <div className="flex flex-col items-center gap-3 py-12">
+        <p className="text-muted-foreground">Owner not found.</p>
+        <Link to="/owners"><Button variant="outline" size="sm"><ArrowLeft className="h-4 w-4 mr-1" />Back to Owners</Button></Link>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-5 max-w-[1400px] mx-auto w-full">
