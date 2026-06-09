@@ -79,6 +79,39 @@ function DeleteContactBtn({ contactId, ownerId }: { contactId: string; ownerId: 
   )
 }
 
+function DeleteInteractionBtn({ interactionId, ownerId }: { interactionId: string; ownerId: string }) {
+  const qc = useQueryClient()
+  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const del = useMutation({
+    mutationFn: async () => {
+      const { OpenAPI } = await import("@/client")
+      const token = typeof OpenAPI.TOKEN === "function" ? await (OpenAPI.TOKEN as any)({}) : OpenAPI.TOKEN
+      const res = await fetch(`${OpenAPI.BASE}/api/v1/owners/interactions/${interactionId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) throw new Error(await res.text())
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["owner-interactions", ownerId] })
+      qc.invalidateQueries({ queryKey: ["owner", ownerId] })
+      showSuccessToast("Interaction deleted.")
+    },
+    onError: (e: any) => showErrorToast(e?.message ?? "Failed to delete"),
+  })
+  return (
+    <Button
+      variant="ghost" size="sm"
+      className="h-6 w-6 p-0 text-red-400 hover:text-red-600 hover:bg-red-50"
+      onClick={() => { if (confirm("Delete this interaction?")) del.mutate() }}
+      disabled={del.isPending}
+      title="Delete interaction"
+    >
+      <Trash2 className="h-3 w-3" />
+    </Button>
+  )
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
 
 function OwnerWorkspace() {
@@ -227,7 +260,42 @@ function OwnerWorkspace() {
               <AddContact ownerId={owner.id} />
             </div>
             {contacts && contacts.length > 0 ? (
-              <div className="overflow-x-auto">
+              <>
+              {/* Mobile cards */}
+              <div className="md:hidden flex flex-col gap-2">
+                {contacts.map((c: OwnerContactPublic) => (
+                  <div key={c.id} className="rounded-lg border bg-card p-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-sm">
+                          {c.senior_flag && <span className="inline-block bg-amber-100 text-amber-700 text-[9px] font-bold px-1 rounded mr-1">C</span>}
+                          {c.owner_contact}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">
+                          {c.fusion_role}{(c as any).contact_title ? ` · ${(c as any).contact_title}` : ""}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-0.5 shrink-0">
+                        <ContactDialog ownerId={owner.id} contact={c} />
+                        <DeleteContactBtn contactId={c.id} ownerId={owner.id} />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-wrap mt-2">
+                      <Badge label={c.strength} colorMap={{ Strong: "bg-green-100 text-green-700", Warm: "bg-amber-100 text-amber-700", New: "bg-gray-100 text-gray-600" }} />
+                      {c.last_met && <span className="text-[10px] text-muted-foreground">Met {c.last_met}</span>}
+                    </div>
+                    {((c as any).email || (c as any).phone) && (
+                      <div className="flex items-center gap-3 mt-2 text-[11px]">
+                        {(c as any).email && <a href={`mailto:${(c as any).email}`} className="text-primary hover:underline truncate">{(c as any).email}</a>}
+                        {(c as any).phone && <a href={`tel:${(c as any).phone}`} className="text-primary hover:underline">{(c as any).phone}</a>}
+                      </div>
+                    )}
+                    {c.note && <p className="text-[11px] text-muted-foreground mt-1.5">{c.note}</p>}
+                  </div>
+                ))}
+              </div>
+              {/* Desktop table */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b">
@@ -271,6 +339,7 @@ function OwnerWorkspace() {
                   </tbody>
                 </table>
               </div>
+              </>
             ) : (
               <div className="text-sm text-muted-foreground py-4 text-center">
                 No contacts yet. Click <span className="font-medium">Add Contact</span> to map the relationship.
@@ -373,10 +442,15 @@ function OwnerWorkspace() {
                 {interactions.map((i: OwnerInteractionPublic) => (
                   <div key={i.id} className="relative">
                     <div className="absolute -left-[26px] top-1 h-2.5 w-2.5 rounded-full bg-primary border-2 border-background" />
-                    <div className="rounded-md bg-muted/40 p-2.5">
-                      <div className="flex items-center justify-between">
+                    <div className="rounded-md bg-muted/40 p-2.5 group/intr">
+                      <div className="flex items-center justify-between gap-2">
                         <span className="text-xs font-semibold">{i.interaction_type}</span>
-                        <span className="text-xs text-muted-foreground">{i.date}</span>
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-muted-foreground">{i.date}</span>
+                          <span className="opacity-0 group-hover/intr:opacity-100 transition-opacity">
+                            <DeleteInteractionBtn interactionId={i.id} ownerId={owner.id} />
+                          </span>
+                        </div>
                       </div>
                       {i.note && <p className="text-xs text-muted-foreground mt-1">{i.note}</p>}
                     </div>

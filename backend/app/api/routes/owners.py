@@ -271,3 +271,19 @@ def add_interaction(
     session.commit()
     session.refresh(interaction)
     return interaction
+
+
+# ── DELETE /owners/interactions/{interaction_id} ─────────────────────────────
+
+@router.delete("/interactions/{interaction_id}", response_model=Message)
+def delete_interaction(
+    session: SessionDep, current_user: CurrentUser, interaction_id: uuid.UUID
+) -> Any:
+    """Remove a mis-logged interaction. Interactions are not editable
+    (append-only audit), but a wrong entry can be deleted."""
+    interaction = session.get(OwnerInteraction, interaction_id)
+    if not interaction:
+        raise HTTPException(status_code=404, detail="Interaction not found")
+    session.delete(interaction)
+    session.commit()
+    return Message(message="Interaction deleted")
