@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { Briefcase, Search, X, Trash2 } from "lucide-react"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 
 import { ProjectsService, type ProjectPublic } from "@/client"
 import { AddProject } from "@/components/Projects/AddProject"
@@ -38,18 +38,43 @@ function ProjectsPage() {
   const { showSuccessToast } = useCustomToast()
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("")
+  const [countryFilter, setCountryFilter] = useState("")
+  const [ownerFilter, setOwnerFilter] = useState("")
+  const [typeFilter, setTypeFilter] = useState("")
+  const [sortBy, setSortBy] = useState("name")
 
   const { data, isLoading } = useQuery({
-    queryKey: ["projects", { search, statusFilter }],
-    queryFn: () => ProjectsService.listProjects({
-      search: search || undefined,
-      status: (statusFilter as any) || undefined,
-      limit: 300,
-    }),
+    queryKey: ["projects"],
+    queryFn: () => ProjectsService.listProjects({ limit: 500 }),
   })
 
-  const projects = data?.data ?? []
+  const allProjects = (data?.data ?? []) as ProjectPublic[]
   const total = data?.count ?? 0
+
+  // Filter option lists derived from data
+  const countries = useMemo(() => Array.from(new Set(allProjects.map(p => p.country).filter(Boolean))).sort(), [allProjects])
+  const owners = useMemo(() => Array.from(new Set(allProjects.map(p => p.owner_name).filter(Boolean))).sort(), [allProjects])
+  const types = useMemo(() => Array.from(new Set(allProjects.map(p => p.project_type).filter(Boolean))).sort(), [allProjects])
+
+  const projects = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    let arr = allProjects.filter(p =>
+      (!q || `${p.name} ${p.city ?? ""} ${p.country ?? ""} ${p.owner_name ?? ""}`.toLowerCase().includes(q)) &&
+      (!statusFilter || p.status === statusFilter) &&
+      (!countryFilter || p.country === countryFilter) &&
+      (!ownerFilter || p.owner_name === ownerFilter) &&
+      (!typeFilter || p.project_type === typeFilter))
+    arr = [...arr].sort((a, b) =>
+      sortBy === "keys" ? ((b.keys ?? 0) - (a.keys ?? 0))
+      : sortBy === "deals" ? (((b as any).deal_count ?? 0) - ((a as any).deal_count ?? 0))
+      : sortBy === "pipeline" ? (((b as any).active_pipeline_value ?? 0) - ((a as any).active_pipeline_value ?? 0))
+      : String(a.name).localeCompare(String(b.name)))
+    return arr
+  }, [allProjects, search, statusFilter, countryFilter, ownerFilter, typeFilter, sortBy])
+
+  const filteredCount = projects.length
+  const hasFilters = !!(search || statusFilter || countryFilter || ownerFilter || typeFilter)
+  const clearAll = () => { setSearch(""); setStatusFilter(""); setCountryFilter(""); setOwnerFilter(""); setTypeFilter("") }
   const { page, setPage, pageSize, setPageSize, totalPages, paginated } = usePagination(projects, 10)
 
   const delMut = useMutation({
@@ -71,21 +96,53 @@ function ProjectsPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 items-center">
-        <div className="relative flex-1 min-w-[200px] max-w-sm">
+      <div className="flex flex-wrap gap-2 items-center">
+        <div className="relative flex-1 min-w-[200px] max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input className="pl-9" placeholder="Search project, city..." value={search} onChange={e => setSearch(e.target.value)} />
+          <Input className="pl-9 h-9" placeholder="Search name, city, owner..." value={search} onChange={e => setSearch(e.target.value)} />
         </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[150px]"><SelectValue placeholder="All statuses" /></SelectTrigger>
+        <Select value={statusFilter || "__all__"} onValueChange={v => setStatusFilter(v === "__all__" ? "" : v)}>
+          <SelectTrigger className="h-9 w-[140px]"><SelectValue placeholder="All status" /></SelectTrigger>
           <SelectContent>
+            <SelectItem value="__all__">All status</SelectItem>
             {["Prospect","Active","On Hold","Operating","Lost","Closed"].map(s => (
               <SelectItem key={s} value={s}>{s}</SelectItem>
             ))}
           </SelectContent>
         </Select>
-        {(search || statusFilter) && (
-          <Button variant="ghost" size="sm" onClick={() => { setSearch(""); setStatusFilter("") }}>
+        <Select value={countryFilter || "__all__"} onValueChange={v => setCountryFilter(v === "__all__" ? "" : v)}>
+          <SelectTrigger className="h-9 w-[140px]"><SelectValue placeholder="All countries" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__">All countries</SelectItem>
+            {countries.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={ownerFilter || "__all__"} onValueChange={v => setOwnerFilter(v === "__all__" ? "" : v)}>
+          <SelectTrigger className="h-9 w-[150px]"><SelectValue placeholder="All owners" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__">All owners</SelectItem>
+            {owners.map(o => <SelectItem key={o} value={o!}>{o}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={typeFilter || "__all__"} onValueChange={v => setTypeFilter(v === "__all__" ? "" : v)}>
+          <SelectTrigger className="h-9 w-[150px]"><SelectValue placeholder="All types" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__">All types</SelectItem>
+            {types.map(t => <SelectItem key={t} value={t!}>{t}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="h-9 w-[140px]"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="name">Sort: Name</SelectItem>
+            <SelectItem value="keys">Sort: Keys</SelectItem>
+            <SelectItem value="deals">Sort: Deals</SelectItem>
+            <SelectItem value="pipeline">Sort: Pipeline</SelectItem>
+          </SelectContent>
+        </Select>
+        <span className="text-xs text-muted-foreground self-center">{filteredCount} of {total}</span>
+        {hasFilters && (
+          <Button variant="ghost" size="sm" onClick={clearAll}>
             <X className="h-4 w-4 mr-1" />Clear
           </Button>
         )}
