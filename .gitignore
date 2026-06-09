@@ -30,3 +30,6 @@ dist/
 
 # Local deploy script with real Watchtower token (copy from deploy.bat.example)
 deploy.bat
+
+# Generated decks / scratch
+*.pptx
