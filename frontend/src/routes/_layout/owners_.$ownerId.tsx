@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { useMemo, useState } from "react"
 import {
   ArrowLeft, Building2, Briefcase, Users as UsersIcon,
-  MessageSquare, Activity, Trash2,
+  MessageSquare, Activity, Trash2, Search, ChevronDown, ChevronRight,
 } from "lucide-react"
 
 import {
@@ -17,6 +18,10 @@ import { EditOwner } from "@/components/Owners/EditOwner"
 import { DeleteOwner } from "@/components/Owners/DeleteOwner"
 import { LogInteraction } from "@/components/Owners/LogInteraction"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import useCustomToast from "@/hooks/useCustomToast"
 
@@ -168,6 +173,67 @@ function OwnerWorkspace() {
   const projectCount = (owner as any).project_count ?? projectsList.length
   const contactCount = contacts?.length ?? 0
   const interactionCount = interactions?.length ?? 0
+
+  // ── Tab scale controls: search / filter / sort / group ────────────────────
+  const [projSearch, setProjSearch] = useState("")
+  const [projStatus, setProjStatus] = useState("")
+  const [dealSearch, setDealSearch] = useState("")
+  const [dealStage, setDealStage] = useState("")
+  const [dealSort, setDealSort] = useState("value")
+  const [actType, setActType] = useState("")
+  const [actShowAll, setActShowAll] = useState(false)
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set())
+
+  const filteredProjects = useMemo(() => {
+    const q = projSearch.trim().toLowerCase()
+    return projectsList.filter(p =>
+      (!q || `${p.name} ${p.city ?? ""} ${p.country ?? ""}`.toLowerCase().includes(q)) &&
+      (!projStatus || p.status === projStatus))
+  }, [projectsList, projSearch, projStatus])
+
+  const projNameById = useMemo(() => {
+    const m: Record<string, string> = {}
+    projectsList.forEach(p => { m[p.id] = p.name })
+    return m
+  }, [projectsList])
+
+  const filteredDeals = useMemo(() => {
+    const q = dealSearch.trim().toLowerCase()
+    let arr = dealsList.filter(d =>
+      (!q || `${d.name} ${d.deal_type ?? ""} ${d.stage ?? ""}`.toLowerCase().includes(q)) &&
+      (!dealStage || d.stage === dealStage))
+    arr = [...arr].sort((a, b) =>
+      dealSort === "value" ? (b.pipeline_value ?? 0) - (a.pipeline_value ?? 0)
+      : dealSort === "prob" ? (b.probability ?? 0) - (a.probability ?? 0)
+      : String(a.name).localeCompare(String(b.name)))
+    return arr
+  }, [dealsList, dealSearch, dealStage, dealSort])
+
+  const dealGroups = useMemo(() => {
+    const groups: Record<string, { name: string; deals: any[]; value: number }> = {}
+    filteredDeals.forEach(d => {
+      const key = d.project_id ?? "__none__"
+      const name = d.project_id ? (projNameById[d.project_id] ?? "Unknown project") : "Unlinked deals"
+      if (!groups[key]) groups[key] = { name, deals: [], value: 0 }
+      groups[key].deals.push(d)
+      groups[key].value += d.pipeline_value ?? 0
+    })
+    return Object.entries(groups).sort((a, b) => b[1].value - a[1].value)
+  }, [filteredDeals, projNameById])
+
+  const dealStages = useMemo(() => Array.from(new Set(dealsList.map(d => d.stage).filter(Boolean))), [dealsList])
+  const projStatuses = useMemo(() => Array.from(new Set(projectsList.map(p => p.status).filter(Boolean))), [projectsList])
+  const actTypes = useMemo(() => Array.from(new Set((interactions ?? []).map((i: any) => i.interaction_type).filter(Boolean))), [interactions])
+
+  const filteredInteractions = useMemo(() => {
+    const arr = (interactions ?? []).filter((i: any) => !actType || i.interaction_type === actType)
+    return actShowAll ? arr : arr.slice(0, 10)
+  }, [interactions, actType, actShowAll])
+
+  const toggleGroup = (k: string) => setCollapsedGroups(s => {
+    const n = new Set(s); n.has(k) ? n.delete(k) : n.add(k); return n
+  })
+  const fmtM = (v?: number | null) => v ? `$${(v / 1_000_000).toFixed(1)}M` : "—"
 
   return (
     <div className="flex flex-col gap-5 max-w-[1400px] mx-auto w-full">
@@ -368,25 +434,48 @@ function OwnerWorkspace() {
                 <p className="text-xs text-muted-foreground mt-1">Add the first hotel asset for this owner.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3">
-                {projectsList.map(p => (
-                  <div key={p.id}
-                    className="rounded-md border bg-muted/20 hover:bg-muted/40 p-3 cursor-pointer transition-colors"
-                    onClick={() => navigate({ to: "/projects/$projectId" as any, params: { projectId: p.id } })}
-                  >
-                    <div className="flex items-start justify-between gap-2 mb-1">
-                      <p className="font-semibold text-sm">{p.name}</p>
-                      <span className="text-[10px] font-semibold uppercase text-muted-foreground whitespace-nowrap">{p.status}</span>
+              <>
+                {/* Filter bar (shows when there's enough to filter) */}
+                {projectsList.length > 4 && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <div className="relative flex-1 min-w-[180px] max-w-xs">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input className="pl-9 h-9" placeholder="Search projects..." value={projSearch} onChange={e => setProjSearch(e.target.value)} />
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {p.city ?? p.country} · {p.keys ?? "—"} keys
-                    </p>
-                    {p.project_type && (
-                      <p className="text-[10px] text-muted-foreground mt-0.5">{p.project_type}</p>
-                    )}
+                    <Select value={projStatus || "__all__"} onValueChange={v => setProjStatus(v === "__all__" ? "" : v)}>
+                      <SelectTrigger className="h-9 w-[150px]"><SelectValue placeholder="All status" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__all__">All status</SelectItem>
+                        {projStatuses.map(st => <SelectItem key={st} value={st}>{st}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <span className="text-xs text-muted-foreground self-center ml-auto">{filteredProjects.length} of {projectsList.length}</span>
                   </div>
-                ))}
-              </div>
+                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {filteredProjects.map(p => (
+                    <div key={p.id}
+                      className="rounded-md border bg-muted/20 hover:bg-muted/40 p-3 cursor-pointer transition-colors"
+                      onClick={() => navigate({ to: "/projects/$projectId" as any, params: { projectId: p.id } })}
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <p className="font-semibold text-sm">{p.name}</p>
+                        <span className="text-[10px] font-semibold uppercase text-muted-foreground whitespace-nowrap">{p.status}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {p.city ?? p.country} · {p.keys ?? "—"} keys
+                        {(p as any).deal_count != null ? ` · ${(p as any).deal_count} deals` : ""}
+                      </p>
+                      {p.project_type && (
+                        <p className="text-[10px] text-muted-foreground mt-0.5">{p.project_type}</p>
+                      )}
+                    </div>
+                  ))}
+                  {filteredProjects.length === 0 && (
+                    <p className="text-sm text-muted-foreground py-4 col-span-full text-center">No projects match.</p>
+                  )}
+                </div>
+              </>
             )}
           </div>
         </TabsContent>
@@ -402,27 +491,81 @@ function OwnerWorkspace() {
                 <p className="text-xs text-muted-foreground mt-1">Create a project first, then add deals from there.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-2">
-                {dealsList.map(d => (
-                  <div key={d.id}
-                    className="rounded-md border bg-muted/20 hover:bg-muted/40 p-3 cursor-pointer transition-colors flex items-center gap-3"
-                    onClick={() => navigate({ to: "/deals/$dealId" as any, params: { dealId: d.id } })}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm truncate">{d.name}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {d.deal_type ?? "HMA"} · {d.stage} · {d.probability ?? 0}% prob
-                      </p>
+              <>
+                {/* Filter / sort bar */}
+                {dealsList.length > 4 && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <div className="relative flex-1 min-w-[180px] max-w-xs">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input className="pl-9 h-9" placeholder="Search deals..." value={dealSearch} onChange={e => setDealSearch(e.target.value)} />
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold tabular-nums">
-                        {d.pipeline_value ? `$${(d.pipeline_value / 1_000_000).toFixed(1)}M` : "—"}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground">pipeline</p>
-                    </div>
+                    <Select value={dealStage || "__all__"} onValueChange={v => setDealStage(v === "__all__" ? "" : v)}>
+                      <SelectTrigger className="h-9 w-[150px]"><SelectValue placeholder="All stages" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__all__">All stages</SelectItem>
+                        {dealStages.map(st => <SelectItem key={st} value={st}>{st}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <Select value={dealSort} onValueChange={setDealSort}>
+                      <SelectTrigger className="h-9 w-[150px]"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="value">Sort: Value</SelectItem>
+                        <SelectItem value="prob">Sort: Probability</SelectItem>
+                        <SelectItem value="name">Sort: Name</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <span className="text-xs text-muted-foreground self-center ml-auto">{filteredDeals.length} of {dealsList.length}</span>
                   </div>
-                ))}
-              </div>
+                )}
+                {/* Grouped by project */}
+                <div className="flex flex-col gap-3">
+                  {dealGroups.map(([key, g]) => {
+                    const collapsed = collapsedGroups.has(key)
+                    return (
+                      <div key={key} className="rounded-lg border bg-card overflow-hidden">
+                        <button
+                          onClick={() => toggleGroup(key)}
+                          className="w-full flex items-center justify-between gap-2 px-3 py-2 bg-muted/40 hover:bg-muted/60 transition-colors"
+                        >
+                          <span className="flex items-center gap-1.5 font-semibold text-sm min-w-0">
+                            {collapsed ? <ChevronRight className="h-4 w-4 shrink-0" /> : <ChevronDown className="h-4 w-4 shrink-0" />}
+                            <Building2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                            <span className="truncate">{g.name}</span>
+                          </span>
+                          <span className="flex items-center gap-3 text-xs text-muted-foreground shrink-0">
+                            <span>{g.deals.length} deal{g.deals.length !== 1 ? "s" : ""}</span>
+                            <span className="font-semibold text-primary tabular-nums">{fmtM(g.value)}</span>
+                          </span>
+                        </button>
+                        {!collapsed && (
+                          <div className="divide-y">
+                            {g.deals.map(d => (
+                              <div key={d.id}
+                                className="hover:bg-muted/20 p-3 cursor-pointer transition-colors flex items-center gap-3"
+                                onClick={() => navigate({ to: "/deals/$dealId" as any, params: { dealId: d.id } })}
+                              >
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-sm truncate">{d.name}</p>
+                                  <p className="text-xs text-muted-foreground mt-0.5">
+                                    {d.deal_type ?? "HMA"} · {d.stage} · {d.probability ?? 0}% prob
+                                  </p>
+                                </div>
+                                <div className="text-right shrink-0">
+                                  <p className="text-sm font-semibold tabular-nums">{fmtM(d.pipeline_value)}</p>
+                                  <p className="text-[10px] text-muted-foreground">pipeline</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                  {filteredDeals.length === 0 && (
+                    <p className="text-sm text-muted-foreground py-4 text-center">No deals match.</p>
+                  )}
+                </div>
+              </>
             )}
           </div>
         </TabsContent>
@@ -435,11 +578,23 @@ function OwnerWorkspace() {
                 <Activity className="h-4 w-4 text-muted-foreground" />
                 Interactions Timeline
               </h3>
-              <LogInteraction ownerId={owner.id} />
+              <div className="flex items-center gap-2">
+                {(interactions ?? []).length > 4 && (
+                  <Select value={actType || "__all__"} onValueChange={v => setActType(v === "__all__" ? "" : v)}>
+                    <SelectTrigger className="h-8 w-[150px] text-xs"><SelectValue placeholder="All types" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__all__">All types</SelectItem>
+                      {actTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                )}
+                <LogInteraction ownerId={owner.id} />
+              </div>
             </div>
             {interactions && interactions.length > 0 ? (
+              <>
               <div className="relative pl-5 border-l-2 border-muted flex flex-col gap-3">
-                {interactions.map((i: OwnerInteractionPublic) => (
+                {filteredInteractions.map((i: OwnerInteractionPublic) => (
                   <div key={i.id} className="relative">
                     <div className="absolute -left-[26px] top-1 h-2.5 w-2.5 rounded-full bg-primary border-2 border-background" />
                     <div className="rounded-md bg-muted/40 p-2.5 group/intr">
@@ -457,6 +612,21 @@ function OwnerWorkspace() {
                   </div>
                 ))}
               </div>
+              {/* Show more / collapse + empty-after-filter */}
+              {filteredInteractions.length === 0 && (
+                <p className="text-sm text-muted-foreground py-4 text-center">No interactions match this filter.</p>
+              )}
+              {!actShowAll && (interactions ?? []).filter((i: any) => !actType || i.interaction_type === actType).length > 10 && (
+                <button onClick={() => setActShowAll(true)} className="text-xs text-primary hover:underline mt-3 mx-auto block">
+                  Show all {(interactions ?? []).filter((i: any) => !actType || i.interaction_type === actType).length} interactions
+                </button>
+              )}
+              {actShowAll && (
+                <button onClick={() => setActShowAll(false)} className="text-xs text-muted-foreground hover:underline mt-3 mx-auto block">
+                  Show recent only
+                </button>
+              )}
+              </>
             ) : (
               <div className="text-center py-8">
                 <MessageSquare className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
