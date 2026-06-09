@@ -8,7 +8,7 @@ from sqlmodel import col, func, select
 from app.api.deps import CurrentUser, SessionDep
 from app.models import (
     CatchupStatus, Deal, Message, Owner, OwnerContact, OwnerContactCreate,
-    OwnerContactPublic, OwnerCreate, OwnerInteraction, OwnerInteractionCreate,
+    OwnerContactPublic, OwnerContactUpdate, OwnerCreate, OwnerInteraction, OwnerInteractionCreate,
     OwnerInteractionPublic, OwnerPublic, OwnersPublic, OwnerRelationship,
     OwnerType, OwnerUpdate, Project,
 )
@@ -210,6 +210,25 @@ def add_contact(
     if not session.get(Owner, id):
         raise HTTPException(status_code=404, detail="Owner not found")
     contact = OwnerContact.model_validate(contact_in, update={"owner_id": id})
+    session.add(contact)
+    session.commit()
+    session.refresh(contact)
+    return contact
+
+
+# ── PATCH /owners/contacts/{contact_id} ──────────────────────────────────────
+
+@router.patch("/contacts/{contact_id}", response_model=OwnerContactPublic)
+def update_contact(
+    *, session: SessionDep, current_user: CurrentUser,
+    contact_id: uuid.UUID, contact_in: OwnerContactUpdate
+) -> Any:
+    contact = session.get(OwnerContact, contact_id)
+    if not contact:
+        raise HTTPException(status_code=404, detail="Contact not found")
+    data = contact_in.model_dump(exclude_unset=True)
+    for k, v in data.items():
+        setattr(contact, k, v)
     session.add(contact)
     session.commit()
     session.refresh(contact)

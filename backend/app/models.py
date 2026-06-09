@@ -492,6 +492,19 @@ class OwnerContact(OwnerContactBase, table=True):
     owner: Optional["Owner"] = Relationship(back_populates="contacts")
 
 
+class OwnerContactUpdate(SQLModel):
+    fusion_role: str | None = Field(default=None, max_length=100)
+    owner_contact: str | None = Field(default=None, max_length=100)
+    contact_title: str | None = Field(default=None, max_length=100)
+    email: str | None = Field(default=None, max_length=255)
+    phone: str | None = Field(default=None, max_length=50)
+    seniority: str | None = Field(default=None, max_length=20)
+    strength: ContactStrength | None = None
+    last_met: str | None = Field(default=None, max_length=20)
+    senior_flag: bool | None = None
+    note: str | None = Field(default=None, max_length=500)
+
+
 class OwnerContactPublic(OwnerContactBase):
     id: uuid.UUID
     owner_id: uuid.UUID

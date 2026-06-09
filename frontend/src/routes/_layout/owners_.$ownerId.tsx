@@ -11,7 +11,7 @@ import {
   type OwnerInteractionPublic,
   type ProjectPublic,
 } from "@/client"
-import { AddContact } from "@/components/Owners/AddContact"
+import { AddContact, ContactDialog } from "@/components/Owners/AddContact"
 import { AddProject } from "@/components/Projects/AddProject"
 import { EditOwner } from "@/components/Owners/EditOwner"
 import { DeleteOwner } from "@/components/Owners/DeleteOwner"
@@ -231,7 +231,7 @@ function OwnerWorkspace() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b">
-                      {["Fusion","Owner Contact","Title","Email","Strength","Last Met","Note",""].map(h => (
+                      {["Fusion","Owner Contact","Title","Email","Phone","Strength","Last Met","Note",""].map(h => (
                         <th key={h} className="text-left text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground pb-2 pr-3">
                           {h}
                         </th>
@@ -249,14 +249,22 @@ function OwnerWorkspace() {
                         </td>
                         <td className="py-2 pr-3 font-medium">{c.owner_contact}</td>
                         <td className="py-2 pr-3 text-muted-foreground text-xs">{(c as any).contact_title || "—"}</td>
-                        <td className="py-2 pr-3 text-muted-foreground text-xs">{(c as any).email || "—"}</td>
+                        <td className="py-2 pr-3 text-muted-foreground text-xs">
+                          {(c as any).email ? <a href={`mailto:${(c as any).email}`} className="hover:underline">{(c as any).email}</a> : "—"}
+                        </td>
+                        <td className="py-2 pr-3 text-muted-foreground text-xs">
+                          {(c as any).phone ? <a href={`tel:${(c as any).phone}`} className="hover:underline">{(c as any).phone}</a> : "—"}
+                        </td>
                         <td className="py-2 pr-3">
                           <Badge label={c.strength} colorMap={{ Strong: "bg-green-100 text-green-700", Warm: "bg-amber-100 text-amber-700", New: "bg-gray-100 text-gray-600" }} />
                         </td>
                         <td className="py-2 pr-3 text-muted-foreground">{c.last_met || "—"}</td>
                         <td className="py-2 pr-2 text-muted-foreground text-xs">{c.note || "—"}</td>
                         <td className="py-2">
-                          <DeleteContactBtn contactId={c.id} ownerId={owner.id} />
+                          <div className="flex items-center gap-0.5">
+                            <ContactDialog ownerId={owner.id} contact={c} />
+                            <DeleteContactBtn contactId={c.id} ownerId={owner.id} />
+                          </div>
                         </td>
                       </tr>
                     ))}
