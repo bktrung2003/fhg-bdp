@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useQuery } from "@tanstack/react-query"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { FileBarChart, Printer, Building2, TrendingUp, Layers, Globe, UserCheck, Star, Activity } from "lucide-react"
 
 import {
@@ -290,6 +290,61 @@ function ReportsPage() {
   const by = useMemo(() => aggregate(deals), [deals])
   const who = user?.full_name || user?.email || "—"
 
+  const [showPreview, setShowPreview] = useState(false)
+
+  // Reports grouped by category — scales to many reports without clutter.
+  const categories = [
+    {
+      title: "Pipeline & Deals",
+      reports: [
+        {
+          icon: TrendingUp, title: "Pipeline Report",
+          desc: "Executive summary — KPIs, breakdown by stage/type/country, full deal list.",
+          stat: `${by.active.length} active · ${fmtM(by.totalWeighted)} weighted`,
+          disabled: deals.length === 0,
+          onPrint: () => printPipelineReport(deals, by, who),
+          onPreview: () => setShowPreview(s => !s),
+        },
+      ],
+    },
+    {
+      title: "Relationships",
+      reports: [
+        {
+          icon: UserCheck, title: "Owner Relationship Report",
+          desc: "Owners by priority & relationship, catch-up status, projects/deals per owner.",
+          stat: `${owners.length} owners`,
+          disabled: owners.length === 0,
+          onPrint: () => printOwnerReport(owners, who),
+        },
+      ],
+    },
+    {
+      title: "Governance",
+      reports: [
+        {
+          icon: Star, title: "Feasibility Scorecard Report",
+          desc: "Assessed deals ranked by score, recommendation bands, 6-dimension breakdown.",
+          stat: `${scoreRows.length} assessed · avg ${scoreAvg ? scoreAvg.toFixed(0) : 0}/100`,
+          disabled: scoreRows.length === 0,
+          onPrint: () => printFeasibilityReport(scoreRows, scoreAvg, who),
+        },
+      ],
+    },
+    {
+      title: "Activity",
+      reports: [
+        {
+          icon: Activity, title: "Activity Summary Report",
+          desc: "Interactions by type, most active deals, recent activity log.",
+          stat: `${activities.length} activities`,
+          disabled: activities.length === 0,
+          onPrint: () => printActivityReport(activities, who),
+        },
+      ],
+    },
+  ]
+
   return (
     <div className="flex flex-col gap-6 max-w-[1100px] mx-auto w-full pb-10">
       <div>
@@ -301,101 +356,71 @@ function ReportsPage() {
         </p>
       </div>
 
-      {/* Pipeline Report */}
-      <div className="rounded-xl border bg-card">
-        <div className="flex items-center justify-between gap-3 p-4 border-b flex-wrap">
-          <div>
-            <h2 className="font-semibold flex items-center gap-2"><TrendingUp className="h-4 w-4 text-primary" />Pipeline Report</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">Executive summary of the deal pipeline — KPIs, stage breakdown, full deal list.</p>
+      {categories.map(cat => (
+        <div key={cat.title}>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">{cat.title}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {cat.reports.map(r => <ReportCard key={r.title} {...r} />)}
           </div>
-          <Button onClick={() => printPipelineReport(deals, by, who)} disabled={isLoading || deals.length === 0}>
-            <Printer className="h-4 w-4 mr-1.5" />Print / Save PDF
-          </Button>
         </div>
+      ))}
 
-        {/* On-screen preview */}
-        <div className="p-4 flex flex-col gap-5">
-          {/* KPIs */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {[
-              { l: "Active deals", v: String(by.active.length), icon: Building2 },
-              { l: "Total deals", v: String(deals.length), icon: Layers },
-              { l: "Active pipeline", v: fmtM(by.totalPipeline), icon: TrendingUp },
-              { l: "Weighted pipeline", v: fmtM(by.totalWeighted), icon: TrendingUp },
-            ].map(k => (
-              <div key={k.l} className="rounded-lg border bg-muted/30 p-3">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1"><k.icon className="h-3 w-3" />{k.l}</p>
-                <p className="text-xl font-bold mt-1 tabular-nums">{k.v}</p>
-              </div>
-            ))}
+      {/* Pipeline preview (toggled from the Pipeline card) */}
+      {showPreview && (
+        <div className="rounded-xl border bg-card">
+          <div className="flex items-center justify-between gap-3 p-4 border-b">
+            <h2 className="font-semibold text-sm flex items-center gap-2"><TrendingUp className="h-4 w-4 text-primary" />Pipeline preview</h2>
+            <Button variant="ghost" size="sm" onClick={() => setShowPreview(false)}>Hide</Button>
           </div>
-
-          {/* Stage breakdown */}
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">By stage</p>
-            <div className="rounded-lg border overflow-hidden">
-              <table className="w-full text-sm">
-                <thead><tr className="bg-muted/40 text-[10.5px] uppercase tracking-wider text-muted-foreground">
-                  <th className="text-left py-2 px-3">Stage</th><th className="text-right py-2 px-3">Deals</th>
-                  <th className="text-right py-2 px-3">Pipeline</th><th className="text-right py-2 px-3">Weighted</th>
-                </tr></thead>
-                <tbody>
-                  {by.byStage.map(r => (
-                    <tr key={r.stage} className="border-t">
-                      <td className="py-2 px-3">{r.stage}</td>
-                      <td className="py-2 px-3 text-right tabular-nums">{r.count}</td>
-                      <td className="py-2 px-3 text-right tabular-nums">{fmtM(r.value)}</td>
-                      <td className="py-2 px-3 text-right tabular-nums font-medium text-primary">{fmtM(r.weighted)}</td>
-                    </tr>
-                  ))}
-                  {by.byStage.length === 0 && <tr><td colSpan={4} className="py-6 text-center text-muted-foreground text-sm">No deals yet. Load demo data or add deals.</td></tr>}
-                </tbody>
-              </table>
+          <div className="p-4 flex flex-col gap-5">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              {[
+                { l: "Active deals", v: String(by.active.length), icon: Building2 },
+                { l: "Total deals", v: String(deals.length), icon: Layers },
+                { l: "Active pipeline", v: fmtM(by.totalPipeline), icon: TrendingUp },
+                { l: "Weighted pipeline", v: fmtM(by.totalWeighted), icon: TrendingUp },
+              ].map(k => (
+                <div key={k.l} className="rounded-lg border bg-muted/30 p-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1"><k.icon className="h-3 w-3" />{k.l}</p>
+                  <p className="text-xl font-bold mt-1 tabular-nums">{k.v}</p>
+                </div>
+              ))}
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">By stage</p>
+              <div className="rounded-lg border overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead><tr className="bg-muted/40 text-[10.5px] uppercase tracking-wider text-muted-foreground">
+                    <th className="text-left py-2 px-3">Stage</th><th className="text-right py-2 px-3">Deals</th>
+                    <th className="text-right py-2 px-3">Pipeline</th><th className="text-right py-2 px-3">Weighted</th>
+                  </tr></thead>
+                  <tbody>
+                    {by.byStage.map(r => (
+                      <tr key={r.stage} className="border-t">
+                        <td className="py-2 px-3">{r.stage}</td>
+                        <td className="py-2 px-3 text-right tabular-nums">{r.count}</td>
+                        <td className="py-2 px-3 text-right tabular-nums">{fmtM(r.value)}</td>
+                        <td className="py-2 px-3 text-right tabular-nums font-medium text-primary">{fmtM(r.weighted)}</td>
+                      </tr>
+                    ))}
+                    {by.byStage.length === 0 && <tr><td colSpan={4} className="py-6 text-center text-muted-foreground text-sm">No deals yet. Load demo data or add deals.</td></tr>}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <MiniBreak title="By deal type" icon={Layers} rows={by.byType} />
+              <MiniBreak title="By country" icon={Globe} rows={by.byCountry} />
             </div>
           </div>
-
-          {/* Breakdowns */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <MiniBreak title="By deal type" icon={Layers} rows={by.byType} />
-            <MiniBreak title="By country" icon={Globe} rows={by.byCountry} />
-          </div>
-
-          <p className="text-[11px] text-muted-foreground">
-            The PDF includes the full deal-by-deal list. Weighted = pipeline × stage probability.
-          </p>
         </div>
-      </div>
-
-      {/* More reports */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <ReportCard
-          icon={UserCheck} title="Owner Relationship Report"
-          desc="Owners by priority & relationship, catch-up status, projects/deals per owner."
-          stat={`${owners.length} owners`}
-          disabled={owners.length === 0}
-          onPrint={() => printOwnerReport(owners, who)}
-        />
-        <ReportCard
-          icon={Star} title="Feasibility Scorecard Report"
-          desc="All assessed deals ranked by score, recommendation bands, 6-dimension breakdown."
-          stat={`${scoreRows.length} assessed · avg ${scoreAvg ? scoreAvg.toFixed(0) : 0}/100`}
-          disabled={scoreRows.length === 0}
-          onPrint={() => printFeasibilityReport(scoreRows, scoreAvg, who)}
-        />
-        <ReportCard
-          icon={Activity} title="Activity Summary Report"
-          desc="Interactions by type, most active deals, recent activity log."
-          stat={`${activities.length} activities`}
-          disabled={activities.length === 0}
-          onPrint={() => printActivityReport(activities, who)}
-        />
-      </div>
+      )}
     </div>
   )
 }
 
-function ReportCard({ icon: Icon, title, desc, stat, disabled, onPrint }: {
-  icon: any; title: string; desc: string; stat: string; disabled?: boolean; onPrint: () => void
+function ReportCard({ icon: Icon, title, desc, stat, disabled, onPrint, onPreview }: {
+  icon: any; title: string; desc: string; stat: string; disabled?: boolean; onPrint: () => void; onPreview?: () => void
 }) {
   return (
     <div className="rounded-xl border bg-card p-4 flex flex-col">
@@ -405,9 +430,14 @@ function ReportCard({ icon: Icon, title, desc, stat, disabled, onPrint }: {
       </div>
       <p className="text-xs text-muted-foreground mt-1 flex-1">{desc}</p>
       <p className="text-[11px] font-medium text-muted-foreground mt-2">{stat}</p>
-      <Button variant="outline" size="sm" className="mt-3 w-full" onClick={onPrint} disabled={disabled}>
-        <Printer className="h-3.5 w-3.5 mr-1.5" />Print / Save PDF
-      </Button>
+      <div className="flex gap-2 mt-3">
+        <Button variant="outline" size="sm" className="flex-1" onClick={onPrint} disabled={disabled}>
+          <Printer className="h-3.5 w-3.5 mr-1.5" />Print / PDF
+        </Button>
+        {onPreview && (
+          <Button variant="ghost" size="sm" onClick={onPreview} disabled={disabled}>Preview</Button>
+        )}
+      </div>
     </div>
   )
 }
