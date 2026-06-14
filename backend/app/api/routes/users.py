@@ -222,6 +222,27 @@ def update_user(
     return db_user
 
 
+@router.post(
+    "/{user_id}/disable-2fa",
+    dependencies=[Depends(get_current_active_superuser)],
+    response_model=Message,
+)
+def admin_disable_2fa(
+    session: SessionDep, current_user: CurrentUser, user_id: uuid.UUID
+) -> Any:
+    """Superuser: turn off 2FA for a user (e.g. they lost their authenticator).
+    Clears the secret so they can re-enroll. Use sparingly — it lowers that
+    account's security until they re-enable."""
+    user = session.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.totp_enabled = False
+    user.totp_secret = None
+    session.add(user)
+    session.commit()
+    return Message(message="2FA disabled for user")
+
+
 @router.delete("/{user_id}", dependencies=[Depends(get_current_active_superuser)])
 def delete_user(
     session: SessionDep, current_user: CurrentUser, user_id: uuid.UUID

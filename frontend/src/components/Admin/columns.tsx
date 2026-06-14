@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { MapPin, ShieldAlert } from "lucide-react"
+import { MapPin, ShieldAlert, ShieldCheck } from "lucide-react"
 
 import type { UserPublic } from "@/client"
 import { Badge } from "@/components/ui/badge"
@@ -98,6 +98,18 @@ export const columns: ColumnDef<UserTableData>[] = [
         </span>
       </div>
     ),
+  },
+  {
+    accessorKey: "totp_enabled",
+    header: "2FA",
+    cell: ({ row }) =>
+      (row.original as any).totp_enabled ? (
+        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700">
+          <ShieldCheck className="h-3.5 w-3.5" />On
+        </span>
+      ) : (
+        <span className="text-[11px] text-muted-foreground">Off</span>
+      ),
   },
   {
     id: "actions",
