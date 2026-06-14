@@ -187,7 +187,8 @@ function Login() {
               )}
             />
 
-            <LoadingButton type="submit" loading={loginMutation.isPending}>
+            {error && <p className="text-xs text-destructive text-center">{error}</p>}
+            <LoadingButton type="submit" loading={loading}>
               Log In
             </LoadingButton>
           </div>
