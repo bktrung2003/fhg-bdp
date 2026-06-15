@@ -6,7 +6,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/) and
 (`/whats-new`) is generated from `frontend/src/releases.ts` — keep the two in
 sync when cutting a release.
 
-## [1.2.2] — 2026-06-09
+## [1.2.2] — 2026-06-15
 
 ### Security
 - **Login rate limiting (brute-force protection)** — failed sign-ins are
@@ -14,7 +14,7 @@ sync when cutting a release.
   per IP within a 15-minute window returns 429. Wrong TOTP codes count too.
   A successful login clears the counter; old rows are pruned opportunistically.
 
-## [1.2.1] — 2026-06-09
+## [1.2.1] — 2026-06-14
 
 ### Security
 - **Disabled public self-registration** — `/users/signup` now returns 403
@@ -29,7 +29,7 @@ sync when cutting a release.
 - Known minor: file-serve uses a `?token=` query (JWT in URL → may appear in
   logs/history). Acceptable same-origin; could move to short-lived tokens later.
 
-## [1.2.0] — 2026-06-09
+## [1.2.0] — 2026-06-13
 
 ### Added
 - **Two-factor authentication (2FA)** — opt-in TOTP per user (Settings →
@@ -40,7 +40,7 @@ sync when cutting a release.
 - **Auto sign-out when idle** — per-device timeout (Off / 5 / 15 / 30 / 60 min)
   in Settings → Security; activity-reset timer clears the session on timeout.
 
-## [1.1.0] — 2026-06-09
+## [1.1.0] — 2026-06-11
 
 ### Added
 - **Reports** (`/reports`) — auto-generated from live data, one-click

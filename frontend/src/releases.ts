@@ -14,7 +14,7 @@ export interface Release {
 export const RELEASES: Release[] = [
   {
     version: "1.2.2",
-    date: "2026-06-09",
+    date: "2026-06-15",
     title: "Login rate limiting",
     highlights: [
       "Brute-force protection — repeated failed sign-ins are throttled per account & IP (locks for 15 min)",
@@ -22,7 +22,7 @@ export const RELEASES: Release[] = [
   },
   {
     version: "1.2.1",
-    date: "2026-06-09",
+    date: "2026-06-14",
     title: "Security hardening",
     highlights: [
       "Disabled public self-registration — accounts are created by an administrator",
@@ -31,7 +31,7 @@ export const RELEASES: Release[] = [
   },
   {
     version: "1.2.0",
-    date: "2026-06-09",
+    date: "2026-06-13",
     title: "Security — 2FA & auto sign-out",
     highlights: [
       "Two-factor authentication (2FA) — opt-in TOTP with Google / Microsoft Authenticator (Settings → Security)",
@@ -41,7 +41,7 @@ export const RELEASES: Release[] = [
   },
   {
     version: "1.1.0",
-    date: "2026-06-09",
+    date: "2026-06-11",
     title: "Reports + polish",
     highlights: [
       "Reports — auto-generated, one-click Print / Save as PDF: Pipeline, Owner Relationship, Feasibility Scorecard, Activity Summary",
