@@ -81,7 +81,11 @@ function Login() {
     }
     const detail = (await res.json().catch(() => ({})))?.detail
     if (res.status === 401 && detail === "TOTP_REQUIRED") { setNeeds2fa(true); setError(null); return }
+    if (res.status === 429) { setError(typeof detail === "string" ? detail : "Too many attempts. Try again later."); return }
     if (res.status === 401) { setError("Invalid authentication code."); return }
+    if (res.status === 400 && typeof detail === "string" && detail.toLowerCase().includes("inactive")) {
+      setError("Your account is inactive. Contact an administrator."); return
+    }
     setError("Incorrect email or password.")
   }
 

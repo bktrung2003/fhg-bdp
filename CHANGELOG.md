@@ -6,6 +6,14 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/) and
 (`/whats-new`) is generated from `frontend/src/releases.ts` — keep the two in
 sync when cutting a release.
 
+## [1.2.2] — 2026-06-09
+
+### Security
+- **Login rate limiting (brute-force protection)** — failed sign-ins are
+  recorded (DB-backed, works across workers) and throttled: 8 per email or 25
+  per IP within a 15-minute window returns 429. Wrong TOTP codes count too.
+  A successful login clears the counter; old rows are pruned opportunistically.
+
 ## [1.2.1] — 2026-06-09
 
 ### Security

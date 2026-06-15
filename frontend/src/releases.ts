@@ -2,7 +2,7 @@
 // Bump CURRENT_VERSION and add an entry here on each meaningful release.
 // Powers the version badge + the /whats-new page.
 
-export const CURRENT_VERSION = "1.2.1"
+export const CURRENT_VERSION = "1.2.2"
 
 export interface Release {
   version: string
@@ -12,6 +12,14 @@ export interface Release {
 }
 
 export const RELEASES: Release[] = [
+  {
+    version: "1.2.2",
+    date: "2026-06-09",
+    title: "Login rate limiting",
+    highlights: [
+      "Brute-force protection — repeated failed sign-ins are throttled per account & IP (locks for 15 min)",
+    ],
+  },
   {
     version: "1.2.1",
     date: "2026-06-09",

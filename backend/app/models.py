@@ -1134,3 +1134,14 @@ class PushSubscriptionCreate(SQLModel):
     endpoint: str
     keys: dict[str, str]            # { "p256dh": "...", "auth": "..." }
     user_agent: str | None = None
+
+
+# ── Login attempts (brute-force rate limiting) ───────────────────────────────
+
+class LoginAttempt(SQLModel, table=True):
+    """One row per FAILED login. Used to rate-limit by email + IP.
+    Cleared on successful login; pruned opportunistically."""
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    email: str = Field(max_length=255, index=True)
+    ip_address: str | None = Field(default=None, max_length=64, index=True)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), index=True)

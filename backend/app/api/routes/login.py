@@ -1,15 +1,59 @@
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Form, HTTPException
+from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlmodel import col, delete, func, select
 
 from app import crud
 from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser
 from app.core import security
 from app.core.config import settings
-from app.models import Message, NewPassword, Token, UserPublic, UserUpdate
+from app.models import LoginAttempt, Message, NewPassword, Token, UserPublic, UserUpdate
+
+# Rate-limit thresholds (per rolling window)
+_RL_WINDOW_MIN = 15
+_RL_MAX_PER_EMAIL = 8
+_RL_MAX_PER_IP = 25
+
+
+def _client_ip(request: Request) -> str | None:
+    fwd = request.headers.get("x-forwarded-for")
+    if fwd:
+        return fwd.split(",")[0].strip()
+    return request.client.host if request.client else None
+
+
+def _check_login_rate(session: SessionDep, email: str, ip: str | None) -> None:
+    """Raise 429 if too many recent failed logins for this email or IP."""
+    since = datetime.now(timezone.utc) - timedelta(minutes=_RL_WINDOW_MIN)
+    # prune old rows opportunistically
+    session.exec(delete(LoginAttempt).where(col(LoginAttempt.created_at) < since - timedelta(hours=1)))
+    session.commit()
+    by_email = session.exec(
+        select(func.count()).select_from(LoginAttempt)
+        .where(LoginAttempt.email == email, LoginAttempt.created_at >= since)
+    ).one()
+    if (by_email or 0) >= _RL_MAX_PER_EMAIL:
+        raise HTTPException(status_code=429, detail=f"Too many attempts. Try again in {_RL_WINDOW_MIN} minutes.")
+    if ip:
+        by_ip = session.exec(
+            select(func.count()).select_from(LoginAttempt)
+            .where(LoginAttempt.ip_address == ip, LoginAttempt.created_at >= since)
+        ).one()
+        if (by_ip or 0) >= _RL_MAX_PER_IP:
+            raise HTTPException(status_code=429, detail=f"Too many attempts. Try again in {_RL_WINDOW_MIN} minutes.")
+
+
+def _record_failure(session: SessionDep, email: str, ip: str | None) -> None:
+    session.add(LoginAttempt(email=email, ip_address=ip))
+    session.commit()
+
+
+def _clear_failures(session: SessionDep, email: str) -> None:
+    session.exec(delete(LoginAttempt).where(LoginAttempt.email == email))
+    session.commit()
 from app.utils import (
     generate_password_reset_token,
     generate_reset_password_email,
@@ -22,19 +66,25 @@ router = APIRouter(tags=["login"])
 
 @router.post("/login/access-token")
 def login_access_token(
+    request: Request,
     session: SessionDep,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     code: Annotated[str | None, Form()] = None,
 ) -> Token:
     """
-    OAuth2 compatible token login. If the user has 2FA enabled, a valid TOTP
-    `code` is required; otherwise a 401 "TOTP_REQUIRED" is returned so the
-    client can prompt for the 6-digit code.
+    OAuth2 compatible token login. Rate-limited per email + IP to blunt
+    brute-force. If 2FA is enabled, a valid TOTP `code` is required (a 401
+    "TOTP_REQUIRED" prompts the client for the code).
     """
+    email = form_data.username
+    ip = _client_ip(request)
+    _check_login_rate(session, email, ip)
+
     user = crud.authenticate(
-        session=session, email=form_data.username, password=form_data.password
+        session=session, email=email, password=form_data.password
     )
     if not user:
+        _record_failure(session, email, ip)
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
@@ -44,8 +94,10 @@ def login_access_token(
             raise HTTPException(status_code=401, detail="TOTP_REQUIRED")
         import pyotp
         if not pyotp.TOTP(user.totp_secret).verify(code.strip(), valid_window=1):
+            _record_failure(session, email, ip)  # count code brute-force too
             raise HTTPException(status_code=401, detail="Invalid authentication code")
 
+    _clear_failures(session, email)
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return Token(
         access_token=security.create_access_token(
