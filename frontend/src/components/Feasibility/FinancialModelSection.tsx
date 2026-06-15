@@ -140,7 +140,7 @@ export function FinancialModelSection({ dealId, dealName, dealKeys }: Props) {
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Financial Model — ${dealName}</title>
+<title>Financial Model — ${escapeHtml(dealName)}</title>
 ${styles}
 <style>
   @page { size: A4 portrait; margin: 12mm; }
