@@ -128,6 +128,8 @@ def update_project(
 
 @router.delete("/{id}", response_model=Message)
 def delete_project(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> Any:
+    if not current_user.is_superuser and getattr(current_user, "role", None) not in {"BD Director", "COO", "CEO"}:
+        raise HTTPException(status_code=403, detail="Not enough permissions to delete")
     p = session.get(Project, id)
     if not p:
         raise HTTPException(status_code=404, detail="Project not found")

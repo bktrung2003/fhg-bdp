@@ -6,6 +6,21 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/) and
 (`/whats-new`) is generated from `frontend/src/releases.ts` — keep the two in
 sync when cutting a release.
 
+## [1.2.1] — 2026-06-09
+
+### Security
+- **Disabled public self-registration** — `/users/signup` now returns 403
+  unless `USERS_OPEN_REGISTRATION=true` (default false). Removed the "Sign up"
+  link from the login page. Accounts are created by an admin.
+- **Delete authorization** — deleting an owner or a project now requires a
+  senior role (BD Director / COO / CEO) or superuser, matching deal deletion.
+
+### Notes
+- Reviewed: CORS is origin-scoped (no wildcard), passwords argon2/bcrypt-hashed,
+  JWT-signed sessions, SQLModel parameterised queries, 2FA + idle logout.
+- Known minor: file-serve uses a `?token=` query (JWT in URL → may appear in
+  logs/history). Acceptable same-origin; could move to short-lived tokens later.
+
 ## [1.2.0] — 2026-06-09
 
 ### Added

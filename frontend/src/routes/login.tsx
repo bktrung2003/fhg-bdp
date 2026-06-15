@@ -193,11 +193,8 @@ function Login() {
             </LoadingButton>
           </div>
 
-          <div className="text-center text-sm">
-            Don't have an account yet?{" "}
-            <RouterLink to="/signup" className="underline underline-offset-4">
-              Sign up
-            </RouterLink>
+          <div className="text-center text-xs text-muted-foreground">
+            Accounts are created by your administrator.
           </div>
         </form>
       </Form>

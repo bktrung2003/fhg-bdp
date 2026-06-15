@@ -193,8 +193,17 @@ def update_owner(
 
 # ── DELETE /owners/{id} ───────────────────────────────────────────────────────
 
+_SENIOR_ROLES = {"BD Director", "COO", "CEO"}
+
+
+def _require_senior(user: Any) -> None:
+    if not user.is_superuser and getattr(user, "role", None) not in _SENIOR_ROLES:
+        raise HTTPException(status_code=403, detail="Not enough permissions to delete")
+
+
 @router.delete("/{id}", response_model=Message)
 def delete_owner(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> Any:
+    _require_senior(current_user)
     owner = session.get(Owner, id)
     if not owner:
         raise HTTPException(status_code=404, detail="Owner not found")

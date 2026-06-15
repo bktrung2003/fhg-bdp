@@ -2,7 +2,7 @@
 // Bump CURRENT_VERSION and add an entry here on each meaningful release.
 // Powers the version badge + the /whats-new page.
 
-export const CURRENT_VERSION = "1.2.0"
+export const CURRENT_VERSION = "1.2.1"
 
 export interface Release {
   version: string
@@ -12,6 +12,15 @@ export interface Release {
 }
 
 export const RELEASES: Release[] = [
+  {
+    version: "1.2.1",
+    date: "2026-06-09",
+    title: "Security hardening",
+    highlights: [
+      "Disabled public self-registration — accounts are created by an administrator",
+      "Deleting owners and projects now requires a senior role (Director / COO / CEO)",
+    ],
+  },
   {
     version: "1.2.0",
     date: "2026-06-09",
